@@ -1,0 +1,39 @@
+import React from 'react'
+
+interface ARIALogoProps {
+  size?: number
+  className?: string
+}
+
+const ARIALogo: React.FC<ARIALogoProps> = ({ size = 40, className = '' }) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 400 400"
+    xmlns="http://www.w3.org/2000/svg"
+    className={className}
+    style={{ flexShrink: 0 }}
+  >
+    <defs>
+      <linearGradient id="ariaEdgeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stopColor="#BFE6D8" />
+        <stop offset="100%" stopColor="#5EE0B2" />
+      </linearGradient>
+      <radialGradient id="ariaCoreGlow" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stopColor="#7FE5C2" />
+        <stop offset="100%" stopColor="#5EE0B2" />
+      </radialGradient>
+    </defs>
+    <g transform="translate(0,400) scale(1,-1)">
+      <polygon points="95,90 155,90 200,260 170,260" fill="url(#ariaEdgeGrad)" />
+      <polygon points="305,90 245,90 200,260 230,260" fill="url(#ariaEdgeGrad)" />
+      <line x1="145" y1="140" x2="200" y2="260" stroke="#00443A" strokeWidth="2" />
+      <line x1="255" y1="140" x2="200" y2="260" stroke="#00443A" strokeWidth="2" />
+      <circle cx="200" cy="260" r="20" fill="none" stroke="#5EE0B2" strokeWidth="6" />
+      <circle cx="200" cy="260" r="16" fill="url(#ariaCoreGlow)" />
+      <circle cx="200" cy="260" r="5" fill="#003C33" />
+    </g>
+  </svg>
+)
+
+export default ARIALogo
