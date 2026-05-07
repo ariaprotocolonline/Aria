@@ -101,7 +101,7 @@ const ChatPanel: React.FC<ChatPanelProps> = ({ riskProfile }) => {
         <div ref={containerRef} className="flex-1 overflow-y-auto p-6 flex flex-col gap-6">
           {messages.map(msg => (
             <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-              <div className={`max-w-[80%] p-4 rounded-sm text-sm leading-relaxed ${
+              <div className={`max-w-[85%] min-w-0 p-4 rounded-sm text-sm leading-relaxed break-words ${
                 msg.role === 'user'
                   ? 'bg-text-primary text-bg'
                   : msg.error
@@ -137,7 +137,7 @@ const ChatPanel: React.FC<ChatPanelProps> = ({ riskProfile }) => {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Query position strategy or market conditions..."
-              className="flex-1 bg-bg-soft border border-soft rounded-sm px-4 py-3 text-sm focus:outline-none focus:border-text-secondary transition-colors"
+              className="flex-1 bg-bg-soft border border-soft rounded-sm px-4 py-3 text-base md:text-sm focus:outline-none focus:border-text-secondary transition-colors"
               disabled={isLoading}
             />
             <button

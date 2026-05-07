@@ -53,8 +53,8 @@ const DepositModal: React.FC<DepositModalProps> = ({ onClose }) => {
   const isLoading = step === 'approving' || step === 'depositing' || isPending;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="bg-card border border-soft rounded-sm w-full max-w-md p-6 shadow-xl">
+    <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center bg-black/50">
+      <div className="bg-card border border-soft rounded-t-2xl md:rounded-sm w-full md:max-w-md p-6 shadow-xl max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between mb-6">
           <h2 className="font-serif text-xl text-text-primary">Deposit</h2>
           <button

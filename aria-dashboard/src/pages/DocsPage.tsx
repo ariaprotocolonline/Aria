@@ -108,7 +108,7 @@ const DocsPage: React.FC<DocsPageProps> = ({ isDarkMode, toggleDarkMode }) => {
         </select>
       </div>
 
-      <main className="flex-1 max-w-7xl mx-auto w-full flex px-6 md:px-12 lg:px-24 py-12 gap-12 relative">
+      <main className="flex-1 max-w-7xl mx-auto w-full flex px-4 md:px-12 lg:px-24 py-8 md:py-12 gap-12 relative">
         
         {/* Left Sidebar Desktop */}
         <aside className="hidden md:block w-[260px] flex-shrink-0">
@@ -131,8 +131,8 @@ const DocsPage: React.FC<DocsPageProps> = ({ isDarkMode, toggleDarkMode }) => {
         </aside>
 
         {/* Right Content */}
-        <div className="flex-1 w-full flex justify-center">
-          <article className="max-w-[720px] w-full text-[16px] leading-[1.8] font-sans text-justify text-text-primary">
+        <div className="flex-1 min-w-0 w-full flex justify-center">
+          <article className="max-w-[720px] w-full min-w-0 text-[16px] leading-[1.8] font-sans text-left md:text-justify text-text-primary">
             
             {/* Header Area */}
             <div className="mb-12 border-b border-soft pb-8">
@@ -142,7 +142,7 @@ const DocsPage: React.FC<DocsPageProps> = ({ isDarkMode, toggleDarkMode }) => {
               <h2 className="font-serif text-2xl text-text-secondary italic mb-6">Autonomous RWA Intelligence Agent</h2>
               <div className="text-sm text-text-secondary mb-8">Whitepaper | Version 1.0 | 2026</div>
               
-              <div className="flex items-center justify-between">
+              <div className="flex flex-wrap items-center justify-between gap-3">
                 <span className="text-sm text-text-secondary font-medium">~12 min read</span>
                 <a href="/ARIA_Whitepaper.pdf" download="ARIA_Whitepaper.pdf" className="flex items-center gap-2 text-accent border border-accent rounded-sm px-4 py-2 text-sm font-medium hover:bg-accent/10 transition-colors">
                   <Download size={16} />
@@ -153,7 +153,7 @@ const DocsPage: React.FC<DocsPageProps> = ({ isDarkMode, toggleDarkMode }) => {
 
             {/* Content Sections */}
             <section id="abstract" className="mb-12 scroll-mt-[100px]">
-              <h2 className="font-serif text-3xl font-bold mb-6 text-text-primary">1. Abstract</h2>
+              <h2 className="font-serif text-2xl md:text-3xl font-bold mb-6 text-text-primary">1. Abstract</h2>
               <p className="mb-6">
                 ARIA is an autonomous protocol that manages Real World Asset capital on the Mantle blockchain. It monitors liquidity conditions, identifies yield opportunities across the Mantle ecosystem, and reallocates positions without requiring user intervention. Every decision is logged and explained in plain language so users maintain complete visibility into how their capital is being managed at all times.
               </p>
@@ -163,7 +163,7 @@ const DocsPage: React.FC<DocsPageProps> = ({ isDarkMode, toggleDarkMode }) => {
             </section>
 
             <section id="introduction" className="mb-12 scroll-mt-[100px]">
-              <h2 className="font-serif text-3xl font-bold mb-6 text-text-primary">2. Introduction</h2>
+              <h2 className="font-serif text-2xl md:text-3xl font-bold mb-6 text-text-primary">2. Introduction</h2>
               <p className="mb-6">
                 The tokenization of real-world assets is one of the most consequential developments in decentralized finance. USDY, the yield-bearing dollar issued by Ondo Finance and backed by short-duration US Treasuries, and mETH, Mantle's liquid staking token, give users onchain access to yields that were previously only available through traditional financial infrastructure. Both assets trade with meaningful liquidity on Mantle and together form the foundation of the chain's RWA ecosystem.
               </p>
@@ -176,7 +176,7 @@ const DocsPage: React.FC<DocsPageProps> = ({ isDarkMode, toggleDarkMode }) => {
             </section>
 
             <section id="the-problem" className="mb-12 scroll-mt-[100px]">
-              <h2 className="font-serif text-3xl font-bold mb-6 text-text-primary">3. The Problem</h2>
+              <h2 className="font-serif text-2xl md:text-3xl font-bold mb-6 text-text-primary">3. The Problem</h2>
               <p className="mb-6">The structural inefficiencies affecting RWA capital on Mantle fall into four categories.</p>
               
               <h3 className="font-serif text-xl font-bold mb-4 mt-8">Incentive-Driven Liquidity Fragility</h3>
@@ -201,7 +201,7 @@ const DocsPage: React.FC<DocsPageProps> = ({ isDarkMode, toggleDarkMode }) => {
             </section>
 
             <section id="the-aria-protocol" className="mb-12 scroll-mt-[100px]">
-              <h2 className="font-serif text-3xl font-bold mb-6 text-text-primary">4. The ARIA Protocol</h2>
+              <h2 className="font-serif text-2xl md:text-3xl font-bold mb-6 text-text-primary">4. The ARIA Protocol</h2>
               <p className="mb-6">
                 ARIA manages USDY and mETH positions on behalf of users through three intelligence layers that operate in continuous parallel. The user connects their wallet, selects a risk profile, and ARIA handles everything thereafter.
               </p>
@@ -223,7 +223,7 @@ const DocsPage: React.FC<DocsPageProps> = ({ isDarkMode, toggleDarkMode }) => {
             </section>
 
             <section id="user-experience" className="mb-12 scroll-mt-[100px]">
-              <h2 className="font-serif text-3xl font-bold mb-6 text-text-primary">5. User Experience</h2>
+              <h2 className="font-serif text-2xl md:text-3xl font-bold mb-6 text-text-primary">5. User Experience</h2>
               <p className="mb-6">
                 ARIA's interface is built around a single principle: users should always understand what is happening with their capital, without needing to take any action to make it happen. The dashboard presents the user's current position value and live yield, a chronological log of all protocol actions with plain-language explanations, a view of conditions ARIA is currently monitoring, and the user's selected risk profile.
               </p>
@@ -231,13 +231,13 @@ const DocsPage: React.FC<DocsPageProps> = ({ isDarkMode, toggleDarkMode }) => {
                 A conversational interface allows users to ask questions about their portfolio, current conditions across Mantle protocols, or the reasoning behind specific decisions. Responses are grounded in live portfolio state and real-time onchain data.
               </p>
               
-              <blockquote className="border-l-4 border-accent bg-bg-soft font-serif italic pl-6 pr-4 py-4 my-8 text-lg text-text-secondary">
+              <blockquote className="border-l-4 border-accent bg-bg-soft font-serif italic pl-6 pr-4 py-4 my-8 text-base md:text-lg text-text-secondary">
                 "Transparency and autonomy are not competing values. ARIA acts without requiring user input, but it never acts without explaining itself. This makes the protocol accessible to users with no prior DeFi experience while remaining accountable enough for sophisticated capital allocators."
               </blockquote>
             </section>
 
             <section id="technical-architecture" className="mb-12 scroll-mt-[100px]">
-              <h2 className="font-serif text-3xl font-bold mb-6 text-text-primary">6. Technical Architecture</h2>
+              <h2 className="font-serif text-2xl md:text-3xl font-bold mb-6 text-text-primary">6. Technical Architecture</h2>
               
               <h3 className="font-serif text-xl font-bold mb-4 mt-8">Vault Contract Layer</h3>
               <p className="mb-6">
@@ -261,7 +261,7 @@ const DocsPage: React.FC<DocsPageProps> = ({ isDarkMode, toggleDarkMode }) => {
             </section>
 
             <section id="supported-assets" className="mb-12 scroll-mt-[100px]">
-              <h2 className="font-serif text-3xl font-bold mb-6 text-text-primary">7. Supported Assets</h2>
+              <h2 className="font-serif text-2xl md:text-3xl font-bold mb-6 text-text-primary">7. Supported Assets</h2>
               <p className="mb-6">
                 <strong>USDY</strong> is issued by Ondo Finance and backed by short-duration US Treasuries and bank demand deposits. It carries a base yield of approximately 5.0% APY, variable and reset monthly. Under ARIA management, target yield ranges from 6.2% to 18.6% APY depending on the user's risk profile. It represents the deepest RWA liquidity pool on Mantle.
               </p>
@@ -271,7 +271,7 @@ const DocsPage: React.FC<DocsPageProps> = ({ isDarkMode, toggleDarkMode }) => {
             </section>
 
             <section id="risk-profiles" className="mb-12 scroll-mt-[100px]">
-              <h2 className="font-serif text-3xl font-bold mb-6 text-text-primary">8. Risk Profiles</h2>
+              <h2 className="font-serif text-2xl md:text-3xl font-bold mb-6 text-text-primary">8. Risk Profiles</h2>
               <p className="mb-6">
                 Users select one of three risk profiles at onboarding. The profile governs reallocation thresholds, approved protocol tiers, and concentration limits, and can be updated at any time.
               </p>
@@ -290,7 +290,7 @@ const DocsPage: React.FC<DocsPageProps> = ({ isDarkMode, toggleDarkMode }) => {
             </section>
 
             <section id="competitive-landscape" className="mb-12 scroll-mt-[100px]">
-              <h2 className="font-serif text-3xl font-bold mb-6 text-text-primary">9. Competitive Landscape</h2>
+              <h2 className="font-serif text-2xl md:text-3xl font-bold mb-6 text-text-primary">9. Competitive Landscape</h2>
               <p className="mb-6">
                 Yield optimization in DeFi is a populated category. The majority of existing protocols operate on fixed rule-based logic, moving capital between pools according to predefined criteria. They automate execution but do not adapt to changing market structure. They cannot distinguish organic liquidity from incentive-driven depth and cannot modify their behavior in response to conditions they have not been explicitly programmed to handle.
               </p>
@@ -300,7 +300,7 @@ const DocsPage: React.FC<DocsPageProps> = ({ isDarkMode, toggleDarkMode }) => {
             </section>
 
             <section id="roadmap" className="mb-12 scroll-mt-[100px]">
-              <h2 className="font-serif text-3xl font-bold mb-6 text-text-primary">10. Roadmap</h2>
+              <h2 className="font-serif text-2xl md:text-3xl font-bold mb-6 text-text-primary">10. Roadmap</h2>
               
               <h3 className="font-serif text-xl font-bold mb-2 mt-8">Phase I — Foundation</h3>
               <p className="mb-6">
@@ -319,14 +319,14 @@ const DocsPage: React.FC<DocsPageProps> = ({ isDarkMode, toggleDarkMode }) => {
             </section>
 
             <section id="governance" className="mb-12 scroll-mt-[100px]">
-              <h2 className="font-serif text-3xl font-bold mb-6 text-text-primary">11. Governance</h2>
+              <h2 className="font-serif text-2xl md:text-3xl font-bold mb-6 text-text-primary">11. Governance</h2>
               <p>
                 ARIA's governance model gives long-term stakeholders meaningful input over protocol parameters without compromising the integrity of the agent's risk management logic. Governance scope covers protocol fee parameters, approved protocol whitelist additions and removals, Liquidity Quality Score methodology updates, and treasury allocation. The core execution logic of the intelligence layer is excluded from governance scope. Full governance documentation, token distribution details, and vesting schedules will be published in a dedicated governance paper prior to Phase II launch.
               </p>
             </section>
 
             <section id="risk-disclosures" className="mb-12 scroll-mt-[100px]">
-              <h2 className="font-serif text-3xl font-bold mb-6 text-text-primary">12. Risk Disclosures</h2>
+              <h2 className="font-serif text-2xl md:text-3xl font-bold mb-6 text-text-primary">12. Risk Disclosures</h2>
               <p className="mb-6">Prospective users should carefully consider the following material risks before depositing capital.</p>
               
               <ul className="list-none space-y-4">
@@ -339,7 +339,7 @@ const DocsPage: React.FC<DocsPageProps> = ({ isDarkMode, toggleDarkMode }) => {
             </section>
 
             <section id="conclusion" className="mb-12 scroll-mt-[100px]">
-              <h2 className="font-serif text-3xl font-bold mb-6 text-text-primary">13. Conclusion</h2>
+              <h2 className="font-serif text-2xl md:text-3xl font-bold mb-6 text-text-primary">13. Conclusion</h2>
               <p className="mb-6">
                 The infrastructure for productive RWA capital deployment exists on Mantle. The assets are there. The protocols are there. The liquidity is there. What has been missing is a protocol capable of putting that capital to work continuously, adapting to changing conditions in real time, and doing so in a way that any user can understand and trust.
               </p>
@@ -351,7 +351,7 @@ const DocsPage: React.FC<DocsPageProps> = ({ isDarkMode, toggleDarkMode }) => {
               </p>
               
               <div className="mt-12 pt-8 border-t border-soft text-sm text-text-secondary text-center space-y-2">
-                <p>For further information: <a href="https://aria-protocol.xyz" className="text-accent hover:underline">aria-protocol.xyz</a> | <a href="https://docs.aria-protocol.xyz" className="text-accent hover:underline">docs.aria-protocol.xyz</a> | <a href="https://twitter.com/aria_protocol" className="text-accent hover:underline">@aria_protocol</a></p>
+                <p>For further information: <a href="https://aria-protocol.xyz" className="text-accent hover:underline">aria-protocol.xyz</a> | <a href="https://docs.aria-protocol.xyz" className="text-accent hover:underline">docs.aria-protocol.xyz</a> | <a href="https://x.com/aria_rwa?s=21" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">@ARIA_rwa</a></p>
                 <p className="text-[12px]">This document is provided for informational purposes only and does not constitute an offer to sell or a solicitation to buy any securities or financial instruments.</p>
               </div>
             </section>

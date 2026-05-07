@@ -2,6 +2,21 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Global mobile resets */
+*,
+*::before,
+*::after {
+  -webkit-tap-highlight-color: transparent;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  overflow-x: clip;
+  width: 100%;
+  -webkit-text-size-adjust: 100%;
+}
+
 @layer base {
   :root {
     --bg: #FFFFFF;

@@ -15,8 +15,8 @@ const Footer = () => {
           <div className="flex gap-8 text-sm font-medium">
             <Link to="/docs" className="text-text-secondary hover:text-text-primary transition-colors">Docs</Link>
             <a href="#" className="text-text-secondary hover:text-text-primary transition-colors">GitHub</a>
-            <a href="#" className="text-text-secondary hover:text-text-primary transition-colors">Twitter</a>
-            <a href="#" className="text-text-secondary hover:text-text-primary transition-colors">Mantle Explorer</a>
+            <a href="https://x.com/aria_rwa?s=21" target="_blank" rel="noopener noreferrer" className="text-text-secondary hover:text-text-primary transition-colors">Twitter</a>
+            <a href="https://mantle.xyz" target="_blank" rel="noopener noreferrer" className="text-text-secondary hover:text-text-primary transition-colors">Mantle Explorer</a>
           </div>
         </div>
         

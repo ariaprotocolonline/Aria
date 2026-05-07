@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useAgentMemory } from '../../hooks/useAgentMemory';
 import { usePortfolioData } from '../../hooks/usePortfolioData';
-import { Send, CheckCircle, Plus } from 'lucide-react';
+import { Send, CheckCircle, Plus, ArrowLeft, MessageSquare } from 'lucide-react';
 import { env } from '../../config/env';
 
 const FEED_URL = env.FEED_URL || 'http://localhost:3001';
@@ -84,6 +84,7 @@ const AgentChat: React.FC = () => {
   const [memoryData, setMemoryData] = useState<MemoryData | null>(null);
   const [memoryLoading, setMemoryLoading] = useState(false);
   const [clearingMemory, setClearingMemory] = useState(false);
+  const [mobilePanel, setMobilePanel] = useState<'sidebar' | 'chat'>('sidebar');
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -98,6 +99,7 @@ const AgentChat: React.FC = () => {
   useEffect(() => {
     if (!currentConversation && conversations.length === 0) {
       startNewConversation();
+      setMobilePanel('chat');
     } else if (!currentConversation && conversations.length > 0) {
       loadConversation(conversations[0].id);
     }
@@ -139,32 +141,59 @@ const AgentChat: React.FC = () => {
   const handleChipClick = (text: string) => setInput(text);
 
   return (
-    <div className="flex flex-col h-screen bg-bg text-text-primary font-sans transition-colors duration-300">
+    <div className="flex flex-col h-[100dvh] bg-bg text-text-primary font-sans transition-colors duration-300">
       {/* Top Bar */}
-      <header className="flex items-center justify-between px-6 py-4 border-b border-soft bg-bg z-10 flex-shrink-0">
-        <div className="flex items-center gap-4">
+      <header className="flex items-center justify-between px-4 md:px-6 py-3 md:py-4 border-b border-soft bg-bg z-10 flex-shrink-0">
+        <div className="flex items-center gap-3">
+          {/* Back to sidebar — mobile only, chat panel only */}
+          {mobilePanel === 'chat' && (
+            <button
+              onClick={() => setMobilePanel('sidebar')}
+              className="md:hidden flex items-center gap-1 text-text-secondary hover:text-text-primary transition-colors"
+              aria-label="Back to conversations"
+            >
+              <ArrowLeft size={20} />
+            </button>
+          )}
           <AriaIconLarge />
           <div>
-            <h1 className="font-serif text-xl font-bold tracking-tight text-text-primary flex items-center gap-2">
+            <h1 className="font-serif text-lg md:text-xl font-bold tracking-tight text-text-primary">
               ARIA Agent
             </h1>
-            <div className="flex items-center gap-2 mt-1">
+            <div className="flex items-center gap-2 mt-0.5">
               <div className="w-2 h-2 bg-accent rounded-full animate-pulse drop-shadow-[0_0_4px_#5EE0B2]"></div>
               <span className="text-[10px] uppercase tracking-widest font-semibold text-text-secondary">Online</span>
             </div>
           </div>
         </div>
-        <Link
-          to="/"
-          className="text-sm font-medium text-text-secondary hover:text-text-primary transition-colors px-4 py-2 border border-soft rounded-sm hover:bg-bg-soft"
-        >
-          Back to Dashboard
-        </Link>
+        <div className="flex items-center gap-2">
+          {/* Conversations icon — mobile only, chat panel only */}
+          {mobilePanel === 'chat' && (
+            <button
+              onClick={() => setMobilePanel('sidebar')}
+              className="md:hidden p-2 border border-soft rounded-sm bg-card hover:bg-bg-soft transition-colors"
+              aria-label="Conversations"
+            >
+              <MessageSquare size={16} className="text-text-secondary" />
+            </button>
+          )}
+          <Link
+            to="/"
+            className="text-sm font-medium text-text-secondary hover:text-text-primary transition-colors px-3 py-1.5 border border-soft rounded-sm hover:bg-bg-soft"
+          >
+            <span className="hidden sm:inline">Back to Dashboard</span>
+            <span className="sm:hidden">← Back</span>
+          </Link>
+        </div>
       </header>
 
       <div className="flex flex-1 overflow-hidden">
-        {/* Left Sidebar */}
-        <aside className="w-[260px] border-r border-soft bg-bg-soft flex flex-col flex-shrink-0">
+        {/* Left Sidebar — full width on mobile, fixed width on desktop */}
+        <aside className={`
+          flex-col border-r border-soft bg-bg-soft flex-shrink-0
+          w-full md:w-[260px]
+          ${mobilePanel === 'sidebar' ? 'flex' : 'hidden'} md:flex
+        `}>
           {/* Sidebar tab switcher */}
           <div className="flex border-b border-soft">
             <button
@@ -193,7 +222,7 @@ const AgentChat: React.FC = () => {
             <>
               <div className="p-4 border-b border-soft">
                 <button
-                  onClick={() => startNewConversation()}
+                  onClick={() => { startNewConversation(); setMobilePanel('chat'); }}
                   className="w-full flex items-center justify-center gap-2 bg-bg border border-soft text-text-primary py-2 rounded-sm hover:border-text-secondary transition-colors text-sm font-medium shadow-sm"
                 >
                   <Plus size={16} /> New Conversation
@@ -203,7 +232,7 @@ const AgentChat: React.FC = () => {
                 {conversations.map(conv => (
                   <button
                     key={conv.id}
-                    onClick={() => loadConversation(conv.id)}
+                    onClick={() => { loadConversation(conv.id); setMobilePanel('chat'); }}
                     className={`w-full text-left p-4 border-b border-soft/50 transition-colors ${
                       currentConversation?.id === conv.id
                         ? 'bg-accent/10 border-l-4 border-l-accent'
@@ -281,8 +310,11 @@ const AgentChat: React.FC = () => {
           )}
         </aside>
 
-        {/* Main Chat Area */}
-        <main className="flex-1 flex flex-col relative bg-bg">
+        {/* Main Chat Area — full width on mobile, flex-1 on desktop */}
+        <main className={`
+          flex-col relative bg-bg flex-1
+          ${mobilePanel === 'chat' ? 'flex' : 'hidden'} md:flex
+        `}>
           <div ref={containerRef} className="flex-1 overflow-y-auto p-6 md:p-12 flex flex-col gap-8">
             {currentConversation?.messages.map((msg, idx) => (
               <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} w-full`}>
@@ -348,7 +380,7 @@ const AgentChat: React.FC = () => {
                   onChange={e => setInput(e.target.value)}
                   placeholder="Message ARIA..."
                   disabled={isTyping}
-                  className="flex-1 bg-bg-soft border border-soft rounded-md pl-4 pr-14 py-4 text-sm text-text-primary focus:outline-none focus:border-text-secondary shadow-inner"
+                  className="flex-1 bg-bg-soft border border-soft rounded-md pl-4 pr-14 py-4 text-base md:text-sm text-text-primary focus:outline-none focus:border-text-secondary shadow-inner"
                 />
                 <button
                   type="submit"

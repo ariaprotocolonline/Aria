@@ -174,7 +174,7 @@ const AgentBot: React.FC = () => {
   return (
     <>
       {/* Global Reminders Toasts */}
-      <div className="fixed bottom-6 left-6 z-[9999] flex flex-col gap-4">
+      <div className="fixed bottom-20 left-3 md:bottom-6 md:left-6 z-[9999] flex flex-col gap-4">
         {activeReminders.map(reminder => (
           <div key={reminder.id} className="bg-bg border-l-4 border-l-accent border-y border-r border-y-soft border-r-soft p-4 rounded-r-md shadow-lg flex flex-col gap-3 w-72 animate-fade-in">
             <div className="flex items-center gap-3">
@@ -192,11 +192,11 @@ const AgentBot: React.FC = () => {
         ))}
       </div>
 
-      <div className="fixed bottom-6 right-6 z-[9999] flex flex-col items-end gap-4">
+      <div className="fixed bottom-4 right-4 md:bottom-6 md:right-6 z-[9999] flex flex-col items-end gap-4">
         {/* Expanded Popup / Chat Bubble */}
         {isOpen && (
           <div 
-            className="bg-bg border border-soft rounded-xl shadow-2xl overflow-hidden w-[320px] transition-all duration-200 ease-out origin-bottom-right"
+            className="bg-bg border border-soft rounded-xl shadow-2xl overflow-hidden w-[calc(100vw-32px)] md:w-[320px] transition-all duration-200 ease-out origin-bottom-right"
             style={{ animation: 'scaleIn 0.2s ease-out forwards' }}
           >
             {showOnboarding ? (

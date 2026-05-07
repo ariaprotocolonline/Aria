@@ -49,7 +49,7 @@ const PortfolioRow: React.FC<PortfolioRowProps> = ({ riskProfile, setRiskProfile
     <>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 py-8 border-b border-soft">
         {/* Total Position Value */}
-        <div data-tour="vault-balance" className="flex flex-col justify-between p-6 bg-card border border-soft rounded-sm">
+        <div data-tour="vault-balance" className="flex flex-col justify-between p-4 md:p-6 bg-card border border-soft rounded-sm">
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm font-semibold tracking-wide text-text-secondary uppercase">
               {label}
@@ -81,7 +81,7 @@ const PortfolioRow: React.FC<PortfolioRowProps> = ({ riskProfile, setRiskProfile
         </div>
 
         {/* Live APY */}
-        <div className="flex flex-col justify-center p-6 bg-card border border-soft rounded-sm">
+        <div className="flex flex-col justify-center p-4 md:p-6 bg-card border border-soft rounded-sm">
           <span className="text-sm font-semibold tracking-wide text-text-secondary uppercase mb-2">
             Live Blended APY
           </span>
@@ -105,7 +105,7 @@ const PortfolioRow: React.FC<PortfolioRowProps> = ({ riskProfile, setRiskProfile
         </div>
 
         {/* Risk Profile Selector */}
-        <div className="flex flex-col justify-center p-6 bg-card border border-soft rounded-sm">
+        <div className="flex flex-col justify-center p-4 md:p-6 bg-card border border-soft rounded-sm">
           <span className="text-sm font-semibold tracking-wide text-text-secondary uppercase mb-4">
             Risk Mandate
           </span>
@@ -117,7 +117,7 @@ const PortfolioRow: React.FC<PortfolioRowProps> = ({ riskProfile, setRiskProfile
                 <button
                   key={rp}
                   onClick={() => setRiskProfile(rp)}
-                  className="flex-1 py-2 text-sm font-medium transition-colors"
+                  className="flex-1 py-2 text-xs md:text-sm font-medium transition-colors"
                   style={
                     isActive
                       ? { background: colors.activeBg, color: colors.activeText, borderColor: colors.activeBorder }

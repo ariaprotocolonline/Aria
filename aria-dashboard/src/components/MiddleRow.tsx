@@ -139,7 +139,39 @@ const MiddleRow: React.FC<MiddleRowProps> = ({ riskProfile, onFeedUpdate }) => {
             <span className="text-[10px] uppercase tracking-wider text-text-secondary mb-1">Data may be delayed</span>
           )}
         </div>
-        <div className="border border-soft rounded-sm overflow-hidden bg-bg">
+        {/* Mobile pool cards */}
+        <div className="md:hidden space-y-3">
+          {pools.length === 0 ? (
+            <div className="p-4 text-center text-text-secondary text-sm border border-soft rounded-sm bg-card">
+              Loading live pool data…
+            </div>
+          ) : pools.map((pool, i) => (
+            <div key={i} className="p-4 bg-card border border-soft rounded-sm">
+              <div className="flex justify-between items-start">
+                <div>
+                  <div className="font-semibold text-text-primary text-sm flex items-center gap-2">
+                    {pool.name}
+                    {pool.incentivized && (
+                      <span className="bg-accent/10 text-accent text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded-sm">Boost</span>
+                    )}
+                  </div>
+                  <div className="text-xs text-text-secondary mt-1">{pool.protocol}</div>
+                </div>
+                <div className="text-right">
+                  <div className="text-lg font-bold text-accent font-mono">{pool.apy}</div>
+                  <div className="text-xs text-text-secondary">APY</div>
+                </div>
+              </div>
+              <div className="flex justify-between mt-3 pt-3 border-t border-soft">
+                <span className="text-xs text-text-secondary">TVL</span>
+                <span className="text-xs font-medium text-text-primary font-mono">{pool.tvl}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Desktop table */}
+        <div className="hidden md:block border border-soft rounded-sm overflow-hidden bg-bg">
           <table className="w-full text-left text-sm">
             <thead className="bg-bg-soft text-text-secondary">
               <tr>
@@ -158,11 +190,13 @@ const MiddleRow: React.FC<MiddleRowProps> = ({ riskProfile, onFeedUpdate }) => {
                 </tr>
               ) : pools.map((pool, i) => (
                 <tr key={i} className="hover:bg-card transition-colors">
-                  <td className="px-5 py-4 font-medium text-text-primary flex items-center gap-2">
-                    {pool.name}
-                    {pool.incentivized && (
-                      <span className="bg-accent/10 text-accent text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded-sm">Boost</span>
-                    )}
+                  <td className="px-5 py-4 font-medium text-text-primary">
+                    <span className="flex items-center gap-2">
+                      {pool.name}
+                      {pool.incentivized && (
+                        <span className="bg-accent/10 text-accent text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded-sm">Boost</span>
+                      )}
+                    </span>
                   </td>
                   <td className="px-5 py-4 text-text-secondary">{pool.protocol}</td>
                   <td className="px-5 py-4 text-right font-mono text-text-secondary">{pool.tvl}</td>

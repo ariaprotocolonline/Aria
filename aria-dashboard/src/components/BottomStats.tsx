@@ -18,7 +18,7 @@ const BottomStats: React.FC<BottomStatsProps> = ({ liveFeed = [] }) => {
 
   return (
     <div className="py-6 flex flex-wrap gap-8 md:gap-16 justify-between items-center text-sm">
-      <div className="flex gap-8 md:gap-16 w-full justify-between">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-16 w-full">
         {stats.map((stat, i) => (
           <div key={i} className="flex flex-col gap-1">
             <span className="font-semibold tracking-wider text-text-secondary uppercase text-[10px]">

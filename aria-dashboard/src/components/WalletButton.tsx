@@ -10,10 +10,13 @@ const btnStyle: React.CSSProperties = {
   fontWeight: 700,
   borderRadius: '10px',
   border: 'none',
-  padding: '10px 20px',
+  padding: '6px 10px',
   cursor: 'pointer',
-  fontSize: '14px',
+  fontSize: '12px',
   lineHeight: 1,
+  whiteSpace: 'nowrap',
+  WebkitAppearance: 'none',
+  touchAction: 'manipulation',
 };
 
 const WalletButton = () => {
