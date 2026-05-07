@@ -86,7 +86,7 @@ function App() {
     setRiskProfile(rp);
     localStorage.setItem('aria-risk-profile', rp);
   };
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(true);
 
   useEffect(() => {
     if (isDarkMode) {

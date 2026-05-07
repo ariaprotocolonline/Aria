@@ -1,6 +1,6 @@
 import React from 'react';
-import { Activity, Menu, Moon, Sun } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Menu, Moon, Sun } from 'lucide-react';
+
 import { useAccount, useDisconnect } from 'wagmi';
 
 interface TopNavProps {
@@ -27,10 +27,6 @@ const TopNav: React.FC<TopNavProps> = ({ isDarkMode, toggleDarkMode }) => {
           >
             {isDarkMode ? <Sun size={16} className="text-text-secondary" /> : <Moon size={16} className="text-text-secondary" />}
           </button>
-          <div className="hidden md:flex items-center gap-2 px-3 py-1 bg-bg-soft border border-soft rounded-full">
-            <div className="w-2 h-2 bg-accent rounded-full animate-pulse" />
-            <span className="text-xs font-semibold tracking-wider text-text-secondary uppercase">Agent Active</span>
-          </div>
         </div>
 
         {/* Center — ARIA always perfectly centred */}
@@ -40,20 +36,6 @@ const TopNav: React.FC<TopNavProps> = ({ isDarkMode, toggleDarkMode }) => {
 
         {/* Right — controls */}
         <div className="ml-auto flex items-center gap-2 md:gap-4">
-          {/* Docs — desktop only */}
-          <Link
-            to="/docs"
-            className="hidden md:block text-sm font-medium text-text-secondary hover:text-text-primary transition-colors"
-          >
-            Read Docs
-          </Link>
-
-          {/* Network — desktop only */}
-          <div className="hidden md:flex items-center gap-2 text-sm font-medium text-text-secondary">
-            <Activity size={16} className="text-accent" />
-            <span>Mantle Network</span>
-          </div>
-
           {/* Wallet button */}
           <button
             data-tour="wallet-button"
