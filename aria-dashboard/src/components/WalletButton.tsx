@@ -26,13 +26,13 @@ const WalletButton = () => {
         const connected = mounted && account && chain;
 
         return (
-          <div
-            {...(!mounted && {
-              'aria-hidden': true,
-              style: { opacity: 0, pointerEvents: 'none', userSelect: 'none' },
-            })}
-          >
-            {!connected ? (
+          <div>
+            {!mounted ? (
+              // Always show a placeholder — never invisible while hydrating
+              <button style={{ ...btnStyle, opacity: 0.55, cursor: 'default' }} disabled type="button">
+                Connect Wallet
+              </button>
+            ) : !connected ? (
               <button onClick={openConnectModal} style={btnStyle} type="button">
                 Connect Wallet
               </button>

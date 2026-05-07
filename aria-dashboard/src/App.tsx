@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { useAccount } from 'wagmi';
 import { type Address } from 'viem';
@@ -8,9 +8,10 @@ import MiddleRow from './components/MiddleRow';
 import ChatPanel from './components/ChatPanel';
 import BottomStats from './components/BottomStats';
 import LandingPage from './pages/LandingPage';
-import DocsPage from './pages/DocsPage';
-import AgentChat from './components/agent/AgentChat';
 import AgentBot from './components/agent/AgentBot';
+
+const DocsPage  = lazy(() => import('./pages/DocsPage'));
+const AgentChat = lazy(() => import('./components/agent/AgentChat'));
 import OnboardingTour from './components/onboarding/OnboardingTour';
 import ErrorBoundary from './components/ErrorBoundary';
 import NetworkGuard from './components/NetworkGuard';
@@ -126,7 +127,11 @@ function App() {
             />
             <Route
               path="/docs"
-              element={<DocsPage isDarkMode={isDarkMode} toggleDarkMode={toggleDarkMode} />}
+              element={
+                <Suspense fallback={null}>
+                  <DocsPage isDarkMode={isDarkMode} toggleDarkMode={toggleDarkMode} />
+                </Suspense>
+              }
             />
             <Route
               path="/agent"
@@ -134,7 +139,9 @@ function App() {
                 !isConnected ? (
                   <Navigate to="/" replace />
                 ) : (
-                  <AgentChat />
+                  <Suspense fallback={null}>
+                    <AgentChat />
+                  </Suspense>
                 )
               }
             />

@@ -15,9 +15,12 @@ const ariaTheme = lightTheme({
   accentColorForeground: '#FFFFFF',
   borderRadius: 'medium',
   fontStack: 'system',
+  overlayBlur: 'small',
 });
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
+const root = ReactDOM.createRoot(document.getElementById('root')!);
+
+root.render(
   <React.StrictMode>
     <WagmiProvider config={wagmiConfig}>
       <QueryClientProvider client={queryClient}>
@@ -28,3 +31,10 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     </WagmiProvider>
   </React.StrictMode>,
 );
+
+// Hide splash after React's first paint
+requestAnimationFrame(() => {
+  requestAnimationFrame(() => {
+    (window as { __hideSplash?: () => void }).__hideSplash?.();
+  });
+});
