@@ -3,23 +3,23 @@ import { ArrowRight } from 'lucide-react';
 
 const SupportedAssets = () => {
   const assets = [
-    { 
-      name: 'Real Estate & Treasury', 
-      symbol: 'USDY', 
-      protocol: 'Ondo Finance', 
-      apy: '7.1%', 
-      tvl: '$89.0M',
+    {
+      name: 'Wrapped Ether',
+      symbol: 'WETH',
+      protocol: 'Agni Finance / FusionX',
+      apy: '8.2%',
+      tvl: '$124.5M',
       image: '/assets/gold.jpeg',
-      description: 'Institutional-grade real estate and US Treasury yields bridged to Mantle.'
+      description: 'Wrapped ETH deployed across concentrated liquidity pools on Mantle for optimised yield.'
     },
-    { 
-      name: 'Physical Gold', 
-      symbol: 'PAXG', 
-      protocol: 'Paxos', 
-      apy: '4.2%', 
-      tvl: '$120.5M',
+    {
+      name: 'USD Coin',
+      symbol: 'USDC',
+      protocol: 'Agni Finance / FusionX',
+      apy: '4.2%',
+      tvl: '$89.0M',
       image: '/assets/new_gold.jpg',
-      description: 'Physical gold bars vaulted in London, tokenized for instant liquidity.'
+      description: 'Stable USDC liquidity rotated between Agni Finance and FusionX for consistent yield.'
     },
   ];
 

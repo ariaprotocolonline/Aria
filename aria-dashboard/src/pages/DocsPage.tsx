@@ -158,14 +158,14 @@ const DocsPage: React.FC<DocsPageProps> = ({ isDarkMode, toggleDarkMode }) => {
                 ARIA is an autonomous protocol that manages Real World Asset capital on the Mantle blockchain. It monitors liquidity conditions, identifies yield opportunities across the Mantle ecosystem, and reallocates positions without requiring user intervention. Every decision is logged and explained in plain language so users maintain complete visibility into how their capital is being managed at all times.
               </p>
               <p>
-                The protocol addresses a structural gap in decentralized finance. The growth of high-quality RWA instruments onchain has not been matched by the infrastructure needed to actively manage those positions. Capital in USDY and mETH sits largely static, unable to respond to shifting liquidity conditions or emerging yield opportunities in real time. ARIA closes that gap.
+                The protocol addresses a structural gap in decentralized finance. The growth of high-quality onchain assets has not been matched by the infrastructure needed to actively manage those positions. Capital in WETH and USDC sits largely static, unable to respond to shifting liquidity conditions or emerging yield opportunities in real time. ARIA closes that gap.
               </p>
             </section>
 
             <section id="introduction" className="mb-12 scroll-mt-[100px]">
               <h2 className="font-serif text-2xl md:text-3xl font-bold mb-6 text-text-primary">2. Introduction</h2>
               <p className="mb-6">
-                The tokenization of real-world assets is one of the most consequential developments in decentralized finance. USDY, the yield-bearing dollar issued by Ondo Finance and backed by short-duration US Treasuries, and mETH, Mantle's liquid staking token, give users onchain access to yields that were previously only available through traditional financial infrastructure. Both assets trade with meaningful liquidity on Mantle and together form the foundation of the chain's RWA ecosystem.
+                Yield optimisation across DeFi liquidity pools is one of the most consequential opportunities in decentralised finance. WETH, the canonical wrapped ether on Mantle, and USDC, the leading dollar stablecoin, give users onchain access to yields across concentrated liquidity pools on Agni Finance and FusionX. Both assets trade with deep liquidity on Mantle and together form the foundation of the chain's DeFi ecosystem.
               </p>
               <p className="mb-6">
                 The existence of these instruments has not, however, resolved the fundamental challenge of capital efficiency in DeFi. Yield rates shift continuously across protocols. Liquidity composition changes as incentive programs begin and end. A position that is optimal at one point in time can become suboptimal within hours. Capturing the full yield potential of RWA instruments requires a level of continuous monitoring and execution speed that no individual user can sustainably provide.
@@ -186,12 +186,12 @@ const DocsPage: React.FC<DocsPageProps> = ({ isDarkMode, toggleDarkMode }) => {
 
               <h3 className="font-serif text-xl font-bold mb-4 mt-8">Yield Opportunity Decay</h3>
               <p className="mb-6">
-                Yield rates across Mantle's lending and liquidity protocols shift on timescales measured in hours. Opportunities on Lendle, Init Capital, Pendle, FusionX, and Agni Finance open and close continuously. The difference between the best and worst available risk-adjusted return for a given asset at any moment can exceed several hundred basis points. Capturing these opportunities requires continuous monitoring across multiple protocols simultaneously, which no individual user can sustainably maintain.
+                Yield rates across Mantle's liquidity protocols shift on timescales measured in hours. Opportunities on Agni Finance, FusionX, and the broader Mantle DeFi ecosystem open and close continuously. The difference between the best and worst available risk-adjusted return for a given asset at any moment can exceed several hundred basis points. Capturing these opportunities requires continuous monitoring across multiple protocols simultaneously, which no individual user can sustainably maintain.
               </p>
 
               <h3 className="font-serif text-xl font-bold mb-4 mt-8">Single-Position Capital Concentration</h3>
               <p className="mb-6">
-                Most RWA capital on Mantle is deployed in a single position and held there indefinitely. The ecosystem supports a range of complementary strategies that collectively offer superior risk-adjusted returns compared to any single static position. Using USDY as collateral on lending protocols, rotating along the yield curve on Pendle, deploying mETH into concentrated liquidity ranges — these approaches require active management that most users are not positioned to provide.
+                Most capital on Mantle is deployed in a single position and held there indefinitely. The ecosystem supports a range of complementary strategies that collectively offer superior risk-adjusted returns compared to any single static position. Deploying WETH into concentrated liquidity ranges, rotating USDC across stable pools on Agni Finance and FusionX — these approaches require active management that most users are not positioned to provide.
               </p>
 
               <h3 className="font-serif text-xl font-bold mb-4 mt-8">Risk Opacity</h3>
@@ -203,7 +203,7 @@ const DocsPage: React.FC<DocsPageProps> = ({ isDarkMode, toggleDarkMode }) => {
             <section id="the-aria-protocol" className="mb-12 scroll-mt-[100px]">
               <h2 className="font-serif text-2xl md:text-3xl font-bold mb-6 text-text-primary">4. The ARIA Protocol</h2>
               <p className="mb-6">
-                ARIA manages USDY and mETH positions on behalf of users through three intelligence layers that operate in continuous parallel. The user connects their wallet, selects a risk profile, and ARIA handles everything thereafter.
+                ARIA manages WETH and USDC positions on behalf of users through three intelligence layers that operate in continuous parallel. The user connects their wallet, selects a risk profile, and ARIA handles everything thereafter.
               </p>
 
               <h3 className="font-serif text-xl font-bold mb-4 mt-8">Liquidity Quality Intelligence</h3>
@@ -241,7 +241,7 @@ const DocsPage: React.FC<DocsPageProps> = ({ isDarkMode, toggleDarkMode }) => {
               
               <h3 className="font-serif text-xl font-bold mb-4 mt-8">Vault Contract Layer</h3>
               <p className="mb-6">
-                Each user's capital is held in an individually deployed vault smart contract on Mantle. The vault accepts deposits of USDY and mETH and grants ARIA bounded execution permissions — the ability to move funds between a predefined set of approved protocol integrations and nothing else. ARIA cannot move funds to any address outside the approved set. The approved set is defined by the user at vault creation and can only be modified by the vault owner. Users can pause execution or withdraw capital directly at any time with no timelock.
+                Each user's capital is held in an individually deployed vault smart contract on Mantle. The vault accepts deposits of WETH and USDC and grants ARIA bounded execution permissions — the ability to move funds between a predefined set of approved protocol integrations and nothing else. ARIA cannot move funds to any address outside the approved set. The approved set is defined by the user at vault creation and can only be modified by the vault owner. Users can pause execution or withdraw capital directly at any time with no timelock.
               </p>
 
               <h3 className="font-serif text-xl font-bold mb-4 mt-8">Intelligence Layer</h3>
@@ -251,7 +251,7 @@ const DocsPage: React.FC<DocsPageProps> = ({ isDarkMode, toggleDarkMode }) => {
 
               <h3 className="font-serif text-xl font-bold mb-4 mt-8">Protocol Integrations</h3>
               <p className="mb-6">
-                Agni Finance — concentrated liquidity, USDY/USDC and mETH/ETH pools. FusionX — AMM liquidity provision for mETH pairs. Lendle — lending and borrowing, USDY collateral and yield. Init Capital — isolated lending markets for mETH. Pendle — yield tokenization and fixed-rate strategies for USDY. Cleopatra — concentrated liquidity for high-yield strategies.
+                <strong>Agni Finance</strong> — concentrated liquidity AMM on Mantle. Launch pools: WETH/USDT (<code className="font-mono text-xs bg-bg-soft px-1 rounded">0x628f…bd4</code>), WETH/WMNT (<code className="font-mono text-xs bg-bg-soft px-1 rounded">0x585e…94a7</code>), and USDC/USDT (<code className="font-mono text-xs bg-bg-soft px-1 rounded">0x1686…4ae0</code>). <strong>FusionX</strong> — AMM liquidity provision on Mantle. Launch pools: WETH/USDT (<code className="font-mono text-xs bg-bg-soft px-1 rounded">0xbe18…3650</code>) and USDC/USDT (<code className="font-mono text-xs bg-bg-soft px-1 rounded">0x6488…1ca065</code>). Additional protocol integrations — including lending markets and yield tokenisation — are planned for Phase II and will be added to the approved pool list via governance.
               </p>
 
               <h3 className="font-serif text-xl font-bold mb-4 mt-8">Security</h3>
@@ -263,10 +263,10 @@ const DocsPage: React.FC<DocsPageProps> = ({ isDarkMode, toggleDarkMode }) => {
             <section id="supported-assets" className="mb-12 scroll-mt-[100px]">
               <h2 className="font-serif text-2xl md:text-3xl font-bold mb-6 text-text-primary">7. Supported Assets</h2>
               <p className="mb-6">
-                <strong>USDY</strong> is issued by Ondo Finance and backed by short-duration US Treasuries and bank demand deposits. It carries a base yield of approximately 5.0% APY, variable and reset monthly. Under ARIA management, target yield ranges from 6.2% to 18.6% APY depending on the user's risk profile. It represents the deepest RWA liquidity pool on Mantle.
+                <strong>WETH</strong> is the canonical wrapped ether on Mantle, pegged 1:1 to ETH and deployed across concentrated liquidity pools on Agni Finance and FusionX. It carries a base yield of approximately 8.2% APY in the WETH/USDT pool. Under ARIA management, target yield ranges from 7.8% to 9.5% APY depending on the pool and risk profile.
               </p>
               <p>
-                <strong>mETH</strong> is issued by the Mantle Liquid Staking Protocol and represents staked ETH earning Ethereum staking rewards at a base yield of approximately 3.8% APY. Under ARIA management, target yield ranges from 7.8% to 24.1% APY depending on the user's risk profile.
+                <strong>USDC</strong> is the leading dollar stablecoin on Mantle, deployed across stable pools on Agni Finance and FusionX. It carries a base yield of approximately 4.2% APY. Under ARIA management, USDC is rotated between pools to capture the best available stable yield at any given time.
               </p>
             </section>
 
@@ -281,10 +281,10 @@ const DocsPage: React.FC<DocsPageProps> = ({ isDarkMode, toggleDarkMode }) => {
                   <strong className="font-serif text-lg">Conservative.</strong> Target APY range of 6% to 9%. Operates within Agni Finance and FusionX base pools only. Liquidity quality floor of 70. Reallocation requires 150 basis points of APY improvement. Maximum single-pool exposure of 80%. Incentivized pools excluded entirely.
                 </li>
                 <li>
-                  <strong className="font-serif text-lg">Balanced.</strong> Target APY range of 9% to 14%. Adds Lendle and Init Capital to the approved protocol set. Liquidity quality floor of 55. Reallocation requires 75 basis points of APY improvement. Maximum single-pool exposure of 65%. Incentivized pools permitted above a quality score of 60.
+                  <strong className="font-serif text-lg">Balanced.</strong> Target APY range of 9% to 14%. Operates across all five live Agni Finance and FusionX pools, including higher-yield WETH/WMNT. Liquidity quality floor of 55. Reallocation requires 75 basis points of APY improvement. Maximum single-pool exposure of 65%. Incentivized pools permitted above a quality score of 60.
                 </li>
                 <li>
-                  <strong className="font-serif text-lg">Aggressive.</strong> Target APY range of 14% to 25% and above. Adds Pendle and Cleopatra to the approved protocol set. Liquidity quality floor of 40. Reallocation requires 40 basis points of APY improvement. Maximum single-pool exposure of 50%. Incentivized pools and leveraged yield strategies permitted.
+                  <strong className="font-serif text-lg">Aggressive.</strong> Target APY range of 14% to 25% and above. Accesses all live pools with preference for highest-APY WETH positions. Liquidity quality floor of 40. Reallocation requires 40 basis points of APY improvement. Maximum single-pool exposure of 50%. Incentivized pools permitted. Leveraged yield strategies and additional high-yield protocol integrations added in Phase II.
                 </li>
               </ul>
             </section>
@@ -304,12 +304,12 @@ const DocsPage: React.FC<DocsPageProps> = ({ isDarkMode, toggleDarkMode }) => {
               
               <h3 className="font-serif text-xl font-bold mb-2 mt-8">Phase I — Foundation</h3>
               <p className="mb-6">
-                ARIA's core infrastructure is established on Mantle mainnet. Audited vault contracts are deployed. Conservative and Balanced risk profiles go live across the six launch protocol integrations. The dashboard, activity feed, and conversational interface are released publicly. The objective is to establish the core value proposition in production and build an initial user base of capital allocators on Mantle.
+                ARIA's core infrastructure is established on Mantle mainnet. Audited vault contracts are deployed. Conservative and Balanced risk profiles go live across the five launch pool integrations on Agni Finance and FusionX. The dashboard, activity feed, and conversational interface are released publicly. The objective is to establish the core value proposition in production and build an initial user base of capital allocators on Mantle.
               </p>
 
               <h3 className="font-serif text-xl font-bold mb-2 mt-8">Phase II — Expansion</h3>
               <p className="mb-6">
-                Asset coverage expands to include additional RWA instruments achieving sufficient liquidity on Mantle. The Aggressive risk profile launches with Pendle and Cleopatra strategies. Multi-asset vault management enables ARIA to optimize combined USDY and mETH positions with cross-asset logic. An institutional API provides programmatic access to the intelligence layer for funds and protocol integrations.
+                Asset coverage expands to include additional tokens achieving sufficient liquidity on Mantle. The Aggressive risk profile launches with Pendle and Cleopatra strategies. Multi-asset vault management enables ARIA to optimise combined WETH and USDC positions with cross-asset logic. An institutional API provides programmatic access to the intelligence layer for funds and protocol integrations.
               </p>
 
               <h3 className="font-serif text-xl font-bold mb-2 mt-8">Phase III — Infrastructure</h3>

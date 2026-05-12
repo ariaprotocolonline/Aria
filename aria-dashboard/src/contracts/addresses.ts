@@ -16,14 +16,14 @@ export const FACTORY_ADDRESS: Record<number, Address> = {
 
 export const TOKEN_ADDRESSES: Record<number, Record<string, Address>> = {
   [MANTLE_MAINNET_ID]: {
-    USDY: env.USDY_ADDRESS_MAINNET as Address,
-    mETH: env.METH_ADDRESS_MAINNET as Address,
+    WETH: '0xdEAddEaDdeadDEadDEADDEaDDeaDDeAD00000000' as Address,
+    USDC: '0x09bc4e0d864854c6afb6eb9a9cdf58ac190d0df9' as Address,
   },
   [MANTLE_TESTNET_ID]: {
-    USDY: env.USDY_ADDRESS_TESTNET as Address,
-    mETH: env.METH_ADDRESS_TESTNET as Address,
+    WETH: import.meta.env.VITE_WETH_ADDRESS_TESTNET as Address,
+    USDC: import.meta.env.VITE_USDC_ADDRESS_TESTNET as Address,
   },
 };
 
-export const SUPPORTED_TOKENS = ['USDY', 'mETH'] as const;
+export const SUPPORTED_TOKENS = ['WETH', 'USDC'] as const;
 export type SupportedToken = (typeof SUPPORTED_TOKENS)[number];

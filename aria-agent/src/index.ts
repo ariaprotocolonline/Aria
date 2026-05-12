@@ -2,9 +2,10 @@
 // VAULT_ADDRESS, or ANTHROPIC_API_KEY will throw before the agent runs.
 import { CYCLE_INTERVAL_MS, RISK_PROFILE, VAULT_ADDRESS } from './config';
 import { runCycle } from './agent';
+import { getYieldOpportunities } from './yield';
 import { executeReallocation, type ExecutionResult } from './executor';
 import { generateExplanation, generateNoActionExplanation } from './explainer';
-import { startFeedServer, addFeedItem } from './feedServer';
+import { startFeedServer, addFeedItem, setLatestPools } from './feedServer';
 import { addMemoryEntry } from './memory';
 
 const FEED_PORT = parseInt(process.env.FEED_PORT ?? '3001', 10);
@@ -16,6 +17,23 @@ let cycleCount = 0;
 
 async function tick() {
   log(`Cycle start — risk: ${RISK_PROFILE}, vault: ${VAULT_ADDRESS}`);
+
+  // Always publish real on-chain pool data first — independent of Claude availability
+  try {
+    const opportunities = await getYieldOpportunities();
+    if (opportunities.length > 0) {
+      setLatestPools(opportunities.map(o => ({
+        protocol:       o.protocol,
+        poolAddress:    o.poolAddress,
+        tokenIn:        o.tokenIn,
+        apyBps:         o.apyBps,
+        liquidityScore: o.liquidityScore,
+      })));
+      log(`Pools published: ${opportunities.length} pools scanned`);
+    }
+  } catch (err) {
+    log(`Pool scan failed: ${err instanceof Error ? err.message : String(err)}`);
+  }
 
   try {
     const decision = await runCycle();

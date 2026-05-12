@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo, lazy, Suspense } from 'react';
+import { useState, useEffect, useCallback, lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { useAccount } from 'wagmi';
 import { type Address } from 'viem';
@@ -16,7 +16,7 @@ import OnboardingTour from './components/onboarding/OnboardingTour';
 import ErrorBoundary from './components/ErrorBoundary';
 import NetworkGuard from './components/NetworkGuard';
 import VaultGuard from './components/VaultGuard';
-import { RiskProfile, type FeedItem } from './services/claude';
+import { RiskProfile, type FeedItem, type MarketPool } from './services/claude';
 import { useVaultPaused } from './hooks/useARIAVault';
 
 function Dashboard({
@@ -34,25 +34,19 @@ function Dashboard({
 }) {
   const isPaused = useVaultPaused(vaultAddress).data as boolean | undefined;
   const [liveFeed, setLiveFeed] = useState<FeedItem[]>([]);
+  const [blendedApy, setBlendedApy] = useState<number | null>(null);
 
   const handleFeedUpdate = useCallback((items: FeedItem[]) => {
     setLiveFeed(items);
   }, []);
 
-  const blendedApy = useMemo(() => {
-    try {
-      const raw = localStorage.getItem('aria-pool-cache');
-      if (!raw) return null;
-      const cache = JSON.parse(raw) as { riskProfile: string; pools: { apy: string }[] };
-      if (cache.riskProfile !== riskProfile || !Array.isArray(cache.pools)) return null;
-      const apys = cache.pools
-        .map(p => parseFloat(p.apy.replace('%', '')))
-        .filter(a => !isNaN(a));
-      return apys.length > 0 ? apys.reduce((a, b) => a + b, 0) / apys.length : null;
-    } catch {
-      return null;
-    }
-  }, [riskProfile]);
+  const handlePoolsUpdate = useCallback((pools: MarketPool[]) => {
+    const apys = pools.map(p => parseFloat(p.apy.replace('%', ''))).filter(a => !isNaN(a));
+    setBlendedApy(apys.length > 0 ? apys.reduce((a, b) => a + b, 0) / apys.length : null);
+  }, []);
+
+  // Reset APY when risk profile changes so stale value doesn't persist
+  useEffect(() => { setBlendedApy(null); }, [riskProfile]);
 
   return (
     <div className="min-h-screen bg-bg text-text-primary transition-colors duration-300">
@@ -66,7 +60,7 @@ function Dashboard({
           )}
           <main className="flex-1 flex flex-col">
             <PortfolioRow riskProfile={riskProfile} setRiskProfile={setRiskProfile} blendedApy={blendedApy} />
-            <MiddleRow riskProfile={riskProfile} onFeedUpdate={handleFeedUpdate} />
+            <MiddleRow riskProfile={riskProfile} onFeedUpdate={handleFeedUpdate} onPoolsUpdate={handlePoolsUpdate} />
             <ChatPanel riskProfile={riskProfile} />
           </main>
           <BottomStats liveFeed={liveFeed} />

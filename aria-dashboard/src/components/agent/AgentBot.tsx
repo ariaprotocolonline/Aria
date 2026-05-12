@@ -215,7 +215,7 @@ const AgentBot: React.FC = () => {
                   </div>
                   <div>
                     <h4 className="font-bold mb-1">How the Dashboard Works</h4>
-                    <p className="text-text-secondary">Connect your wallet to view your portfolio. ARIA tracks your Real World Assets (like USDY) and liquid staking tokens (like mETH) on the Mantle network.</p>
+                    <p className="text-text-secondary">Connect your wallet to view your portfolio. ARIA tracks your assets (like WETH and USDC) on the Mantle network.</p>
                   </div>
                   <div>
                     <h4 className="font-bold mb-1">Getting Started & Earning</h4>

@@ -5,8 +5,8 @@ import dotenv from "dotenv";
 
 dotenv.config({ path: path.resolve(__dirname, "../../.env") });
 
-const USDY_MINT = ethers.parseUnits("10000", 18);
-const METH_MINT = ethers.parseUnits("10", 18);
+const WETH_MINT = ethers.parseUnits("10", 18);
+const USDC_MINT = ethers.parseUnits("10000", 6);
 
 async function main() {
   const [deployer] = await ethers.getSigners();
@@ -33,32 +33,32 @@ async function main() {
     );
   }
 
-  // ── 1. Deploy MockERC20 (USDY) ─────────────────────────────────────────────
-  console.log("[1/3] Deploying MockERC20 (USDY)...");
+  // ── 1. Deploy MockERC20 (WETH) ─────────────────────────────────────────────
+  console.log("[1/4] Deploying MockERC20 (WETH)...");
   const MockERC20 = await ethers.getContractFactory("MockERC20");
-  const usdy = await MockERC20.deploy("Ondo US Dollar Yield", "USDY");
-  await usdy.waitForDeployment();
-  const usdyAddress = await usdy.getAddress();
-  console.log("      USDY:", usdyAddress);
+  const weth = await MockERC20.deploy("Wrapped Ether", "WETH");
+  await weth.waitForDeployment();
+  const wethAddress = await weth.getAddress();
+  console.log("      WETH:", wethAddress);
 
-  await (await usdy.mint(deployer.address, USDY_MINT)).wait();
+  await (await weth.mint(deployer.address, WETH_MINT)).wait();
   if (agentAddress.toLowerCase() !== deployer.address.toLowerCase()) {
-    await (await usdy.mint(agentAddress, USDY_MINT)).wait();
+    await (await weth.mint(agentAddress, WETH_MINT)).wait();
   }
 
-  // ── 2. Deploy MockERC20 (mETH) ─────────────────────────────────────────────
-  console.log("[2/3] Deploying MockERC20 (mETH)...");
-  const meth = await MockERC20.deploy("Mantle Staked Ether", "mETH");
-  await meth.waitForDeployment();
-  const methAddress = await meth.getAddress();
-  console.log("      mETH:", methAddress);
+  // ── 2. Deploy MockERC20 (USDC) ─────────────────────────────────────────────
+  console.log("[2/4] Deploying MockERC20 (USDC)...");
+  const usdc = await MockERC20.deploy("USD Coin", "USDC");
+  await usdc.waitForDeployment();
+  const usdcAddress = await usdc.getAddress();
+  console.log("      USDC:", usdcAddress);
 
-  await (await meth.mint(deployer.address, METH_MINT)).wait();
+  await (await usdc.mint(deployer.address, USDC_MINT)).wait();
   if (agentAddress.toLowerCase() !== deployer.address.toLowerCase()) {
-    await (await meth.mint(agentAddress, METH_MINT)).wait();
+    await (await usdc.mint(agentAddress, USDC_MINT)).wait();
   }
 
-  // ── 3. Deploy ARIAVault (deployer's own vault) ────────────────────────────
+  // ── 3. Deploy ARIAVault ────────────────────────────────────────────────────
   console.log("[3/4] Deploying ARIAVault...");
   const ARIAVault = await ethers.getContractFactory("ARIAVault");
   const vault = await ARIAVault.deploy(deployer.address, agentAddress, feeRecipient);
@@ -74,12 +74,31 @@ async function main() {
   const factoryAddress = await factory.getAddress();
   console.log("      ARIAVaultFactory:", factoryAddress);
 
+  // ── Patch ARIA/.env ───────────────────────────────────────────────────────
+  const envPath = path.resolve(__dirname, "../../.env");
+  function patchEnv(key: string, value: string) {
+    let content = fs.readFileSync(envPath, "utf8");
+    const regex = new RegExp(`^(${key}=).*`, "m");
+    if (regex.test(content)) {
+      content = content.replace(regex, `$1${value}`);
+    } else {
+      content += `\n${key}=${value}`;
+    }
+    fs.writeFileSync(envPath, content);
+  }
+  patchEnv("VAULT_ADDRESS", vaultAddress);
+  patchEnv("VITE_VAULT_ADDRESS_TESTNET", vaultAddress);
+  patchEnv("VITE_WETH_ADDRESS_TESTNET", wethAddress);
+  patchEnv("VITE_USDC_ADDRESS_TESTNET", usdcAddress);
+  patchEnv("VITE_FACTORY_ADDRESS_TESTNET", factoryAddress);
+  patchEnv("FACTORY_ADDRESS", factoryAddress);
+
   // ── Save deployment JSON ───────────────────────────────────────────────────
   const deployment = {
     network: network.name,
     chainId: network.chainId.toString(),
-    USDY: usdyAddress,
-    mETH: methAddress,
+    WETH: wethAddress,
+    USDC: usdcAddress,
     ARIAVault: vaultAddress,
     ARIAVaultFactory: factoryAddress,
     deployer: deployer.address,
@@ -90,16 +109,14 @@ async function main() {
   const outPath = path.join(__dirname, "../full-deployment.json");
   fs.writeFileSync(outPath, JSON.stringify(deployment, null, 2));
 
-  // ── Print paste-ready .env block ───────────────────────────────────────────
+  // ── Summary ───────────────────────────────────────────────────────────────
   console.log("\n═══════════════════════════════════════════");
-  console.log("  Paste into ARIA/.env:");
+  console.log("  Deployed — ARIA/.env auto-patched:");
   console.log("═══════════════════════════════════════════");
-  console.log(`VAULT_ADDRESS=${vaultAddress}`);
-  console.log(`VITE_VAULT_ADDRESS_TESTNET=${vaultAddress}`);
-  console.log(`VITE_USDY_ADDRESS_TESTNET=${usdyAddress}`);
-  console.log(`VITE_METH_ADDRESS_TESTNET=${methAddress}`);
-  console.log(`VITE_FACTORY_ADDRESS_TESTNET=${factoryAddress}`);
-  console.log(`FACTORY_ADDRESS=${factoryAddress}`);
+  console.log(`WETH:               ${wethAddress}`);
+  console.log(`USDC:               ${usdcAddress}`);
+  console.log(`ARIAVault:          ${vaultAddress}`);
+  console.log(`ARIAVaultFactory:   ${factoryAddress}`);
   console.log("═══════════════════════════════════════════\n");
   console.log("Deployment saved to full-deployment.json");
   console.log("Restart the Vite dev server to pick up new addresses.");

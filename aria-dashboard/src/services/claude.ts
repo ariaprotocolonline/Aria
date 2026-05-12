@@ -126,19 +126,19 @@ Return ONLY raw JSON — no markdown fences, no commentary:
     const set = new Date().getMinutes() % 3;
     const fallbacks = [
       [
-        { tag: 'ALERT' as const,       message: 'mETH staking yield declined 18bps over the past 4h. Monitoring for continued compression before reallocation.' },
-        { tag: 'OPPORTUNITY' as const, message: `Pendle PT-USDY expiring in 14 days offers a locked ${riskProfile === 'Conservative' ? '6.8' : riskProfile === 'Balanced' ? '11.2' : '19.4'}% APY. Entry window is narrow.` },
-        { tag: 'ACTION' as const,      message: `Portfolio rebalanced to ${riskProfile} mandate. USDY weight increased 3% to reduce volatility exposure.` },
+        { tag: 'ALERT' as const,       message: 'WETH/WMNT pool liquidity thinned 18bps over the past 4h. Monitoring for continued compression before reallocation.' },
+        { tag: 'OPPORTUNITY' as const, message: `Agni Finance WETH/USDT pool offering a locked ${riskProfile === 'Conservative' ? '6.8' : riskProfile === 'Balanced' ? '11.2' : '19.4'}% APY. Entry window is narrow.` },
+        { tag: 'ACTION' as const,      message: `Portfolio rebalanced to ${riskProfile} mandate. USDC weight increased 3% to reduce volatility exposure.` },
       ],
       [
-        { tag: 'OPPORTUNITY' as const, message: 'Merchant Moe MNT/mUSD pool offering 22% APY with boosted incentives — eligible for current risk tier.' },
-        { tag: 'ALERT' as const,       message: 'On-chain liquidity for USDY thinned 12% on Mantle DEXs in the last hour. Slippage risk elevated for large exits.' },
+        { tag: 'OPPORTUNITY' as const, message: 'FusionX WETH/USDT pool offering 22% APY with boosted incentives — eligible for current risk tier.' },
+        { tag: 'ALERT' as const,       message: 'On-chain liquidity for WETH thinned 12% on Mantle DEXs in the last hour. Slippage risk elevated for large exits.' },
         { tag: 'ACTION' as const,      message: 'Yield scan complete. No reallocation triggered — current allocation within optimal range for this mandate.' },
       ],
       [
-        { tag: 'ACTION' as const,      message: 'Initiated position in Ondo USDY yield tranche. Capital deployed at 7.1% fixed rate through next settlement.' },
-        { tag: 'OPPORTUNITY' as const, message: 'Init Capital leveraged mETH vault now accepting deposits at projected 28% net APY — flagged for Aggressive mandate review.' },
-        { tag: 'ALERT' as const,       message: 'US CPI data due in 6h. Historical pattern shows RWA yield repricing within 30min of release. Reducing duration exposure.' },
+        { tag: 'ACTION' as const,      message: 'Initiated position in Agni Finance WETH/USDT pool. Capital deployed at 8.2% fixed rate.' },
+        { tag: 'OPPORTUNITY' as const, message: 'FusionX USDC/USDT pool now accepting deposits at projected 28% net APY — flagged for Aggressive mandate review.' },
+        { tag: 'ALERT' as const,       message: 'US CPI data due in 6h. Historical pattern shows yield repricing within 30min of release. Reducing duration exposure.' },
       ],
     ];
     return fallbacks[set].map((item, i) => ({
@@ -155,29 +155,30 @@ export interface MarketPool {
   apy: string;
   tvl: string;
   incentivized: boolean;
+  isLive?: boolean;
 }
 
 const POOL_FALLBACKS: Record<RiskProfile, MarketPool[]> = {
   Conservative: [
-    { name: 'USDY',      protocol: 'Ondo Finance',  apy: '5.2%',  tvl: '$124.5M', incentivized: false },
-    { name: 'mETH',      protocol: 'Mantle LSP',    apy: '4.8%',  tvl: '$89.2M',  incentivized: false },
-    { name: 'USDY/USDC', protocol: 'Merchant Moe',  apy: '6.1%',  tvl: '$18.4M',  incentivized: true  },
-    { name: 'USDY',      protocol: 'Lendle',        apy: '5.7%',  tvl: '$42.1M',  incentivized: false },
-    { name: 'USDC',      protocol: 'Init Capital',  apy: '5.9%',  tvl: '$31.6M',  incentivized: true  },
+    { name: 'WETH/USDT',   protocol: 'Agni Finance', apy: '8.2%',  tvl: '$124.5M', incentivized: false },
+    { name: 'WETH/USDT',   protocol: 'FusionX',      apy: '7.8%',  tvl: '$89.2M',  incentivized: false },
+    { name: 'USDC/USDT',   protocol: 'Agni Finance', apy: '4.2%',  tvl: '$18.4M',  incentivized: true  },
+    { name: 'USDC/USDT',   protocol: 'FusionX',      apy: '3.8%',  tvl: '$42.1M',  incentivized: false },
+    { name: 'WETH/WMNT',   protocol: 'Agni Finance', apy: '6.1%',  tvl: '$31.6M',  incentivized: true  },
   ],
   Balanced: [
-    { name: 'mETH',         protocol: 'Pendle',       apy: '12.4%', tvl: '$67.3M',  incentivized: false },
-    { name: 'USDY',         protocol: 'Ondo Finance', apy: '5.2%',  tvl: '$124.5M', incentivized: false },
-    { name: 'mETH/WETH',    protocol: 'Merchant Moe', apy: '14.8%', tvl: '$22.1M',  incentivized: true  },
-    { name: 'mETH',         protocol: 'Init Capital', apy: '11.2%', tvl: '$38.9M',  incentivized: false },
-    { name: 'MNT/mUSD',     protocol: 'Merchant Moe', apy: '18.3%', tvl: '$9.7M',   incentivized: true  },
+    { name: 'WETH/WMNT',   protocol: 'Agni Finance', apy: '9.5%',  tvl: '$67.3M',  incentivized: false },
+    { name: 'WETH/USDT',   protocol: 'Agni Finance', apy: '8.2%',  tvl: '$124.5M', incentivized: false },
+    { name: 'WETH/USDT',   protocol: 'FusionX',      apy: '7.8%',  tvl: '$22.1M',  incentivized: true  },
+    { name: 'USDC/USDT',   protocol: 'Agni Finance', apy: '4.2%',  tvl: '$38.9M',  incentivized: false },
+    { name: 'USDC/USDT',   protocol: 'FusionX',      apy: '3.8%',  tvl: '$9.7M',   incentivized: true  },
   ],
   Aggressive: [
-    { name: 'PT-USDY',      protocol: 'Pendle',       apy: '22.6%', tvl: '$14.2M',  incentivized: false },
-    { name: 'mETH Leverage', protocol: 'Init Capital', apy: '28.4%', tvl: '$8.1M',   incentivized: false },
-    { name: 'MNT/WETH',     protocol: 'Merchant Moe', apy: '31.7%', tvl: '$6.4M',   incentivized: true  },
-    { name: 'YT-mETH',      protocol: 'Pendle',       apy: '24.1%', tvl: '$4.8M',   incentivized: false },
-    { name: 'mETH/MNT',     protocol: 'Merchant Moe', apy: '26.9%', tvl: '$11.3M',  incentivized: true  },
+    { name: 'WETH/WMNT',   protocol: 'Agni Finance', apy: '9.5%',  tvl: '$14.2M',  incentivized: false },
+    { name: 'WETH/USDT',   protocol: 'FusionX',      apy: '7.8%',  tvl: '$8.1M',   incentivized: false },
+    { name: 'WETH/USDT',   protocol: 'Agni Finance', apy: '8.2%',  tvl: '$6.4M',   incentivized: true  },
+    { name: 'USDC/USDT',   protocol: 'Agni Finance', apy: '4.2%',  tvl: '$4.8M',   incentivized: false },
+    { name: 'USDC/USDT',   protocol: 'FusionX',      apy: '3.8%',  tvl: '$11.3M',  incentivized: true  },
   ],
 };
 

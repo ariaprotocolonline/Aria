@@ -1,0 +1,8 @@
+{
+  "network": "mantleTestnet",
+  "chainId": "5003",
+  "WETH": "0xd67783513AD5d183e560D45b43eFC02a334A1E0E",
+  "USDC": "0x6B16f214D04994e628366B6B6f49f0a0C23E34d7",
+  "deployer": "0x793fda54017d08C2b379C99639f315f9A5e80713",
+  "deployedAt": "2026-05-11T14:26:20.134Z"
+}

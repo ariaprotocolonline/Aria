@@ -11,21 +11,26 @@ export interface Opportunity {
   liquidityScore: number; // [0, 1]
 }
 
-// Lendle LendingPool — mainnet only; APY reads fall back gracefully on testnet
-const LENDLE_POOL: Address = '0x401eCb1D350407f13ba348573E5630B83638E30D';
+const ZERO = '0x0000000000000000000000000000000000000000';
 
-const USDY_ADDRESS = (process.env.MANTLE_NETWORK === 'testnet'
-  ? process.env.VITE_USDY_ADDRESS_TESTNET
-  : process.env.VITE_USDY_ADDRESS_MAINNET) as Address;
+const WETH_ADDRESS = (
+  process.env.MANTLE_NETWORK === 'testnet' &&
+  process.env.VITE_WETH_ADDRESS_TESTNET &&
+  process.env.VITE_WETH_ADDRESS_TESTNET !== ZERO
+    ? process.env.VITE_WETH_ADDRESS_TESTNET
+    : '0xdEAddEaDdeadDEadDEADDEaDDeaDDeAD00000000'
+) as Address;
 
-const METH_ADDRESS = (process.env.MANTLE_NETWORK === 'testnet'
-  ? process.env.VITE_METH_ADDRESS_TESTNET
-  : process.env.VITE_METH_ADDRESS_MAINNET) as Address;
+const USDC_ADDRESS = (
+  process.env.MANTLE_NETWORK === 'testnet' &&
+  process.env.VITE_USDC_ADDRESS_TESTNET &&
+  process.env.VITE_USDC_ADDRESS_TESTNET !== ZERO
+    ? process.env.VITE_USDC_ADDRESS_TESTNET
+    : '0x09bc4e0d864854c6afb6eb9a9cdf58ac190d0df9'
+) as Address;
 
-// Only verified on-chain pools. Fallback APYs used when the live read fails.
-// TODO: Add FusionX pools once V3 pool addresses are confirmed on Mantle explorer
-// TODO: Add Agni Finance pools once LP addresses are confirmed
-// TODO: Add Cleopatra pools once deployment is live on Mantle mainnet
+const WMNT_ADDRESS = '0x78c1b0C915c4FAA5FffA6CAbf0219DA63d7f4cb' as Address;
+
 const POOLS: Array<{
   protocol: string;
   poolAddress: Address;
@@ -34,18 +39,39 @@ const POOLS: Array<{
   apyFallbackBps: number;
 }> = [
   {
-    protocol: 'Lendle USDY',
-    poolAddress: LENDLE_POOL,
-    tokenIn:  USDY_ADDRESS,
-    tokenOut: USDY_ADDRESS,
-    apyFallbackBps: 620,
+    protocol: 'Agni Finance WETH/USDT',
+    poolAddress: '0x628f7131cf43e88ebe3921ae78c4ba0c31872bd4' as Address,
+    tokenIn:  WETH_ADDRESS,
+    tokenOut: USDC_ADDRESS,
+    apyFallbackBps: 820,
   },
   {
-    protocol: 'Lendle mETH',
-    poolAddress: LENDLE_POOL,
-    tokenIn:  METH_ADDRESS,
-    tokenOut: METH_ADDRESS,
-    apyFallbackBps: 480,
+    protocol: 'Agni Finance WETH/WMNT',
+    poolAddress: '0x585ec64f06afa80e474bb6574ef7be38a8ef94a7' as Address,
+    tokenIn:  WETH_ADDRESS,
+    tokenOut: WMNT_ADDRESS,
+    apyFallbackBps: 950,
+  },
+  {
+    protocol: 'FusionX WETH/USDT',
+    poolAddress: '0xbe18aad013699c1cdd903cb3e6d596ef99c37650' as Address,
+    tokenIn:  WETH_ADDRESS,
+    tokenOut: USDC_ADDRESS,
+    apyFallbackBps: 780,
+  },
+  {
+    protocol: 'Agni Finance USDC/USDT',
+    poolAddress: '0x16867d00d45347a2ded25b8cdb7022b3171d4ae0' as Address,
+    tokenIn:  USDC_ADDRESS,
+    tokenOut: USDC_ADDRESS,
+    apyFallbackBps: 420,
+  },
+  {
+    protocol: 'FusionX USDC/USDT',
+    poolAddress: '0x6488f911c6cd86c289aa319c5a826dcf8f1ca065' as Address,
+    tokenIn:  USDC_ADDRESS,
+    tokenOut: USDC_ADDRESS,
+    apyFallbackBps: 380,
   },
 ];
 

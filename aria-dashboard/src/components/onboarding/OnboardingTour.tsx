@@ -39,7 +39,7 @@ const DASHBOARD_STEPS: TourStep[] = [
   {
     selector: '[data-tour="vault-balance"]',
     heading: 'Your Vault Balance',
-    body: 'Your real-time balance across USDY and mETH. Every reallocation ARIA makes is reflected here instantly.',
+    body: 'Your real-time balance across WETH and USDC. Every reallocation ARIA makes is reflected here instantly.',
   },
   {
     selector: '[data-tour="wallet-button"]',
@@ -49,7 +49,7 @@ const DASHBOARD_STEPS: TourStep[] = [
   {
     selector: '[data-tour="withdraw-btn"]',
     heading: 'Withdraw Anytime',
-    body: 'Your funds are never locked. Hit Withdraw to pull your USDY or mETH back to your wallet at any time.',
+    body: 'Your funds are never locked. Hit Withdraw to pull your WETH or USDC back to your wallet at any time.',
   },
   {
     selector: '[data-tour="intelligence-feed"]',

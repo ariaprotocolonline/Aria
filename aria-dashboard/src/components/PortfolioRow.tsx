@@ -23,8 +23,8 @@ const PortfolioRow: React.FC<PortfolioRowProps> = ({ riskProfile, setRiskProfile
   const {
     address,
     vaultDeployed,
-    usdyDisplay,
-    methDisplay,
+    wethDisplay,
+    usdcDisplay,
     nativeDisplay,
     nativeSymbol,
     nativeLoading,
@@ -88,12 +88,12 @@ const PortfolioRow: React.FC<PortfolioRowProps> = ({ riskProfile, setRiskProfile
           <h2 className="font-serif text-4xl text-text-primary tracking-tight">{currentApy}</h2>
           <div className="mt-4 space-y-1.5">
             <div className="flex justify-between text-xs text-text-secondary">
-              <span>USDY</span>
-              <span>{usdyDisplay.toFixed(4)}</span>
+              <span>WETH</span>
+              <span>{wethDisplay.toFixed(4)}</span>
             </div>
             <div className="flex justify-between text-xs text-text-secondary">
-              <span>mETH</span>
-              <span>{methDisplay.toFixed(4)}</span>
+              <span>USDC</span>
+              <span>{usdcDisplay.toFixed(4)}</span>
             </div>
             {!vaultDeployed && address && (
               <div className="flex justify-between text-xs text-text-secondary">

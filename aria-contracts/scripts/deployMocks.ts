@@ -6,9 +6,9 @@ import dotenv from "dotenv";
 const ENV_PATH = path.resolve(__dirname, "../../.env");
 dotenv.config({ path: ENV_PATH });
 
-// Mint amounts: 10,000 USDY and 10 mETH to deployer
-const USDY_MINT = ethers.parseUnits("10000", 18);
-const METH_MINT = ethers.parseUnits("10", 18);
+// Mint amounts: 10 WETH and 10,000 USDC to deployer
+const WETH_MINT = ethers.parseUnits("10", 18);
+const USDC_MINT = ethers.parseUnits("10000", 6);
 
 function patchEnv(key: string, value: string) {
   let content = fs.readFileSync(ENV_PATH, "utf8");
@@ -40,53 +40,52 @@ async function main() {
     );
   }
 
-  // ── Deploy mock USDY ──────────────────────────────────────────────────────
-  console.log("Deploying MockERC20 (USDY)...");
+  // ── Deploy mock WETH ──────────────────────────────────────────────────────
+  console.log("Deploying MockERC20 (WETH)...");
   const MockERC20 = await ethers.getContractFactory("MockERC20");
 
-  const usdy = await MockERC20.deploy("Ondo US Dollar Yield", "USDY");
-  await usdy.waitForDeployment();
-  const usdyAddress = await usdy.getAddress();
-  console.log("  USDY deployed to:", usdyAddress);
+  const weth = await MockERC20.deploy("Wrapped Ether", "WETH");
+  await weth.waitForDeployment();
+  const wethAddress = await weth.getAddress();
+  console.log("  WETH deployed to:", wethAddress);
 
-  console.log("  Minting 10,000 USDY to deployer...");
-  await (await usdy.mint(deployer.address, USDY_MINT)).wait();
+  console.log("  Minting 10 WETH to deployer...");
+  await (await weth.mint(deployer.address, WETH_MINT)).wait();
 
-  // Also mint to AGENT_ADDRESS if it's a different wallet (e.g. the user's MetaMask)
   const agentAddress = process.env.AGENT_ADDRESS;
   if (agentAddress && agentAddress.toLowerCase() !== deployer.address.toLowerCase()) {
-    console.log("  Minting 10,000 USDY to agent/user wallet...");
-    await (await usdy.mint(agentAddress, USDY_MINT)).wait();
+    console.log("  Minting 10 WETH to agent/user wallet...");
+    await (await weth.mint(agentAddress, WETH_MINT)).wait();
   }
 
-  // ── Deploy mock mETH ──────────────────────────────────────────────────────
-  console.log("\nDeploying MockERC20 (mETH)...");
-  const meth = await MockERC20.deploy("Mantle Staked Ether", "mETH");
-  await meth.waitForDeployment();
-  const methAddress = await meth.getAddress();
-  console.log("  mETH deployed to:", methAddress);
+  // ── Deploy mock USDC ──────────────────────────────────────────────────────
+  console.log("\nDeploying MockERC20 (USDC)...");
+  const usdc = await MockERC20.deploy("USD Coin", "USDC");
+  await usdc.waitForDeployment();
+  const usdcAddress = await usdc.getAddress();
+  console.log("  USDC deployed to:", usdcAddress);
 
-  console.log("  Minting 10 mETH to deployer...");
-  await (await meth.mint(deployer.address, METH_MINT)).wait();
+  console.log("  Minting 10,000 USDC to deployer...");
+  await (await usdc.mint(deployer.address, USDC_MINT)).wait();
 
   if (agentAddress && agentAddress.toLowerCase() !== deployer.address.toLowerCase()) {
-    console.log("  Minting 10 mETH to agent/user wallet...");
-    await (await meth.mint(agentAddress, METH_MINT)).wait();
+    console.log("  Minting 10,000 USDC to agent/user wallet...");
+    await (await usdc.mint(agentAddress, USDC_MINT)).wait();
   }
 
   // ── Patch ARIA/.env ───────────────────────────────────────────────────────
   console.log("\nPatching ARIA/.env...");
-  patchEnv("VITE_USDY_ADDRESS_TESTNET", usdyAddress);
-  patchEnv("VITE_METH_ADDRESS_TESTNET", methAddress);
-  console.log("  VITE_USDY_ADDRESS_TESTNET =", usdyAddress);
-  console.log("  VITE_METH_ADDRESS_TESTNET =", methAddress);
+  patchEnv("VITE_WETH_ADDRESS_TESTNET", wethAddress);
+  patchEnv("VITE_USDC_ADDRESS_TESTNET", usdcAddress);
+  console.log("  VITE_WETH_ADDRESS_TESTNET =", wethAddress);
+  console.log("  VITE_USDC_ADDRESS_TESTNET =", usdcAddress);
 
   // ── Save deployment receipt ───────────────────────────────────────────────
   const receipt = {
     network: network.name,
     chainId: network.chainId.toString(),
-    USDY: usdyAddress,
-    mETH: methAddress,
+    WETH: wethAddress,
+    USDC: usdcAddress,
     deployer: deployer.address,
     deployedAt: new Date().toISOString(),
   };

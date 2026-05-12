@@ -16,6 +16,7 @@ export interface ReallocationDecision {
   reason: string;
   claudeConfidence?: number;
   claudeUrgency?: 'low' | 'medium' | 'high';
+  scannedOpportunities?: Opportunity[];
 }
 
 // ── System prompt for the agent analysis cycle ─────────────────────────────
@@ -24,7 +25,7 @@ export interface ReallocationDecision {
 // Claude talks. Code validates. Chain executes.
 
 const AGENT_ANALYSIS_SYSTEM_PROMPT = `\
-You are ARIA's intelligence layer, analyzing live onchain data to produce reallocation decisions for USDY and mETH positions on Mantle.
+You are ARIA's intelligence layer, analyzing live onchain data to produce reallocation decisions for WETH and USDC positions on Mantle.
 
 Your job is to evaluate the provided pool data and return a structured decision. You are not executing anything — your output is validated by deterministic TypeScript code before anything touches the chain.
 
@@ -90,13 +91,17 @@ async function getVaultBalances(tokenAddresses: Address[]): Promise<Map<Address,
   const unique = [...new Set(tokenAddresses.map(a => a.toLowerCase() as Address))];
   const entries = await Promise.all(
     unique.map(async (token) => {
-      const balance = await publicClient.readContract({
-        address: VAULT_ADDRESS,
-        abi: VAULT_ABI,
-        functionName: 'getBalance',
-        args: [token],
-      });
-      return [token, balance] as [Address, bigint];
+      try {
+        const balance = await publicClient.readContract({
+          address: VAULT_ADDRESS,
+          abi: VAULT_ABI,
+          functionName: 'getBalance',
+          args: [token],
+        });
+        return [token, balance] as [Address, bigint];
+      } catch {
+        return [token, 0n] as [Address, bigint];
+      }
     })
   );
   return new Map(entries);
@@ -132,6 +137,7 @@ export async function runCycle(): Promise<ReallocationDecision> {
   // 2. Gather live onchain data
   const opportunities = await getYieldOpportunities();
   if (opportunities.length === 0) return noOp('No pool data available');
+  const withOpps = (d: ReallocationDecision): ReallocationDecision => ({ ...d, scannedOpportunities: opportunities });
 
   const tokenAddresses = opportunities.map(o => o.tokenIn);
   const vaultBalances  = await getVaultBalances(tokenAddresses);
@@ -176,14 +182,14 @@ export async function runCycle(): Promise<ReallocationDecision> {
   const responseCheck = validateAgentResponse(text);
   if (!responseCheck.safe) {
     console.error(`[SECURITY] Agent response blocked: ${responseCheck.reason}`);
-    return noOp('Response failed security validation');
+    return withOpps(noOp('Response failed security validation'));
   }
 
   // 6. Parse the <decision> block
   const decisionMatch = text.match(/<decision>([\s\S]*?)<\/decision>/);
   if (!decisionMatch) {
     console.warn('[agent] No <decision> block in Claude response — holding');
-    return noOp('No structured decision returned');
+    return withOpps(noOp('No structured decision returned'));
   }
 
   let claudeDecision: ClaudeDecision;
@@ -191,12 +197,12 @@ export async function runCycle(): Promise<ReallocationDecision> {
     claudeDecision = JSON.parse(decisionMatch[1].trim());
   } catch {
     console.warn('[agent] Malformed <decision> JSON — holding');
-    return noOp('Could not parse decision block');
+    return withOpps(noOp('Could not parse decision block'));
   }
 
   // 7. If Claude recommends hold or alert — respect it
   if (claudeDecision.action !== 'reallocate') {
-    return noOp(claudeDecision.reason ?? 'Claude recommends holding');
+    return withOpps(noOp(claudeDecision.reason ?? 'Claude recommends holding'));
   }
 
   // ── From here: code enforces every safety gate ─────────────────────────────
@@ -208,37 +214,37 @@ export async function runCycle(): Promise<ReallocationDecision> {
   );
   if (!targetPool) {
     console.warn(`[agent] SECURITY: Claude recommended unknown protocol "${claudeDecision.toProtocol}" — blocked`);
-    return noOp(`Recommended protocol "${claudeDecision.toProtocol}" not in approved list`);
+    return withOpps(noOp(`Recommended protocol "${claudeDecision.toProtocol}" not in approved list`));
   }
 
   // 9. Liquidity score must meet the profile floor
   const liquidityFloor = PROFILE_FLOORS[RISK_PROFILE];
   if (targetPool.liquidityScore < liquidityFloor) {
-    return noOp(
+    return withOpps(noOp(
       `Liquidity score ${targetPool.liquidityScore.toFixed(3)} below ${RISK_PROFILE} floor ${liquidityFloor}`,
       targetPool
-    );
+    ));
   }
 
   // 10. APY improvement must meet the profile minimum threshold
   const improvementThreshold = PROFILE_THRESHOLDS[RISK_PROFILE];
   if (claudeDecision.apyImprovementBps < improvementThreshold) {
-    return noOp(
+    return withOpps(noOp(
       `APY improvement ${claudeDecision.apyImprovementBps}bps below ${RISK_PROFILE} threshold ${improvementThreshold}bps`,
       targetPool
-    );
+    ));
   }
 
   // 11. Vault must actually hold a balance of the required token
   const vaultBalance = vaultBalances.get(targetPool.tokenIn.toLowerCase() as Address) ?? 0n;
   if (vaultBalance === 0n) {
-    return noOp('Vault has no balance in the required token', targetPool);
+    return withOpps(noOp('Vault has no balance in the required token', targetPool));
   }
 
   // 12. All gates passed — return decision for execution
   const currentApyBps = targetPool.apyBps - claudeDecision.apyImprovementBps;
 
-  return {
+  return withOpps({
     shouldReallocate: true,
     opportunity:      targetPool,
     currentApyBps,
@@ -247,5 +253,5 @@ export async function runCycle(): Promise<ReallocationDecision> {
     reason:           claudeDecision.reason,
     claudeConfidence: claudeDecision.confidence,
     claudeUrgency:    claudeDecision.urgency,
-  };
+  });
 }

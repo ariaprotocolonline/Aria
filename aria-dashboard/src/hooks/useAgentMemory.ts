@@ -251,7 +251,7 @@ export const useAgentMemory = () => {
       const riskProfile = (localStorage.getItem('aria-risk-profile') as 'Conservative' | 'Balanced' | 'Aggressive') || 'Balanced';
 
       const agentSystemPrompt =
-        `You are ARIA, an autonomous RWA intelligence agent managing the user's USDY and mETH positions on Mantle. ` +
+        `You are ARIA, an autonomous RWA intelligence agent managing the user's WETH and USDC positions on Mantle. ` +
         `You have memory of past conversations. You can: answer questions about their portfolio, explain past agent actions, ` +
         `set reminders, and monitor conditions. ` +
         `When setting a reminder respond with your message AND a JSON block wrapped in <action> tags: ` +

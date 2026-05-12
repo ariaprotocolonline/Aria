@@ -9,8 +9,8 @@ export interface PortfolioData {
   address: `0x${string}` | undefined;
   chainId: number;
   vaultDeployed: boolean;
-  usdyDisplay: number;
-  methDisplay: number;
+  wethDisplay: number;
+  usdcDisplay: number;
   nativeDisplay: number;
   nativeSymbol: string;
   nativeLoading: boolean;
@@ -25,23 +25,23 @@ export function usePortfolioData(): PortfolioData {
   const _vaultAddr = VAULT_ADDRESS[chainId];
   const vaultDeployed = _vaultAddr !== undefined && _vaultAddr !== zeroAddress;
 
-  const { data: usdyVaultBalance } = useVaultBalance('USDY');
-  const { data: methVaultBalance } = useVaultBalance('mETH');
+  const { data: wethVaultBalance } = useVaultBalance('WETH');
+  const { data: usdcVaultBalance } = useVaultBalance('USDC');
 
-  const usdyAddr = TOKEN_ADDRESSES[chainId]?.USDY;
-  const methAddr = TOKEN_ADDRESSES[chainId]?.mETH;
-  const tokensDeployed = !!usdyAddr && usdyAddr !== zeroAddress;
+  const wethAddr = TOKEN_ADDRESSES[chainId]?.WETH;
+  const usdcAddr = TOKEN_ADDRESSES[chainId]?.USDC;
+  const tokensDeployed = !!wethAddr && wethAddr !== zeroAddress;
 
-  const { data: usdyWalletRaw } = useReadContract({
-    address: usdyAddr as `0x${string}`,
+  const { data: wethWalletRaw } = useReadContract({
+    address: wethAddr as `0x${string}`,
     abi: erc20Abi,
     functionName: 'balanceOf',
     args: address ? [address] : undefined,
     query: { enabled: !!address && tokensDeployed, refetchInterval: 30_000 },
   });
 
-  const { data: methWalletRaw } = useReadContract({
-    address: methAddr as `0x${string}`,
+  const { data: usdcWalletRaw } = useReadContract({
+    address: usdcAddr as `0x${string}`,
     abi: erc20Abi,
     functionName: 'balanceOf',
     args: address ? [address] : undefined,
@@ -56,11 +56,11 @@ export function usePortfolioData(): PortfolioData {
   const toFloat = (raw: unknown) =>
     raw !== undefined ? parseFloat(formatUnits(raw as bigint, 18)) : 0;
 
-  const usdyDisplay = vaultDeployed ? toFloat(usdyVaultBalance) : toFloat(usdyWalletRaw);
-  const methDisplay = vaultDeployed ? toFloat(methVaultBalance) : toFloat(methWalletRaw);
+  const wethDisplay = vaultDeployed ? toFloat(wethVaultBalance) : toFloat(wethWalletRaw);
+  const usdcDisplay = vaultDeployed ? toFloat(usdcVaultBalance) : toFloat(usdcWalletRaw);
   const nativeDisplay = nativeBalance ? parseFloat(nativeBalance.formatted) : 0;
   const nativeSymbol = nativeBalance?.symbol ?? 'MNT';
-  const totalUsd = usdyDisplay + methDisplay + (vaultDeployed ? 0 : nativeDisplay);
+  const totalUsd = wethDisplay + usdcDisplay + (vaultDeployed ? 0 : nativeDisplay);
 
   const toContextString = (): string => {
     if (!address) return '';
@@ -74,8 +74,8 @@ export function usePortfolioData(): PortfolioData {
       `[Live portfolio snapshot @ ${now}]`,
       `Wallet: ${address}`,
       `Network: ${chainName}`,
-      `USDY: ${usdyDisplay.toFixed(4)}${vaultDeployed ? ' (in vault)' : ' (wallet)'}`,
-      `mETH: ${methDisplay.toFixed(4)}${vaultDeployed ? ' (in vault)' : ' (wallet)'}`,
+      `WETH: ${wethDisplay.toFixed(4)}${vaultDeployed ? ' (in vault)' : ' (wallet)'}`,
+      `USDC: ${usdcDisplay.toFixed(4)}${vaultDeployed ? ' (in vault)' : ' (wallet)'}`,
       `${nativeSymbol}: ${nativeDisplay.toFixed(4)} (native gas token)`,
       `Total value: ~$${totalUsd.toFixed(2)}`,
       `Risk profile: ${riskProfile}`,
@@ -87,8 +87,8 @@ export function usePortfolioData(): PortfolioData {
     address,
     chainId,
     vaultDeployed,
-    usdyDisplay,
-    methDisplay,
+    wethDisplay,
+    usdcDisplay,
     nativeDisplay,
     nativeSymbol,
     nativeLoading,

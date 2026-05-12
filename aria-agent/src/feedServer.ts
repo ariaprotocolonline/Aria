@@ -8,8 +8,23 @@ export interface AgentFeedItem {
   message: string;
 }
 
+export interface PoolSnapshot {
+  protocol: string;
+  poolAddress: string;
+  tokenIn: string;
+  apyBps: number;
+  liquidityScore: number;
+  scannedAt: string;
+}
+
 const MAX_ITEMS = 100;
 const feedBuffer: AgentFeedItem[] = [];
+let latestPools: PoolSnapshot[] = [];
+
+export function setLatestPools(pools: Omit<PoolSnapshot, 'scannedAt'>[]): void {
+  const scannedAt = new Date().toISOString();
+  latestPools = pools.map(p => ({ ...p, scannedAt }));
+}
 
 export function addFeedItem(item: Omit<AgentFeedItem, 'id' | 'timestamp'>): void {
   feedBuffer.unshift({
@@ -67,6 +82,12 @@ export function startFeedServer(port = 3001): http.Server {
     if (req.method === 'GET' && req.url === '/feed') {
       res.writeHead(200);
       res.end(JSON.stringify(feedBuffer));
+      return;
+    }
+
+    if (req.method === 'GET' && req.url === '/pools') {
+      res.writeHead(200);
+      res.end(JSON.stringify(latestPools));
       return;
     }
 

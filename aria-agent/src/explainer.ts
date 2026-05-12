@@ -12,7 +12,7 @@ Rules:
 - Maximum 2 sentences, no exceptions
 - No dashes, no emojis, no technical terms
 - State what happened and why in plain English
-- Example good response: "Moved your USDY to Lendle for a higher yield. Liquidity in the previous pool was thinning."
+- Example good response: "Moved your WETH to Agni Finance for a higher yield. Liquidity in the previous pool was thinning."
 - Example bad response: "ARIA has successfully executed a reallocation transaction --- moving funds from pool 0x123... to optimize yield based on APY differential analysis"
 - Never mention contract addresses, transaction hashes, gas, or any infrastructure detail`;
 

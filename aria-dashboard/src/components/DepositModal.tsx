@@ -11,7 +11,7 @@ interface DepositModalProps {
 const DepositModal: React.FC<DepositModalProps> = ({ onClose }) => {
   const { address } = useAccount();
   const chainId = useChainId();
-  const [selectedToken, setSelectedToken] = useState<SupportedToken>('USDY');
+  const [selectedToken, setSelectedToken] = useState<SupportedToken>('WETH');
   const [amount, setAmount] = useState('');
   const [step, setStep] = useState<'idle' | 'approving' | 'depositing' | 'done' | 'error'>('idle');
   const [errorMsg, setErrorMsg] = useState('');
