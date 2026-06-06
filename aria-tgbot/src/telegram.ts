@@ -89,19 +89,19 @@ export function formatHourlyUpdate(pools: PoolSnapshot[]): string {
   return (
     `📊 <b>ARIA Market Update</b>  <i>${now} UTC</i>\n\n` +
 
-    `<b>Live Liquidity Pools — Mantle</b>\n` +
+    `<b>Live Liquidity Pools on Mantle</b>\n` +
     `${poolLines}\n\n` +
 
     `<b>💡 How you benefit</b>\n` +
-    `ARIA scans these pools every 5 minutes. When a better yield opportunity clears its safety gates — ` +
-    `liquidity depth, APY improvement threshold, and protocol whitelist — it reallocates your WETH and USDC automatically.\n\n` +
+    `ARIA scans these pools every 5 minutes. When a better yield opportunity clears its safety gates ` +
+    `(liquidity depth, APY threshold, protocol whitelist) it reallocates your WETH and USDC automatically.\n\n` +
 
     (best
       ? `Best current opportunity: <b>${best.protocol}</b> at <code>${bestApy}%</code> APY\n\n`
       : '') +
 
-    `Your capital stays in your vault at all times. ARIA can only move funds between pre-approved protocols — ` +
-    `it can never transfer funds to an external address.\n\n` +
+    `Your capital stays in your vault at all times. ARIA can only move funds between pre-approved protocols. ` +
+    `It can never transfer funds to an external address.\n\n` +
 
     `<i>Reply /status to check your vault balance.</i>`
   );
