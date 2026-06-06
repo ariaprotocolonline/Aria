@@ -5,7 +5,7 @@ import crypto from 'crypto';
 const DATA_DIR     = path.join(__dirname, '../data');
 const USERS_FILE   = path.join(DATA_DIR, 'telegram-users.json');
 const PENDING_FILE = path.join(DATA_DIR, 'telegram-pending.json');
-const PENDING_TTL  = 10 * 60_000; // 10 minutes
+const PENDING_TTL  = 30 * 60_000; // 30 minutes
 
 interface TelegramUser {
   walletAddress: string;
