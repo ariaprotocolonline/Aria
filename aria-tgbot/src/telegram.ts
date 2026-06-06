@@ -155,6 +155,6 @@ export function formatOnboarding(wallet: string): string {
     `/help — all commands\n\n` +
 
     `<i>Or just message me — I can answer questions about your positions, yield strategy, and recent moves.</i>\n\n` +
-    `🔗 <a href="https://mantle.aria.finance">Open dashboard</a>`
+    `🔗 <a href="https://ariaprotocol.online">Open dashboard</a>`
   );
 }
