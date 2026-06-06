@@ -5,6 +5,7 @@ import { useAccount } from 'wagmi';
 import { useMarketData } from '../hooks/useMarketData';
 import { useTokenPrice } from '../hooks/useTokenPrice';
 import HeroNetwork from '../components/landing/HeroNetwork';
+import MobileLanding from './MobileLanding';
 
 type Tab = 'conservative' | 'balanced' | 'aggressive';
 
@@ -19,7 +20,14 @@ function XLogo({ src, alt, letter, bg }: { src: string; alt: string; letter: str
   );
 }
 
-export default function LandingPage({ isDarkMode: _isDarkMode, toggleDarkMode: _toggleDarkMode }: { isDarkMode: boolean; toggleDarkMode: () => void }) {
+export default function LandingPage({ isDarkMode, toggleDarkMode }: { isDarkMode: boolean; toggleDarkMode: () => void }) {
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth <= 768);
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth <= 768);
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
+
   const { openConnectModal } = useConnectModal();
   const { address } = useAccount();
   const navigate = useNavigate();
@@ -88,6 +96,8 @@ export default function LandingPage({ isDarkMode: _isDarkMode, toggleDarkMode: _
   const { eth: ethPrice } = useTokenPrice();
 
   const sections = ['ARIA', 'Demo', 'Problem', 'Intelligence', 'Assets', 'Profiles', 'Architecture', 'Integrations', 'Roadmap', 'CTA'];
+
+  if (isMobile) return <MobileLanding isDarkMode={isDarkMode} toggleDarkMode={toggleDarkMode} />;
 
   return (
     <div className="lp" ref={lpRef}>
