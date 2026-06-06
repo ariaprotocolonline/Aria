@@ -371,6 +371,8 @@ export default function Dashboard({ vaultAddress }: { vaultAddress?: string }) {
   const { eth: ethPrice, mnt: mntPrice } = useTokenPrice();
   const { pools: marketPools, loading: marketsLoading, lastUpdated: marketsUpdated } = useMarketData();
   const { status: tgStatus, loading: tgLoading, generateLink: tgGenerateLink, disconnect: tgDisconnect } = useTelegram();
+  const [settingsTgLink, setSettingsTgLink] = useState<string | null>(null);
+  useEffect(() => { if (tgStatus.connected) setSettingsTgLink(null); }, [tgStatus.connected]);
   const { positions: xStockPositions, heldPositions: xStockHeld, totalValueUsd: xStockTotalUsd } = useXStockPortfolio();
 
   const vaultWethNum = parseFloat(vaultWethFmt) || 0;
@@ -2016,21 +2018,25 @@ export default function Dashboard({ vaultAddress }: { vaultAddress?: string }) {
                     Disconnect
                   </button>
                 </div>
+              ) : settingsTgLink ? (
+                <a
+                  href={settingsTgLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn primary"
+                  style={{ padding:'7px 16px', fontSize:12, display:'inline-flex', alignItems:'center', gap:7, textDecoration:'none' }}
+                >
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                  Open @AriaRWAbot
+                </a>
               ) : (
                 <button
                   className="btn primary"
                   style={{ padding:'7px 16px', fontSize:12, display:'flex', alignItems:'center', gap:7 }}
                   disabled={tgLoading}
                   onClick={async () => {
-                    // Open the window synchronously inside the user gesture so browsers
-                    // don't block it as a popup. Set location once the link is ready.
-                    const win = window.open('', '_blank');
                     const link = await tgGenerateLink();
-                    if (link && win) {
-                      win.location.href = link;
-                    } else {
-                      win?.close();
-                    }
+                    if (link) setSettingsTgLink(link);
                   }}
                 >
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
