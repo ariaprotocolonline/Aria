@@ -2108,16 +2108,17 @@ html, body { overflow-x: hidden; -webkit-tap-highlight-color: transparent; }
    Desktop landing page (.lp) is hidden at ≤768px via JS swap.
    ================================================================ */
 
-/* Root */
+/* Root — overflow-x must stay on a non-sticky ancestor.
+   Setting overflow-x:hidden on .mob itself would break position:sticky on .mob-nav. */
 .mob {
   min-height: 100dvh;
   background: var(--bg);
   color: var(--ink);
-  overflow-x: hidden;
   display: flex;
   flex-direction: column;
   font-family: var(--sans);
 }
+body:has(.mob) { overflow-x: hidden; }
 
 /* NAV */
 .mob-nav {

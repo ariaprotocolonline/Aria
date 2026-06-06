@@ -71,7 +71,6 @@ export default function DocsPage({ isDarkMode: _isDarkMode, toggleDarkMode: _tog
             <a style={{ color: 'var(--accent)' }}>Whitepaper</a>
           </div>
           <div className="lp-nav-cta">
-            <span className="lp-chain-pill"><span className="lp-d" />Mantle</span>
             <button className="lp-btn lp-btn-primary" onClick={() => openConnectModal?.()}>Launch app →</button>
           </div>
         </div>
