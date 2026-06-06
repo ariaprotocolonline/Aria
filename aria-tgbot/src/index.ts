@@ -169,7 +169,12 @@ async function handleUpdate(body: string): Promise<void> {
   if (text.startsWith('/start')) {
     const code = text.split(' ')[1]?.trim();
     if (!code) {
-      await sendMessage(chatId, '👋 Welcome to ARIA!\n\nConnect your wallet from the ARIA dashboard → Settings → Connect Telegram.');
+      await sendMessage(chatId,
+        '👋 Welcome to ARIA.\n\n' +
+        'To get started, open the dashboard and connect your wallet there first.\n\n' +
+        '🔗 <a href="https://ariaprotocol.online">ariaprotocol.online</a>\n\n' +
+        '<i>Once connected, go to Settings and tap "Connect Telegram" to link this chat to your vault.</i>'
+      );
       return;
     }
     const wallet = consumePendingLink(code);
@@ -191,7 +196,11 @@ async function handleUpdate(body: string): Promise<void> {
   if (text === '/status') {
     const wallet = getWalletByChatId(chatId);
     if (!wallet) {
-      await sendMessage(chatId, '❌ No wallet linked. Open ARIA dashboard → Settings → Connect Telegram.');
+      await sendMessage(chatId,
+        'No wallet linked to this chat yet.\n\n' +
+        '🔗 <a href="https://ariaprotocol.online">ariaprotocol.online</a>\n\n' +
+        '<i>Connect your wallet on the dashboard, then go to Settings and tap "Connect Telegram".</i>'
+      );
       return;
     }
     await sendMessage(chatId, `✅ Connected to vault\n<code>${wallet}</code>\n\nARIA is monitoring your position.`);
@@ -201,7 +210,13 @@ async function handleUpdate(body: string): Promise<void> {
   // /disconnect
   if (text === '/disconnect') {
     const wallet = getWalletByChatId(chatId);
-    if (!wallet) { await sendMessage(chatId, 'No wallet linked to this chat.'); return; }
+    if (!wallet) {
+      await sendMessage(chatId,
+        'No wallet linked to this chat.\n\n' +
+        '🔗 <a href="https://ariaprotocol.online">ariaprotocol.online</a>'
+      );
+      return;
+    }
     unlinkWallet(wallet);
     await sendMessage(chatId, '🔌 Disconnected. You will no longer receive ARIA notifications.');
     return;
@@ -222,7 +237,11 @@ async function handleUpdate(body: string): Promise<void> {
   // Chat — forward to Claude via aria-server
   const wallet = getWalletByChatId(chatId);
   if (!wallet) {
-    await sendMessage(chatId, 'Link your wallet first: ARIA dashboard → Settings → Connect Telegram.');
+    await sendMessage(chatId,
+      'You need to connect your wallet before chatting with ARIA.\n\n' +
+      '🔗 <a href="https://ariaprotocol.online">ariaprotocol.online</a>\n\n' +
+      '<i>Once connected, go to Settings and tap "Connect Telegram" to link this chat.</i>'
+    );
     return;
   }
   const reply = await askClaude(wallet, text);
