@@ -1501,7 +1501,7 @@ body.view-direct .ask { display: none; }
   .lp .lp-arch, .lp .lp-road-grid { grid-template-columns: 1fr; }
   .lp .lp-layer, .lp .lp-phase { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.07); padding: 28px 24px; }
   .lp .lp-phase:nth-child(n+2) { padding-left: 24px; }
-  .lp .lp-tab-panel { grid-template-columns: 1fr; padding: 32px 24px; }
+  .lp .lp-tab-panel { grid-template-columns: 1fr; padding: 32px 24px; min-height: auto; }
   .lp .lp-trust-grid { grid-template-columns: 1fr 1fr; gap: 24px 0; }
   .lp .lp-tr { border-right: none; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.07); }
   .lp .lp-ft { grid-template-columns: 1fr 1fr; }
@@ -1514,9 +1514,15 @@ body.view-direct .ask { display: none; }
 }
 @media (max-width: 640px) {
   .lp .lp-logos { grid-template-columns: repeat(2, 1fr); }
-  .lp .lp-params { grid-template-columns: 1fr; }
+  .lp . lp-params { grid-template-columns: 1fr; }
   .lp .lp-asset-stats { grid-template-columns: 1fr 1fr; }
   .lp-dotnav { display: none; }
+  /* Collapse tab panel image on phones */
+  .lp-tab-panel-img { display: none; }
+  /* Reduce section padding */
+  .lp-page { padding: 36px 0; }
+  .lp-stage-section { padding: 48px 0 32px; }
+  .lp-cta { padding: 56px 0; }
 }
 
 /* ===== Onboarding (.ob-) ===== */
@@ -1861,15 +1867,17 @@ html, body { overflow-x: hidden; -webkit-tap-highlight-color: transparent; }
   .lp-app-chip { padding: 2px 7px; font-size: 9px; }
 
   /* ── Landing sections ── */
-  .lp-page { padding: 48px 0; }
-  .lp-prob { padding: 20px 18px; }
-  .lp-prob h3 { font-size: 16px; }
+  .lp-page { padding: 36px 0; }
+  .lp-prob { padding: 18px 16px; }
+  .lp-prob h3 { font-size: 15px; }
   .lp-trust-grid { grid-template-columns: 1fr; }
-  .lp-tr { padding: 14px 0; }
-  .lp-pillar { padding: 24px 20px; }
-  .lp-asset-card { padding: 22px 18px; }
-  .lp-arch-item { padding: 22px 18px; }
-  .lp-integ { padding: 18px; }
+  .lp-tr { padding: 12px 0; }
+  .lp-pillar { padding: 20px 18px; }
+  .lp-asset-card { padding: 20px 16px; }
+  .lp-arch-item { padding: 20px 16px; }
+  .lp-integ { padding: 16px; }
+  .lp-tab-panel { min-height: auto; padding: 24px 20px; }
+  .lp-asset-stats { grid-template-columns: 1fr; gap: 12px; }
 
   /* ── Landing footer ── */
   .lp-footer { padding: 40px 0 24px; }
@@ -1929,7 +1937,8 @@ html, body { overflow-x: hidden; -webkit-tap-highlight-color: transparent; }
   .lp-hero-h { font-size: clamp(28px, 8.5vw, 42px); margin-bottom: 20px; }
   .lp-cta h2 { font-size: clamp(30px, 9vw, 52px); }
   .lp-cta p { font-size: 14px; }
-  .lp-cta { padding: 60px 0; }
+  .lp-cta { padding: 44px 0; }
+  .lp-page { padding: 28px 0; }
 
   /* ── Landing demo: minimal view ── */
   .lp-dm-kpis { grid-template-columns: 1fr 1fr; }
