@@ -463,11 +463,6 @@ export default function Dashboard({ vaultAddress }: { vaultAddress?: string }) {
         </div>
 
         <div className="top-right">
-          <button className="chip chip-net">
-            <span className="d" />
-            Mantle
-          </button>
-
           {/* Wallet chip */}
           <div className={`wallet-wrap${walletOpen ? ' open' : ''}`} data-tour="wallet-button">
             <button className="chip" onClick={e => { e.stopPropagation(); setNotifOpen(false); setWalletOpen(o => !o); }}>
