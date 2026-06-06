@@ -317,14 +317,8 @@ describe("SecurityAudit", function () {
     });
 
     it("fee recipient cannot be set to vault's own address", async function () {
-      // There is no explicit guard — this is a known LOW finding.
-      // Test documents the behavior: fees lock if recipient == vault.
-      await vault.connect(owner).setFeeRecipient(vaultAddr);
-      await depositUsdy(E18(1000));
-      await time.increase(YEAR);
-      // Management fee would transfer to vault itself — tokens stay in vault, not lost
-      // Withdraw should still succeed
-      await expect(vault.connect(owner).withdraw(usdyAddr, E18(1))).to.not.be.reverted;
+      await expect(vault.connect(owner).setFeeRecipient(vaultAddr))
+        .to.be.revertedWith("ARIAVault: fee recipient cannot be vault");
     });
   });
 

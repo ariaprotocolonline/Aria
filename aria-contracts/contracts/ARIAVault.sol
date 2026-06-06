@@ -98,6 +98,7 @@ contract ARIAVault is IARIAVault, Ownable2Step, Pausable, ReentrancyGuard {
         Ownable(initialOwner)
     {
         require(initialAgent != address(0), "ARIAVault: zero agent");
+        require(_feeRecipient != address(this), "ARIAVault: fee recipient cannot be vault");
         agent             = initialAgent;
         feeRecipient      = _feeRecipient;
         performanceFeeBps = 1000; // 10%
@@ -178,6 +179,7 @@ contract ARIAVault is IARIAVault, Ownable2Step, Pausable, ReentrancyGuard {
 
     /// @notice Update the fee recipient. Zero address disables fee collection.
     function setFeeRecipient(address _feeRecipient) external onlyOwner {
+        require(_feeRecipient != address(this), "ARIAVault: fee recipient cannot be vault");
         feeRecipient = _feeRecipient;
         emit FeeRecipientUpdated(_feeRecipient);
     }

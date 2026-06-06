@@ -14,18 +14,20 @@ export async function sendMessage(chatId: number | string, text: string): Promis
   } catch { return false; }
 }
 
-export async function setWebhook(url: string): Promise<boolean> {
+export async function setWebhook(url: string, secretToken?: string): Promise<boolean> {
   if (!TG_BASE) return false;
   try {
+    const payload: Record<string, unknown> = { url, allowed_updates: ['message'] };
+    if (secretToken) payload.secret_token = secretToken;
     const res  = await fetch(`${TG_BASE}/setWebhook`, {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify({ url, allowed_updates: ['message'] }),
+      body:    JSON.stringify(payload),
       signal:  AbortSignal.timeout(8_000),
     });
     const data = await res.json() as { ok: boolean; description?: string };
     if (data.ok) {
-      console.log(`[Telegram] Webhook set: ${url}`);
+      console.log(`[Telegram] Webhook set: ${url}${secretToken ? ' (secret token enabled)' : ''}`);
       return true;
     }
     console.warn(`[Telegram] Webhook failed: ${data.description}`);

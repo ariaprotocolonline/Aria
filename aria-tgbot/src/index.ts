@@ -12,9 +12,10 @@ import {
 
 dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
-const PORT           = parseInt(process.env.TG_PORT ?? '3003', 10);
-const INTERNAL_TOKEN = process.env.INTERNAL_SECRET ?? '';
-const BOT_USERNAME   = process.env.TELEGRAM_BOT_USERNAME ?? 'AriaRWAbot';
+const PORT            = parseInt(process.env.TG_PORT ?? '3003', 10);
+const INTERNAL_TOKEN  = process.env.INTERNAL_SECRET ?? '';
+const BOT_USERNAME    = process.env.TELEGRAM_BOT_USERNAME ?? 'AriaRWAbot';
+const WEBHOOK_SECRET  = process.env.TELEGRAM_WEBHOOK_SECRET ?? '';
 const ARIA_SERVER    = process.env.ARIA_SERVER_URL ?? 'http://127.0.0.1:3002';
 const WALLET_RE      = /^0x[0-9a-fA-F]{40}$/;
 
@@ -253,6 +254,15 @@ const server = http.createServer(async (req, res) => {
 
   // ── Telegram webhook (called by Telegram) ───────────────────────────────────
   if (method === 'POST' && url === '/webhook') {
+    // Validate secret token if configured — rejects spoofed webhook requests
+    if (WEBHOOK_SECRET) {
+      const incoming = req.headers['x-telegram-bot-api-secret-token'];
+      if (incoming !== WEBHOOK_SECRET) {
+        log(`[Security] Webhook rejected — invalid or missing secret token`);
+        res.writeHead(403); res.end('{}');
+        return;
+      }
+    }
     res.writeHead(200); res.end('{}'); // Acknowledge immediately
     const body = await readBody(req).catch(() => '');
     handleUpdate(body).catch(() => {});
@@ -358,7 +368,7 @@ server.listen(PORT, '127.0.0.1', async () => {
 
   const webhookUrl = process.env.TELEGRAM_WEBHOOK_URL;
   if (process.env.TELEGRAM_BOT_TOKEN && webhookUrl) {
-    const ok = await setWebhook(webhookUrl);
+    const ok = await setWebhook(webhookUrl, WEBHOOK_SECRET || undefined);
     if (!ok) {
       // Webhook failed — fall back to polling so the bot still works locally
       startPolling().catch(() => {});
