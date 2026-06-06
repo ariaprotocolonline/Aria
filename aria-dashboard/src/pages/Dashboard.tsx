@@ -370,7 +370,7 @@ export default function Dashboard({ vaultAddress }: { vaultAddress?: string }) {
 
   const { eth: ethPrice, mnt: mntPrice } = useTokenPrice();
   const { pools: marketPools, loading: marketsLoading, lastUpdated: marketsUpdated } = useMarketData();
-  const { status: tgStatus, loading: tgLoading, error: tgError, generateLink: tgGenerateLink, disconnect: tgDisconnect } = useTelegram();
+  const { status: tgStatus, loading: tgLoading, generateLink: tgGenerateLink, disconnect: tgDisconnect } = useTelegram();
   const [settingsTgLink, setSettingsTgLink] = useState<string | null>(null);
   const [settingsTgErr, setSettingsTgErr]   = useState<string | null>(null);
   useEffect(() => { if (tgStatus.connected) setSettingsTgLink(null); }, [tgStatus.connected]);
