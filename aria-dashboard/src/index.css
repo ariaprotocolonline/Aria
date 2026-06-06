@@ -1774,6 +1774,70 @@ html, body { overflow-x: hidden; -webkit-tap-highlight-color: transparent; }
 }
 
 /* ================================================================
+   MOBILE LANDING — comprehensive fix
+   Root cause: lp-page has min-height:100vh + scroll-snap, so every
+   section fills the entire screen even with minimal content.
+   On mobile we disable snap, remove min-height, and simplify complex
+   sections (demo browser mockup, gauge visualization).
+   ================================================================ */
+@media (max-width: 768px) {
+  /* Kill full-screen snap — sections size to their content */
+  .lp {
+    scroll-snap-type: none;
+    overflow-x: hidden;
+    height: auto;
+  }
+  .lp .lp-page {
+    min-height: auto;
+    height: auto;
+    scroll-snap-align: none;
+    scroll-snap-stop: normal;
+    overflow: visible;
+    padding: 0;
+    justify-content: flex-start;
+  }
+  /* Hero keeps a minimum so it still feels like a hero */
+  .lp .lp-hero {
+    min-height: 92dvh;
+    height: auto;
+    justify-content: center;
+    padding: 0;
+  }
+  .lp-hero-scroll { display: none; }
+
+  /* Demo section: hide browser chrome & complex panels */
+  .lp-stage-top   { display: none; }
+  .lp-app-hdr     { display: none; }
+  .lp-dm-greet    { display: none; }
+  .lp-dm-chart    { display: none; }
+  .lp-log         { display: none; }
+  .lp-log-h       { display: none; }
+  .lp-input-bar   { display: none; }
+  .lp-dm-strat    { display: none; }
+  .lp-dm-2col     { display: block; }
+  /* Show only the KPI cards — 2×2 grid */
+  .lp-dm-kpis {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    padding: 16px;
+  }
+  .lp-dm-kpi:nth-child(n+5) { display: none; }
+  .lp-demo-content { padding: 0; gap: 0; }
+  .lp-stage { border-radius: 14px; overflow: hidden; }
+
+  /* Risk profiles: hide gauge — text + params is clean enough */
+  .lp-gauge       { display: none; }
+  .lp-tab-panel   { grid-template-columns: 1fr; gap: 0; min-height: auto; }
+  .lp-params      { grid-template-columns: 1fr 1fr; gap: 8px; }
+
+  /* Section headings tighter on phone */
+  .lp-sec-h  { font-size: clamp(24px, 7vw, 36px); }
+  .lp-sec-sub{ font-size: 14px; line-height: 1.55; }
+  .lp-summary{ font-size: 14px; line-height: 1.55; }
+  .lp-wrap   { padding: 0 18px; }
+}
+
+/* ================================================================
    960px — Tablet / Large Phone landscape
    ================================================================ */
 @media (max-width: 960px) {
