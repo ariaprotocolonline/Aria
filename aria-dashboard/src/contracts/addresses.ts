@@ -16,12 +16,12 @@ export const FACTORY_ADDRESS: Record<number, Address> = {
 
 export const TOKEN_ADDRESSES: Record<number, Record<string, Address>> = {
   [MANTLE_MAINNET_ID]: {
-    WETH: '0xdEAddEaDdeadDEadDEADDEaDDeaDDeAD00000000' as Address,
+    WETH: '0xdeaddeaddeaddeaddeaddeaddeaddeaddead1111' as Address,
     USDC: '0x09bc4e0d864854c6afb6eb9a9cdf58ac190d0df9' as Address,
   },
   [MANTLE_TESTNET_ID]: {
-    WETH: import.meta.env.VITE_WETH_ADDRESS_TESTNET as Address,
-    USDC: import.meta.env.VITE_USDC_ADDRESS_TESTNET as Address,
+    WETH: env.WETH_ADDRESS_TESTNET as Address,
+    USDC: env.USDC_ADDRESS_TESTNET as Address,
   },
 };
 

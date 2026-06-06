@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { type Address, zeroAddress } from 'viem';
 import { useAccount } from 'wagmi';
 import { useVaultFactory } from '../hooks/useVaultFactory';
+import { useTelegram } from '../hooks/useTelegram';
 
 interface VaultGuardProps {
   children: (vaultAddress: Address) => React.ReactNode;
@@ -10,11 +11,12 @@ interface VaultGuardProps {
 const VaultGuard: React.FC<VaultGuardProps> = ({ children }) => {
   const { address } = useAccount();
   const { userVaultAddress, hasVault, createVault, isPending, factoryDeployed } = useVaultFactory();
-  const [failed, setFailed] = useState(false);
-  const [creating, setCreating] = useState(false);
+  const { status: tgStatus, generateLink } = useTelegram();
+  const [failed,       setFailed]       = useState(false);
+  const [creating,     setCreating]     = useState(false);
+  const [showTgPrompt, setShowTgPrompt] = useState(false);
   const hasTriggered = useRef(false);
 
-  // Reset trigger guard when the connected address changes
   useEffect(() => {
     hasTriggered.current = false;
     setFailed(false);
@@ -25,13 +27,16 @@ const VaultGuard: React.FC<VaultGuardProps> = ({ children }) => {
     setCreating(true);
     try {
       await createVault();
+      if (!localStorage.getItem('aria-telegram-prompted') && !tgStatus.connected) {
+        setShowTgPrompt(true);
+      }
     } catch (err) {
       console.error('Vault creation failed:', err);
       setFailed(true);
     } finally {
       setCreating(false);
     }
-  }, [createVault]);
+  }, [createVault, tgStatus.connected]);
 
   useEffect(() => {
     if (
@@ -40,8 +45,8 @@ const VaultGuard: React.FC<VaultGuardProps> = ({ children }) => {
       hasVault === false &&
       !isPending &&
       !creating &&
-      !failed &&              // don't retry after a failure/denial
-      !hasTriggered.current  // fire at most once per connected address
+      !failed &&
+      !hasTriggered.current
     ) {
       hasTriggered.current = true;
       attemptCreate();
@@ -110,8 +115,8 @@ const VaultGuard: React.FC<VaultGuardProps> = ({ children }) => {
         >
           <div style={{ fontWeight: 600, marginBottom: 4 }}>⚠ Vault setup failed</div>
           <div style={{ color: '#6b7280', marginBottom: 10, lineHeight: 1.4 }}>
-            You need a small amount of MNT for gas to create your vault.
-            Get free testnet MNT at <strong>faucet.testnet.mantle.xyz</strong>, then tap retry.
+            You need a small amount of MNT in your wallet to cover the gas fee for vault creation.
+            Add MNT to your wallet and tap retry.
           </div>
           <button
             onClick={() => {
@@ -135,6 +140,51 @@ const VaultGuard: React.FC<VaultGuardProps> = ({ children }) => {
       )}
 
       <style>{`@keyframes aria-spin { to { transform: rotate(360deg); } }`}</style>
+
+      {showTgPrompt && (
+        <div style={{
+          position:'fixed', bottom:24, right:24, zIndex:9998,
+          background:'var(--bg)', border:'1px solid var(--line)',
+          borderRadius:12, padding:'18px 20px', maxWidth:300,
+          boxShadow:'0 8px 32px rgba(0,0,0,0.18)', fontFamily:'inherit',
+        }}>
+          <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:8 }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            <span style={{ fontWeight:600, fontSize:13, color:'var(--ink)' }}>Connect Telegram</span>
+          </div>
+          <p style={{ fontSize:12, color:'var(--ink-2)', lineHeight:1.5, margin:'0 0 14px' }}>
+            Get notified when ARIA acts on your behalf. Chat with ARIA directly from your phone.
+          </p>
+          <div style={{ display:'flex', gap:8 }}>
+            <button
+              style={{
+                flex:1, padding:'7px 0', background:'var(--accent)', color:'#0a1b10',
+                border:'none', borderRadius:7, fontSize:12, fontWeight:600, cursor:'pointer',
+              }}
+              onClick={async () => {
+                const link = await generateLink();
+                if (link) window.open(link, '_blank');
+                localStorage.setItem('aria-telegram-prompted', 'true');
+                setShowTgPrompt(false);
+              }}
+            >
+              Connect
+            </button>
+            <button
+              style={{
+                flex:1, padding:'7px 0', background:'transparent', color:'var(--mute)',
+                border:'1px solid var(--line)', borderRadius:7, fontSize:12, cursor:'pointer',
+              }}
+              onClick={() => {
+                localStorage.setItem('aria-telegram-prompted', 'true');
+                setShowTgPrompt(false);
+              }}
+            >
+              Maybe later
+            </button>
+          </div>
+        </div>
+      )}
 
       {children(vaultAddress)}
     </>

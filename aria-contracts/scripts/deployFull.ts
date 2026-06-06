@@ -18,6 +18,13 @@ async function main() {
 
   const feeRecipient = process.env.FEE_RECIPIENT_ADDRESS ?? deployer.address;
 
+  if (feeRecipient.toLowerCase() === agentAddress.toLowerCase()) {
+    throw new Error(
+      "FEE_RECIPIENT_ADDRESS must not equal AGENT_ADDRESS.\n" +
+      "Use a separate cold-storage treasury wallet for fee collection."
+    );
+  }
+
   console.log("═══════════════════════════════════════════");
   console.log("  ARIA Full Deployment (Mocks + Vault + Factory)");
   console.log("═══════════════════════════════════════════");

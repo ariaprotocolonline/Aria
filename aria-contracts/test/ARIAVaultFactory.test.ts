@@ -30,6 +30,13 @@ describe("ARIAVaultFactory", function () {
     it("starts with zero vaults", async () => {
       expect(await factory.totalVaults()).to.equal(0n);
     });
+
+    it("reverts if defaultAgent is zero address", async () => {
+      const Factory = await ethers.getContractFactory("ARIAVaultFactory");
+      await expect(
+        Factory.deploy(ethers.ZeroAddress, feeRecipient.address)
+      ).to.be.revertedWith("ARIAVaultFactory: zero agent");
+    });
   });
 
   // ─── createVault() ───────────────────────────────────────────────────────────

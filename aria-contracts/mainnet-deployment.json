@@ -1,0 +1,10 @@
+{
+  "network": "mantleMainnet",
+  "chainId": "5000",
+  "ARIAVault": "0xeee96e7512227B78598bd90102C8Efe57b411118",
+  "ARIAVaultFactory": "0xa05382F5a7ed65CABA12a5E4Fd4451192E55503c",
+  "deployer": "0xA826467bAcbA5ED04d3F5dB5202b414F7940Cd70",
+  "agent": "0x793fda54017d08C2b379C99639f315f9A5e80713",
+  "feeRecipient": "0x017B9171DB466b78c3b813d4Daf17bE8f1f9E75A",
+  "deployedAt": "2026-06-05T22:02:27.094Z"
+}

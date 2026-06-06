@@ -211,6 +211,10 @@ describe("ARIAVault", function () {
     beforeEach(async () => {
       await depositUsdy(AMOUNT);
       await vault.connect(owner).addApprovedProtocol(mockProtocolAddr);
+      await vault.connect(owner).addApprovedToken(usdyAddr);
+      await vault.connect(owner).addApprovedToken(methAddr);
+      const swapSelector = mockProtocol.interface.getFunction('swap').selector;
+      await vault.connect(owner).addApprovedSelector(mockProtocolAddr, swapSelector);
     });
 
     it("allows the agent to reallocate to an approved protocol", async () => {
@@ -219,7 +223,7 @@ describe("ARIAVault", function () {
       await expect(
         vault
           .connect(agent)
-          .reallocate(usdyAddr, methAddr, mockProtocolAddr, AMOUNT, 0n, 0n, data)
+          .reallocate(usdyAddr, methAddr, mockProtocolAddr, AMOUNT, 0n, 0n, 1n, data)
       )
         .to.emit(vault, "Reallocated")
         .withArgs(usdyAddr, methAddr, mockProtocolAddr, AMOUNT, AMOUNT);
@@ -232,7 +236,7 @@ describe("ARIAVault", function () {
       const data = buildSwapData(usdyAddr, methAddr, AMOUNT);
       await vault
         .connect(agent)
-        .reallocate(usdyAddr, methAddr, mockProtocolAddr, AMOUNT, 0n, 0n, data);
+        .reallocate(usdyAddr, methAddr, mockProtocolAddr, AMOUNT, 0n, 0n, 1n, data);
 
       expect(await vault.balances(usdyAddr)).to.equal(0n);
       expect(await vault.balances(methAddr)).to.equal(AMOUNT);
@@ -243,7 +247,7 @@ describe("ARIAVault", function () {
       await expect(
         vault
           .connect(agent)
-          .reallocate(usdyAddr, methAddr, stranger.address, AMOUNT, 0n, 0n, data)
+          .reallocate(usdyAddr, methAddr, stranger.address, AMOUNT, 0n, 0n, 1n, data)
       ).to.be.revertedWith("ARIAVault: not approved protocol");
     });
 
@@ -252,7 +256,7 @@ describe("ARIAVault", function () {
       await expect(
         vault
           .connect(owner)
-          .reallocate(usdyAddr, methAddr, mockProtocolAddr, AMOUNT, 0n, 0n, data)
+          .reallocate(usdyAddr, methAddr, mockProtocolAddr, AMOUNT, 0n, 0n, 1n, data)
       ).to.be.revertedWith("ARIAVault: not agent");
     });
 
@@ -261,7 +265,7 @@ describe("ARIAVault", function () {
       await expect(
         vault
           .connect(stranger)
-          .reallocate(usdyAddr, methAddr, mockProtocolAddr, AMOUNT, 0n, 0n, data)
+          .reallocate(usdyAddr, methAddr, mockProtocolAddr, AMOUNT, 0n, 0n, 1n, data)
       ).to.be.revertedWith("ARIAVault: not agent");
     });
 
@@ -270,7 +274,7 @@ describe("ARIAVault", function () {
       await expect(
         vault
           .connect(agent)
-          .reallocate(usdyAddr, methAddr, mockProtocolAddr, E18(200), 0n, 0n, data)
+          .reallocate(usdyAddr, methAddr, mockProtocolAddr, E18(200), 0n, 0n, 1n, data)
       ).to.be.revertedWith("ARIAVault: insufficient tokenIn");
     });
 
@@ -278,7 +282,7 @@ describe("ARIAVault", function () {
       const data = buildSwapData(usdyAddr, methAddr, AMOUNT);
       await vault
         .connect(agent)
-        .reallocate(usdyAddr, methAddr, mockProtocolAddr, AMOUNT, 0n, 0n, data);
+        .reallocate(usdyAddr, methAddr, mockProtocolAddr, AMOUNT, 0n, 0n, 1n, data);
 
       const allowance = await usdy.allowance(vaultAddr, mockProtocolAddr);
       expect(allowance).to.equal(0n);
@@ -313,7 +317,7 @@ describe("ARIAVault", function () {
       await expect(
         vault
           .connect(agent)
-          .reallocate(usdyAddr, methAddr, mockProtocolAddr, E18(100), 0n, 0n, data)
+          .reallocate(usdyAddr, methAddr, mockProtocolAddr, E18(100), 0n, 0n, 1n, data)
       ).to.be.revertedWithCustomError(vault, "EnforcedPause");
     });
 
@@ -402,6 +406,95 @@ describe("ARIAVault", function () {
     });
   });
 
+  describe("addApprovedToken() / removeApprovedToken()", () => {
+    it("allows the owner to add a token", async () => {
+      await expect(vault.connect(owner).addApprovedToken(methAddr))
+        .to.emit(vault, "TokenApproved")
+        .withArgs(methAddr);
+
+      expect(await vault.approvedTokens(methAddr)).to.be.true;
+    });
+
+    it("rejects adding the same token twice", async () => {
+      await vault.connect(owner).addApprovedToken(methAddr);
+      await expect(
+        vault.connect(owner).addApprovedToken(methAddr)
+      ).to.be.revertedWith("ARIAVault: token already approved");
+    });
+
+    it("allows the owner to remove an approved token", async () => {
+      await vault.connect(owner).addApprovedToken(methAddr);
+      await expect(vault.connect(owner).removeApprovedToken(methAddr))
+        .to.emit(vault, "TokenRemoved")
+        .withArgs(methAddr);
+
+      expect(await vault.approvedTokens(methAddr)).to.be.false;
+    });
+
+    it("rejects removing a token that is not approved", async () => {
+      await expect(
+        vault.connect(owner).removeApprovedToken(methAddr)
+      ).to.be.revertedWith("ARIAVault: token not approved");
+    });
+
+    it("rejects addApprovedToken from non-owner", async () => {
+      await expect(
+        vault.connect(stranger).addApprovedToken(methAddr)
+      ).to.be.revertedWithCustomError(vault, "OwnableUnauthorizedAccount");
+    });
+
+    it("rejects addApprovedToken with zero address", async () => {
+      await expect(
+        vault.connect(owner).addApprovedToken(ethers.ZeroAddress)
+      ).to.be.revertedWith("ARIAVault: zero token");
+    });
+  });
+
+  describe("addApprovedSelector() / removeApprovedSelector()", () => {
+    let selector: string;
+
+    beforeEach(async () => {
+      selector = mockProtocol.interface.getFunction("swap").selector;
+      await vault.connect(owner).addApprovedProtocol(mockProtocolAddr);
+    });
+
+    it("allows the owner to approve a selector on an approved protocol", async () => {
+      await expect(vault.connect(owner).addApprovedSelector(mockProtocolAddr, selector))
+        .to.emit(vault, "SelectorApproved")
+        .withArgs(mockProtocolAddr, selector);
+
+      expect(await vault.approvedSelectors(mockProtocolAddr, selector)).to.be.true;
+    });
+
+    it("rejects addApprovedSelector when protocol is not approved", async () => {
+      await expect(
+        vault.connect(owner).addApprovedSelector(stranger.address, selector)
+      ).to.be.revertedWith("ARIAVault: protocol not approved");
+    });
+
+    it("allows the owner to remove a selector", async () => {
+      await vault.connect(owner).addApprovedSelector(mockProtocolAddr, selector);
+      await expect(vault.connect(owner).removeApprovedSelector(mockProtocolAddr, selector))
+        .to.emit(vault, "SelectorRemoved")
+        .withArgs(mockProtocolAddr, selector);
+
+      expect(await vault.approvedSelectors(mockProtocolAddr, selector)).to.be.false;
+    });
+
+    it("rejects addApprovedSelector from non-owner", async () => {
+      await expect(
+        vault.connect(stranger).addApprovedSelector(mockProtocolAddr, selector)
+      ).to.be.revertedWithCustomError(vault, "OwnableUnauthorizedAccount");
+    });
+
+    it("rejects removeApprovedSelector from non-owner", async () => {
+      await vault.connect(owner).addApprovedSelector(mockProtocolAddr, selector);
+      await expect(
+        vault.connect(stranger).removeApprovedSelector(mockProtocolAddr, selector)
+      ).to.be.revertedWithCustomError(vault, "OwnableUnauthorizedAccount");
+    });
+  });
+
   // ─── renounceOwnership() ────────────────────────────────────────────────────
 
   describe("renounceOwnership()", () => {
@@ -452,6 +545,10 @@ describe("ARIAVault", function () {
       it("accrues correctly over 1 year on reallocate", async () => {
         await depositUsdy(E18(200));
         await vault.connect(owner).addApprovedProtocol(mockProtocolAddr);
+        await vault.connect(owner).addApprovedToken(usdyAddr);
+        await vault.connect(owner).addApprovedToken(methAddr);
+        const swapSelector = mockProtocol.interface.getFunction('swap').selector;
+        await vault.connect(owner).addApprovedSelector(mockProtocolAddr, swapSelector);
         await time.increase(YEAR);
 
         const recipientBefore = await usdy.balanceOf(feeRecipient.address);
@@ -459,7 +556,7 @@ describe("ARIAVault", function () {
         const data = buildSwapData(usdyAddr, methAddr, E18(100));
         await vault
           .connect(agent)
-          .reallocate(usdyAddr, methAddr, mockProtocolAddr, E18(100), 0n, 0n, data);
+          .reallocate(usdyAddr, methAddr, mockProtocolAddr, E18(100), 0n, 0n, 1n, data);
         const recipientAfter = await usdy.balanceOf(feeRecipient.address);
 
         // Expected fee: 200 USDY × 0.5% × 1 year = 1 USDY
@@ -534,6 +631,10 @@ describe("ARIAVault", function () {
       beforeEach(async () => {
         await depositUsdy(AMOUNT);
         await vault.connect(owner).addApprovedProtocol(mockProtocolAddr);
+        await vault.connect(owner).addApprovedToken(usdyAddr);
+        await vault.connect(owner).addApprovedToken(methAddr);
+        const swapSelector = mockProtocol.interface.getFunction('swap').selector;
+        await vault.connect(owner).addApprovedSelector(mockProtocolAddr, swapSelector);
       });
 
       it("charges fee when newApyBps > expectedApyBps", async () => {
@@ -542,7 +643,7 @@ describe("ARIAVault", function () {
 
         await vault
           .connect(agent)
-          .reallocate(usdyAddr, methAddr, mockProtocolAddr, AMOUNT, expectedApyBps, newApyBps, data);
+          .reallocate(usdyAddr, methAddr, mockProtocolAddr, AMOUNT, expectedApyBps, newApyBps, 1n, data);
 
         const recipientAfter = await usdy.balanceOf(feeRecipient.address);
         expect(recipientAfter - recipientBefore).to.equal(perfFee);
@@ -554,7 +655,7 @@ describe("ARIAVault", function () {
 
         await vault
           .connect(agent)
-          .reallocate(usdyAddr, methAddr, mockProtocolAddr, AMOUNT, expectedApyBps, newApyBps, data);
+          .reallocate(usdyAddr, methAddr, mockProtocolAddr, AMOUNT, expectedApyBps, newApyBps, 1n, data);
 
         expect(await usdy.balanceOf(feeRecipient.address) - recipientBefore).to.equal(perfFee);
         // Protocol received net amount and sent back netAmount of mETH
@@ -568,7 +669,7 @@ describe("ARIAVault", function () {
         await expect(
           vault
             .connect(agent)
-            .reallocate(usdyAddr, methAddr, mockProtocolAddr, AMOUNT, expectedApyBps, newApyBps, data)
+            .reallocate(usdyAddr, methAddr, mockProtocolAddr, AMOUNT, expectedApyBps, newApyBps, 1n, data)
         )
           .to.emit(vault, "PerformanceFeeCharged")
           .withArgs(usdyAddr, perfFee, feeRecipient.address);
@@ -580,7 +681,7 @@ describe("ARIAVault", function () {
         await expect(
           vault
             .connect(agent)
-            .reallocate(usdyAddr, methAddr, mockProtocolAddr, AMOUNT, expectedApyBps, newApyBps, data)
+            .reallocate(usdyAddr, methAddr, mockProtocolAddr, AMOUNT, expectedApyBps, newApyBps, 1n, data)
         )
           .to.emit(vault, "Reallocated")
           .withArgs(usdyAddr, methAddr, mockProtocolAddr, netAmount, netAmount);
@@ -593,7 +694,7 @@ describe("ARIAVault", function () {
         // same APY → no fee
         await vault
           .connect(agent)
-          .reallocate(usdyAddr, methAddr, mockProtocolAddr, AMOUNT, 800n, 800n, data);
+          .reallocate(usdyAddr, methAddr, mockProtocolAddr, AMOUNT, 800n, 800n, 1n, data);
 
         const recipientAfter = await usdy.balanceOf(feeRecipient.address);
         expect(recipientAfter).to.equal(recipientBefore);
@@ -607,7 +708,7 @@ describe("ARIAVault", function () {
         // Even with positive APY delta, no fee when feeRecipient is zero
         await vault
           .connect(agent)
-          .reallocate(usdyAddr, methAddr, mockProtocolAddr, AMOUNT, expectedApyBps, newApyBps, data);
+          .reallocate(usdyAddr, methAddr, mockProtocolAddr, AMOUNT, expectedApyBps, newApyBps, 1n, data);
 
         expect(await usdy.balanceOf(feeRecipient.address)).to.equal(recipientBefore);
         expect(await vault.getBalance(methAddr)).to.equal(AMOUNT); // full amount swapped
@@ -620,7 +721,7 @@ describe("ARIAVault", function () {
 
         await vault
           .connect(agent)
-          .reallocate(usdyAddr, methAddr, mockProtocolAddr, AMOUNT, expectedApyBps, newApyBps, data);
+          .reallocate(usdyAddr, methAddr, mockProtocolAddr, AMOUNT, expectedApyBps, newApyBps, 1n, data);
 
         expect(await usdy.balanceOf(feeRecipient.address)).to.equal(recipientBefore);
       });

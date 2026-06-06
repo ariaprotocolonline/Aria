@@ -1,5 +1,6 @@
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { useReadContract, useWriteContract, useChainId } from 'wagmi';
+import { readContract } from '@wagmi/core';
 import { waitForTransactionReceipt } from '@wagmi/core';
 import { erc20Abi, type Address, zeroAddress } from 'viem';
 import { useConfig } from 'wagmi';
@@ -33,7 +34,7 @@ export function useVaultBalance(token: SupportedToken, _vaultOverride?: Address)
     abi: ARIA_ABI,
     functionName: 'getBalance',
     args: [tokenAddr],
-    query: { enabled: isDeployed },
+    query: { enabled: isDeployed, refetchInterval: 15_000 },
   });
 }
 
@@ -45,7 +46,7 @@ export function useVaultPaused(_vaultOverride?: Address) {
     address: vaultAddr,
     abi: ARIA_ABI,
     functionName: 'paused',
-    query: { enabled: isDeployed },
+    query: { enabled: isDeployed, refetchInterval: 15_000 },
   });
 }
 
@@ -57,7 +58,7 @@ export function useVaultAgent(_vaultOverride?: Address) {
     address: vaultAddr,
     abi: ARIA_ABI,
     functionName: 'agent',
-    query: { enabled: isDeployed },
+    query: { enabled: isDeployed, refetchInterval: 15_000 },
   });
 }
 
@@ -118,6 +119,51 @@ export function useWithdraw(_vaultOverride?: Address) {
   return { withdraw, isPending, error };
 }
 
+// Uniswap V3 exactInputSingle selector — valid for Agni, FusionX, and any UniV3 fork.
+const EXACT_INPUT_SINGLE_SELECTOR = '0x414bf389' as `0x${string}`;
+
+export function useAddCustomAsset() {
+  const config = useConfig();
+  const vaultAddr = useVaultAddress();
+  const { writeContractAsync } = useWriteContract();
+  const [isPending, setIsPending] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
+
+  const addCustomAsset = useCallback(
+    async (tokenAddr: Address, routerAddr: Address) => {
+      setIsPending(true);
+      setError(null);
+      try {
+        // Read approval state first — avoid reverting on "already approved"
+        const [tokenApproved, protocolApproved] = await Promise.all([
+          readContract(config, { address: vaultAddr, abi: ARIA_ABI, functionName: 'approvedTokens', args: [tokenAddr] }) as Promise<boolean>,
+          readContract(config, { address: vaultAddr, abi: ARIA_ABI, functionName: 'approvedProtocols', args: [routerAddr] }) as Promise<boolean>,
+        ]);
+
+        if (!tokenApproved) {
+          const tx = await writeContractAsync({ address: vaultAddr, abi: ARIA_ABI, functionName: 'addApprovedToken', args: [tokenAddr], gas: BigInt(120_000) });
+          await waitForTransactionReceipt(config, { hash: tx });
+        }
+        if (!protocolApproved) {
+          const tx = await writeContractAsync({ address: vaultAddr, abi: ARIA_ABI, functionName: 'addApprovedProtocol', args: [routerAddr], gas: BigInt(120_000) });
+          await waitForTransactionReceipt(config, { hash: tx });
+        }
+        // addApprovedSelector is idempotent (sets mapping to true, no revert if already set)
+        const tx = await writeContractAsync({ address: vaultAddr, abi: ARIA_ABI, functionName: 'addApprovedSelector', args: [routerAddr, EXACT_INPUT_SINGLE_SELECTOR], gas: BigInt(120_000) });
+        await waitForTransactionReceipt(config, { hash: tx });
+      } catch (e) {
+        setError(e as Error);
+        throw e;
+      } finally {
+        setIsPending(false);
+      }
+    },
+    [config, vaultAddr, writeContractAsync]
+  );
+
+  return { addCustomAsset, isPending, error };
+}
+
 export function useTokenBalance(tokenSymbol: SupportedToken, owner: Address | undefined) {
   const tokenAddr = useTokenAddress(tokenSymbol);
   const isReady = !!owner && tokenAddr !== zeroAddress;
@@ -127,10 +173,6 @@ export function useTokenBalance(tokenSymbol: SupportedToken, owner: Address | un
     abi: erc20Abi,
     functionName: 'balanceOf',
     args: owner ? [owner] : undefined,
-    query: { enabled: isReady },
+    query: { enabled: isReady, refetchInterval: 15_000 },
   });
-}
-
-export function useTokenAddress_exported(symbol: SupportedToken): Address {
-  return useTokenAddress(symbol);
 }

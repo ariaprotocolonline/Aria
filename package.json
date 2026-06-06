@@ -1,0 +1,35 @@
+{
+  "name": "aria-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "aria-server",
+    "aria-agent",
+    "aria-tgbot",
+    "aria-dashboard"
+  ],
+  "scripts": {
+    "install:all": "npm install --workspaces",
+    "build:server": "npm run build --workspace=aria-server",
+    "build:agent": "npm run build --workspace=aria-agent",
+    "build:tgbot": "npm run build --workspace=aria-tgbot",
+    "build:dashboard": "npm run build --workspace=aria-dashboard",
+    "build:backend": "npm run build:server && npm run build:agent && npm run build:tgbot",
+    "build": "npm run build:backend && npm run build:dashboard",
+    "dev:server": "npm run dev --workspace=aria-server",
+    "dev:agent": "npm run dev --workspace=aria-agent",
+    "dev:tgbot": "npm run dev --workspace=aria-tgbot",
+    "dev:dashboard": "npm run dev --workspace=aria-dashboard",
+    "dev:backend": "concurrently --names \"server,agent,tgbot\" --prefix-colors \"blue,green,yellow\" \"npm run dev:server\" \"npm run dev:agent\" \"npm run dev:tgbot\"",
+    "dev": "concurrently --names \"server,agent,tgbot,dashboard\" --prefix-colors \"blue,green,yellow,magenta\" \"npm run dev:server\" \"npm run dev:agent\" \"npm run dev:tgbot\" \"npm run dev:dashboard\"",
+    "start": "pm2 start ecosystem.config.js && pm2 logs",
+    "stop": "pm2 stop ecosystem.config.js",
+    "restart": "pm2 reload ecosystem.config.js --update-env",
+    "status": "pm2 status",
+    "logs": "pm2 logs",
+    "deploy": "bash deploy.sh"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

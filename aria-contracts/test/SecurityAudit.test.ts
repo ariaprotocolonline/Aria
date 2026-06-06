@@ -118,10 +118,17 @@ describe("SecurityAudit", function () {
 
       await depositUsdy(E18(100));
       await vault.connect(owner).addApprovedProtocol(malProtoAddr);
+      await vault.connect(owner).addApprovedToken(usdyAddr);
+      await vault.connect(owner).addApprovedToken(methAddr);
+      const swapSelector = malProto.interface.getFunction('swap').selector;
+      await vault.connect(owner).addApprovedSelector(malProtoAddr, swapSelector);
 
       // Mode 1 = Reenter: swap() attempts vault.reallocate() again internally.
       // The inner call is blocked by ReentrancyGuard; swap() catches and swallows it.
-      // The outer reallocate() succeeds (success=true) but receives 0 tokenOut.
+      // The outer reallocate() receives 0 tokenOut from the malicious protocol.
+      // With minAmountOut > 0 enforced on-chain, the outer call also reverts —
+      // double protection: reentrancy guard blocks the inner call AND slippage
+      // check reverts the outer call, leaving vault balance completely unchanged.
       await malProto.setMode(1);
 
       const usdyBefore = await usdy.balanceOf(vaultAddr);
@@ -131,14 +138,13 @@ describe("SecurityAudit", function () {
 
       await expect(
         vault.connect(agent).reallocate(
-          usdyAddr, methAddr, malProtoAddr, E18(10), 0, 0, data
+          usdyAddr, methAddr, malProtoAddr, E18(10), 0, 0, 1n, data
         )
-      ).to.not.be.reverted;
+      ).to.be.revertedWith("ARIAVault: insufficient output");
 
-      // USDY should only have decreased by netAmount (1x), not 2x.
-      // This proves the inner reentrant call did not execute.
+      // USDY balance completely unchanged — entire tx reverted.
       const usdyAfter = await usdy.balanceOf(vaultAddr);
-      expect(usdyBefore - usdyAfter).to.be.lte(E18(10));
+      expect(usdyAfter).to.equal(usdyBefore);
     });
   });
 
@@ -212,7 +218,7 @@ describe("SecurityAudit", function () {
       await vault.connect(owner).addApprovedProtocol(goodProtocolAddr);
       const data = buildSwapData(usdyAddr, methAddr, E18(10));
       await expect(
-        vault.connect(owner).reallocate(usdyAddr, methAddr, goodProtocolAddr, E18(10), 0, 100, data)
+        vault.connect(owner).reallocate(usdyAddr, methAddr, goodProtocolAddr, E18(10), 0, 100, 1n, data)
       ).to.be.revertedWith("ARIAVault: not agent");
     });
 
@@ -221,7 +227,7 @@ describe("SecurityAudit", function () {
       await vault.connect(owner).addApprovedProtocol(goodProtocolAddr);
       const data = buildSwapData(usdyAddr, methAddr, E18(10));
       await expect(
-        vault.connect(stranger).reallocate(usdyAddr, methAddr, goodProtocolAddr, E18(10), 0, 100, data)
+        vault.connect(stranger).reallocate(usdyAddr, methAddr, goodProtocolAddr, E18(10), 0, 100, 1n, data)
       ).to.be.revertedWith("ARIAVault: not agent");
     });
 
@@ -230,7 +236,7 @@ describe("SecurityAudit", function () {
       const fakeData = ethers.toUtf8Bytes("steal");
       await expect(
         vault.connect(agent).reallocate(
-          usdyAddr, methAddr, attacker.address, E18(10), 0, 100, fakeData
+          usdyAddr, methAddr, attacker.address, E18(10), 0, 100, 0n, fakeData
         )
       ).to.be.revertedWith("ARIAVault: not approved protocol");
     });
@@ -345,24 +351,35 @@ describe("SecurityAudit", function () {
       await expect(vault.connect(owner).withdraw(usdyAddr, E18(1))).to.not.be.reverted;
     });
 
-    it("performance fee caps at 100% of amount — no overflow, net amount guard fires", async function () {
+    it("performance fee APY delta is capped at MAX_APY_DELTA_BPS — no overflow", async function () {
       await depositUsdy(E18(1000));
       await vault.connect(owner).addApprovedProtocol(goodProtocolAddr);
-      const amount = E18(100);
-      const data = buildSwapData(usdyAddr, methAddr, amount);
+      await vault.connect(owner).addApprovedToken(usdyAddr);
+      await vault.connect(owner).addApprovedToken(methAddr);
+      const swapSelector = goodProtocol.interface.getFunction('swap').selector;
+      await vault.connect(owner).addApprovedSelector(goodProtocolAddr, swapSelector);
 
-      // Extreme APY (10,000%) causes fee to exceed amount.
-      // Cap kicks in: fee = amount, netAmount = 0, contract reverts cleanly.
-      // This proves the cap formula works and there is no arithmetic overflow.
+      const amount = E18(100);
+
+      // With extreme APY (1,000,000 bps), the delta is capped at MAX_APY_DELTA_BPS (5000).
+      // Fee = amount * 5000/10000 * performanceFeeBps/10000 = E18(5) (5%).
+      // netAmount = E18(95). Max fee with vault caps is always ≤ 10% — netAmount is always > 0.
+      // Data must encode netAmount so the 1:1 MockProtocol swap can pull exactly what was approved.
+      const cappedDelta = 5000n;
+      const perfFeeBps = await vault.performanceFeeBps(); // 1000 by default
+      const perfFee = (amount * cappedDelta / 10000n) * perfFeeBps / 10000n;
+      const netAmount = amount - perfFee;
+      const capData = goodProtocol.interface.encodeFunctionData("swap", [usdyAddr, methAddr, netAmount, vaultAddr]);
+
       await expect(
-        vault.connect(agent).reallocate(usdyAddr, methAddr, goodProtocolAddr, amount, 0, 1_000_000, data)
-      ).to.be.revertedWith("ARIAVault: net amount is zero");
+        vault.connect(agent).reallocate(usdyAddr, methAddr, goodProtocolAddr, amount, 0, 1_000_000, 1n, capData)
+      ).to.not.be.reverted;
 
       // With identical expectedApy == newApy, performance fee = 0, netAmount = amount.
       // This proves arithmetic with large APY values produces no overflow.
       const noFeeData = buildSwapData(usdyAddr, methAddr, amount);
       await expect(
-        vault.connect(agent).reallocate(usdyAddr, methAddr, goodProtocolAddr, amount, 100_000, 100_000, noFeeData)
+        vault.connect(agent).reallocate(usdyAddr, methAddr, goodProtocolAddr, amount, 100_000, 100_000, 1n, noFeeData)
       ).to.not.be.reverted;
     });
   });
@@ -379,6 +396,11 @@ describe("SecurityAudit", function () {
 
       await depositUsdy(E18(100));
       await vault.connect(owner).addApprovedProtocol(malProtoAddr);
+      await vault.connect(owner).addApprovedToken(usdyAddr);
+      await vault.connect(owner).addApprovedToken(methAddr);
+      const swapSelector = malProto.interface.getFunction('swap').selector;
+      await vault.connect(owner).addApprovedSelector(malProtoAddr, swapSelector);
+
       // Mode 2: StealApproval — pulls amountIn then tries to pull 1 more
       await malProto.setMode(2);
 
@@ -389,7 +411,7 @@ describe("SecurityAudit", function () {
       // May or may not revert depending on tokenOut balance; what matters is approval
       try {
         await vault.connect(agent).reallocate(
-          usdyAddr, methAddr, malProtoAddr, E18(10), 0, 0, data
+          usdyAddr, methAddr, malProtoAddr, E18(10), 0, 0, 0n, data
         );
       } catch { /* expected in some cases */ }
 
@@ -405,6 +427,11 @@ describe("SecurityAudit", function () {
       await depositUsdy(E18(100));
       await meth.mint(vaultAddr, E18(50));
       await vault.connect(owner).addApprovedProtocol(malProtoAddr);
+      await vault.connect(owner).addApprovedToken(usdyAddr);
+      await vault.connect(owner).addApprovedToken(methAddr);
+      const swapSelector = malProto.interface.getFunction('swap').selector;
+      await vault.connect(owner).addApprovedSelector(malProtoAddr, swapSelector);
+
       await malProto.setMode(4); // DrainTokenOut
 
       const methBefore = await meth.balanceOf(vaultAddr);
@@ -414,7 +441,7 @@ describe("SecurityAudit", function () {
 
       try {
         await vault.connect(agent).reallocate(
-          usdyAddr, methAddr, malProtoAddr, E18(10), 0, 0, data
+          usdyAddr, methAddr, malProtoAddr, E18(10), 0, 0, 0n, data
         );
       } catch { /* expected */ }
 
@@ -447,7 +474,7 @@ describe("SecurityAudit", function () {
       await vault.connect(owner).pause();
       const data = buildSwapData(usdyAddr, methAddr, E18(10));
       await expect(
-        vault.connect(agent).reallocate(usdyAddr, methAddr, goodProtocolAddr, E18(10), 0, 100, data)
+        vault.connect(agent).reallocate(usdyAddr, methAddr, goodProtocolAddr, E18(10), 0, 100, 1n, data)
       ).to.be.revertedWithCustomError(vault, "EnforcedPause");
     });
 
@@ -483,16 +510,21 @@ describe("SecurityAudit", function () {
       await depositUsdy();
       const data = buildSwapData(usdyAddr, methAddr, E18(10));
       await expect(
-        vault.connect(agent).reallocate(usdyAddr, methAddr, goodProtocolAddr, E18(10), 0, 100, data)
+        vault.connect(agent).reallocate(usdyAddr, methAddr, goodProtocolAddr, E18(10), 0, 100, 1n, data)
       ).to.be.revertedWith("ARIAVault: not approved protocol");
     });
 
     it("reallocate with amount exceeding vault balance reverts", async function () {
       await depositUsdy(E18(10));
       await vault.connect(owner).addApprovedProtocol(goodProtocolAddr);
+      await vault.connect(owner).addApprovedToken(usdyAddr);
+      await vault.connect(owner).addApprovedToken(methAddr);
+      const swapSelector = goodProtocol.interface.getFunction('swap').selector;
+      await vault.connect(owner).addApprovedSelector(goodProtocolAddr, swapSelector);
+
       const data = buildSwapData(usdyAddr, methAddr, E18(100));
       await expect(
-        vault.connect(agent).reallocate(usdyAddr, methAddr, goodProtocolAddr, E18(100), 0, 100, data)
+        vault.connect(agent).reallocate(usdyAddr, methAddr, goodProtocolAddr, E18(100), 0, 100, 1n, data)
       ).to.be.revertedWith("ARIAVault: insufficient tokenIn");
     });
 
@@ -500,7 +532,7 @@ describe("SecurityAudit", function () {
       await depositUsdy();
       await vault.connect(owner).addApprovedProtocol(goodProtocolAddr);
       await expect(
-        vault.connect(agent).reallocate(ethers.ZeroAddress, methAddr, goodProtocolAddr, E18(10), 0, 100, "0x")
+        vault.connect(agent).reallocate(ethers.ZeroAddress, methAddr, goodProtocolAddr, E18(10), 0, 100, 1n, "0x")
       ).to.be.revertedWith("ARIAVault: zero tokenIn");
     });
 
@@ -508,8 +540,52 @@ describe("SecurityAudit", function () {
       await depositUsdy();
       await vault.connect(owner).addApprovedProtocol(goodProtocolAddr);
       await expect(
-        vault.connect(agent).reallocate(usdyAddr, ethers.ZeroAddress, goodProtocolAddr, E18(10), 0, 100, "0x")
+        vault.connect(agent).reallocate(usdyAddr, ethers.ZeroAddress, goodProtocolAddr, E18(10), 0, 100, 1n, "0x")
       ).to.be.revertedWith("ARIAVault: zero tokenOut");
+    });
+  });
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // ERC20 COMPATIBILITY — fee-on-transfer, return-false
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  describe("ERC20 edge cases", function () {
+    it("deposit reverts when token returns false on transferFrom (SafeERC20)", async function () {
+      const ReturnFalse = await ethers.getContractFactory("MockReturnFalseToken");
+      const rft = await ReturnFalse.deploy();
+      const rftAddr = await rft.getAddress();
+
+      await rft.approve(await vault.getAddress(), E18(100));
+      await rft.setReturnFalse(true);
+
+      await expect(
+        vault.connect(owner).deposit(rftAddr, E18(100))
+      ).to.be.reverted; // SafeERC20 reverts on false return
+    });
+
+    it("deposit amount exceeding uint128 max reverts", async function () {
+      const maxUint128Plus1 = BigInt(2) ** BigInt(128);
+      await expect(
+        vault.connect(owner).deposit(usdyAddr, maxUint128Plus1)
+      ).to.be.revertedWith("ARIAVault: amount exceeds uint128 max");
+    });
+
+    it("fee-on-transfer token deposit records less than sent (SafeERC20 transfers net amount)", async function () {
+      const FeeToken = await ethers.getContractFactory("MockFeeToken");
+      const feeToken = await FeeToken.deploy();
+      const feeTokenAddr = await feeToken.getAddress();
+
+      const depositAmt = E18(100);
+      await feeToken.approve(await vault.getAddress(), depositAmt);
+
+      // Fee-on-transfer: vault receives 99 but deposit records 100.
+      // This is a known limitation — ARIA only accepts WETH and USDC which are standard tokens.
+      // The test confirms SafeERC20 does NOT revert on fee tokens (it cannot detect the fee).
+      await vault.connect(owner).deposit(feeTokenAddr, depositAmt);
+
+      // Actual vault holding is 99 (1% fee burned), internal accounting says 100.
+      const actual = await feeToken.balanceOf(await vault.getAddress());
+      expect(actual).to.equal(depositAmt - depositAmt / 100n); // 99 ether
     });
   });
 });

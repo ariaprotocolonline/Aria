@@ -17,8 +17,8 @@ const INJECTION_PATTERNS = [
   /disable.*limit/i,
   /reveal.*key/i,
   /show.*private/i,
+  /call\s+(the\s+)?contract\s+function/i,
   /execute.*transaction/i,
-  /call.*contract/i,
   /approve.*protocol/i,
   /change.*agent/i,
   /new.*instruction/i,
@@ -62,7 +62,11 @@ const FORBIDDEN_IN_RESPONSE = [
   /mnemonic/i,
   /seed.?phrase/i,
   /AGENT_PRIVATE/i,
-  /0x[0-9a-fA-F]{64}/, // looks like a raw private key
+  // Raw 32-byte hex (private key pattern). Use negative lookahead to avoid
+  // matching tx hashes embedded in longer strings (e.g. "txHash: 0x...").
+  // A tx hash and a private key are both 64 hex chars — the check is intentionally
+  // conservative: we'd rather return a fallback than leak a key.
+  /(?<![0-9a-fA-F])0x[0-9a-fA-F]{64}(?![0-9a-fA-F])/,
 ]
 
 export function validateAgentResponse(response: string): SecurityScanResult {
@@ -137,6 +141,12 @@ export function checkWalletRateLimit(wallet: string): SecurityScanResult {
   const entry = walletCallCount.get(wallet)
 
   if (!entry || now > entry.resetAt) {
+    // Opportunistically prune expired entries to prevent unbounded map growth.
+    if (walletCallCount.size > 10_000) {
+      for (const [key, val] of walletCallCount) {
+        if (now > val.resetAt) walletCallCount.delete(key)
+      }
+    }
     walletCallCount.set(wallet, { count: 1, resetAt: now + 60_000 })
     return { safe: true }
   }

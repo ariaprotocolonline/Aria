@@ -1,208 +1,147 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 
 export interface TourStep {
-  selector: string;
+  selector?: string;
   heading: string;
   body: string;
-  action?: boolean;
 }
 
-export interface Rect {
-  top: number;
-  left: number;
-  width: number;
-  height: number;
-  cx: number;
-  cy: number;
+function getElementCenter(selector: string): { x: number; y: number } | null {
+  const el = document.querySelector(selector);
+  if (!el) return null;
+  const rect = el.getBoundingClientRect();
+  return {
+    x: rect.left + rect.width / 2,
+    y: rect.top + rect.height / 2,
+  };
 }
 
 export const useTour = (steps: TourStep[], storageKey: string) => {
-  const [isActive, setIsActive] = useState(false);
-  const [showWelcome, setShowWelcome] = useState(false);
+  const [isActive,         setIsActive]        = useState(false);
+  const [showWelcome,      setShowWelcome]      = useState(false);
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
-  const [targetRect, setTargetRect] = useState<Rect | null>(null);
-  const [hasArrived, setHasArrived] = useState(false);
+  const [cursorPos,        setCursorPos]        = useState({ x: window.innerWidth / 2, y: window.innerHeight / 3 });
+  const [hasArrived,       setHasArrived]       = useState(false);
+  const [tooltipVisible,   setTooltipVisible]   = useState(false);
 
-  const pollIntervalRef = useRef<number | null>(null);
+  const highlightedEl = useRef<Element | null>(null);
+  const timers        = useRef<ReturnType<typeof setTimeout>[]>([]);
 
-  // Show the welcome modal automatically on first visit.
-  // Delay slightly so the page finishes rendering before the modal appears.
+  const clearTimers = () => {
+    timers.current.forEach(clearTimeout);
+    timers.current = [];
+  };
+
+  useEffect(() => () => {
+    clearTimers();
+    highlightedEl.current?.classList.remove('aria-tour-highlight');
+  }, []);
+
+  // Show welcome on first visit
   useEffect(() => {
     if (!localStorage.getItem(storageKey)) {
-      const t = setTimeout(() => setShowWelcome(true), 1200);
+      const t = setTimeout(() => setShowWelcome(true), 900);
       return () => clearTimeout(t);
     }
   }, [storageKey]);
 
-  const findElement = useCallback((selector: string): Element | null => {
-    if (selector === 'body') return document.body;
-
-    if (selector.startsWith('text:')) {
-      const searchText = selector.replace('text:', '').trim();
-      const allElements = Array.from(document.querySelectorAll('*'));
-      let bestMatch: Element | null = null;
-      for (const el of allElements) {
-        if (['SCRIPT', 'STYLE', 'NOSCRIPT'].includes(el.tagName)) continue;
-        if (el.textContent?.trim() === searchText) {
-          if (!bestMatch || bestMatch.contains(el)) bestMatch = el;
-        }
-      }
-      return bestMatch;
-    }
-
-    return document.querySelector(selector);
-  }, []);
-
-  const computeRect = useCallback(
-    (step: TourStep): Rect | null => {
-      const el = findElement(step.selector);
-      if (!el) return null;
-
-      if (step.selector === 'body') {
-        return {
-          top: window.innerHeight / 2 - 50,
-          left: window.innerWidth / 2 - 50,
-          width: 100,
-          height: 100,
-          cx: window.innerWidth / 2,
-          cy: window.innerHeight / 2,
-        };
-      }
-
-      const r = el.getBoundingClientRect();
-      if (r.width === 0 && r.height === 0) return null;
-
-      return {
-        top: r.top,
-        left: r.left,
-        width: r.width,
-        height: r.height,
-        cx: r.left + r.width / 2,
-        cy: r.top + r.height / 2,
-      };
-    },
-    [findElement],
-  );
-
-  const updateTargetPosition = useCallback(() => {
-    if (!isActive || currentStepIndex >= steps.length) {
-      setTargetRect(null);
-      return false;
-    }
-    const rect = computeRect(steps[currentStepIndex]);
-    if (rect) {
-      setTargetRect(rect);
-      return true;
-    }
-    setTargetRect(null);
-    return false;
-  }, [isActive, currentStepIndex, steps, computeRect]);
-
+  // Move cursor to current step's target whenever step or active state changes
   useEffect(() => {
     if (!isActive) return;
 
+    clearTimers();
     setHasArrived(false);
-    updateTargetPosition();
+    setTooltipVisible(false);
 
-    // Scroll the page so the target element is centred in the viewport.
-    // We use window.scrollTo with an absolute document offset instead of
-    // scrollIntoView so it works regardless of which element is the scroll
-    // container, and so we can account for the sticky nav height (~72px).
-    const NAV_OFFSET = 72;
+    // Remove previous highlight
+    highlightedEl.current?.classList.remove('aria-tour-highlight');
+    highlightedEl.current = null;
+
     const step = steps[currentStepIndex];
-    if (step && step.selector !== 'body') {
-      const el = findElement(step.selector);
+    if (!step) return;
+
+    const hasSel = !!step.selector && step.selector !== 'body';
+
+    if (hasSel) {
+      const el = document.querySelector(step.selector!);
       if (el) {
-        const rect = el.getBoundingClientRect();
-        const absoluteTop = rect.top + window.scrollY;
-        const centredY = absoluteTop - window.innerHeight / 2 + rect.height / 2 - NAV_OFFSET;
-        window.scrollTo({ top: Math.max(0, centredY), behavior: 'smooth' });
+        highlightedEl.current = el;
+        el.classList.add('aria-tour-highlight');
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
     }
 
-    // Re-measure after scroll animation settles (~600 ms covers most distances)
-    const postScrollTimer = setTimeout(() => updateTargetPosition(), 600);
-
-    let failures = 0;
-    pollIntervalRef.current = window.setInterval(() => {
-      const found = updateTargetPosition();
-      if (!found) {
-        failures++;
-        if (failures >= 5) {
-          failures = 0;
-          // Fall back to viewport center rather than silently freezing
-          setTargetRect({
-            top: window.innerHeight / 2 - 50,
-            left: window.innerWidth / 2 - 50,
-            width: 100,
-            height: 100,
-            cx: window.innerWidth / 2,
-            cy: window.innerHeight / 2,
-          });
-        }
+    // After scroll settles, read final position and move cursor
+    const t1 = setTimeout(() => {
+      if (hasSel) {
+        const pos = getElementCenter(step.selector!);
+        if (pos) setCursorPos(pos);
       } else {
-        failures = 0;
+        setCursorPos({ x: window.innerWidth / 2, y: window.innerHeight / 3 });
       }
-    }, 500);
+    }, hasSel ? 450 : 0);
+    timers.current.push(t1);
 
-    const onResizeOrScroll = () => updateTargetPosition();
-    window.addEventListener('resize', onResizeOrScroll);
-    window.addEventListener('scroll', onResizeOrScroll, true);
+    // Cursor transition is 700ms — after it lands, pulse + show tooltip
+    const t2 = setTimeout(() => setHasArrived(true),     hasSel ? 1200 : 400);
+    const t3 = setTimeout(() => setTooltipVisible(true), hasSel ? 1350 : 550);
+    timers.current.push(t2, t3);
 
-    const arriveTimer = setTimeout(() => setHasArrived(true), 1100);
+  }, [isActive, currentStepIndex, steps]); // eslint-disable-line react-hooks/exhaustive-deps
 
-    return () => {
-      if (pollIntervalRef.current !== null) clearInterval(pollIntervalRef.current);
-      window.removeEventListener('resize', onResizeOrScroll);
-      window.removeEventListener('scroll', onResizeOrScroll, true);
-      clearTimeout(arriveTimer);
-      clearTimeout(postScrollTimer);
-    };
-  }, [isActive, currentStepIndex, steps, findElement, updateTargetPosition]);
-
-  const startTour = () => {
+  const startTour = useCallback(() => {
     setShowWelcome(false);
     setCurrentStepIndex(0);
+    setCursorPos({ x: window.innerWidth / 2, y: window.innerHeight / 3 });
+    setHasArrived(false);
+    setTooltipVisible(false);
     setIsActive(true);
-  };
+  }, []);
 
   const skip = useCallback(() => {
+    clearTimers();
     localStorage.setItem(storageKey, 'true');
+    highlightedEl.current?.classList.remove('aria-tour-highlight');
+    highlightedEl.current = null;
     setShowWelcome(false);
     setIsActive(false);
-    setTargetRect(null);
-  }, [storageKey]);
+    setTooltipVisible(false);
+    setHasArrived(false);
+  }, [storageKey]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const next = () => {
-    if (currentStepIndex < steps.length - 1) {
-      setCurrentStepIndex((i) => i + 1);
-    } else {
-      skip();
-    }
-  };
+  const next = useCallback(() => {
+    setTooltipVisible(false);
+    setCurrentStepIndex(i => {
+      if (i < steps.length - 1) return i + 1;
+      // Last step finished
+      clearTimers();
+      localStorage.setItem(storageKey, 'true');
+      highlightedEl.current?.classList.remove('aria-tour-highlight');
+      highlightedEl.current = null;
+      setIsActive(false);
+      return i;
+    });
+  }, [steps.length, storageKey]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const back = () => {
-    if (currentStepIndex > 0) setCurrentStepIndex((i) => i - 1);
-  };
+  const back = useCallback(() => {
+    setTooltipVisible(false);
+    setCurrentStepIndex(i => (i > 0 ? i - 1 : i));
+  }, []);
 
   const restart = useCallback(() => {
     localStorage.removeItem(storageKey);
     setCurrentStepIndex(0);
+    setCursorPos({ x: window.innerWidth / 2, y: window.innerHeight / 3 });
+    setHasArrived(false);
+    setTooltipVisible(false);
     setIsActive(true);
   }, [storageKey]);
 
   return {
-    isActive,
-    showWelcome,
-    currentStepIndex,
-    totalSteps: steps.length,
-    currentStep: steps[currentStepIndex] ?? steps[0],
-    targetRect,
-    hasArrived,
-    startTour,
-    skip,
-    next,
-    back,
-    restart,
+    isActive, showWelcome, currentStepIndex,
+    totalSteps:    steps.length,
+    currentStep:   steps[currentStepIndex] ?? steps[0]!,
+    cursorPos, hasArrived, tooltipVisible,
+    startTour, skip, next, back, restart,
   };
 };

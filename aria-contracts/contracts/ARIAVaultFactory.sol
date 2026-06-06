@@ -13,6 +13,7 @@ contract ARIAVaultFactory {
     event VaultCreated(address indexed owner, address indexed vault);
 
     constructor(address _defaultAgent, address _feeRecipient) {
+        require(_defaultAgent != address(0), "ARIAVaultFactory: zero agent");
         defaultAgent = _defaultAgent;
         feeRecipient = _feeRecipient;
     }

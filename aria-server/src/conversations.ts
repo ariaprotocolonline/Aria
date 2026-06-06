@@ -18,8 +18,15 @@ export interface Conversation {
 }
 
 const DATA_DIR = path.join(__dirname, '../data');
-const getFilePath = (wallet: string) =>
-  path.join(DATA_DIR, `${wallet.toLowerCase()}.json`);
+const WALLET_RE = /^0x[0-9a-fA-F]{40}$/;
+
+function safeFilePath(wallet: string): string {
+  const lower = wallet.toLowerCase();
+  if (!WALLET_RE.test(lower)) throw new Error(`Invalid wallet address: ${wallet}`);
+  return path.join(DATA_DIR, `${lower}.json`);
+}
+
+const getFilePath = safeFilePath;
 
 function ensureDataDir() {
   if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
@@ -38,7 +45,10 @@ export function loadConversations(wallet: string): Conversation[] {
 
 export function saveConversations(wallet: string, conversations: Conversation[]): void {
   ensureDataDir();
-  fs.writeFileSync(getFilePath(wallet), JSON.stringify(conversations, null, 2));
+  const target = getFilePath(wallet);
+  const tmp = target + '.tmp';
+  fs.writeFileSync(tmp, JSON.stringify(conversations, null, 2));
+  fs.renameSync(tmp, target);
 }
 
 export function upsertConversation(wallet: string, conversation: Conversation): void {

@@ -7,7 +7,7 @@ interface IVault {
     function reallocate(
         address tokenIn, address tokenOut, address protocol,
         uint256 amount, uint256 expectedApyBps, uint256 newApyBps,
-        bytes calldata data
+        uint256 minAmountOut, bytes calldata data
     ) external;
 }
 
@@ -46,7 +46,7 @@ contract MaliciousProtocol {
             // Attack 1: attempt reentrancy into reallocate()
             try IVault(vault).reallocate(
                 _tokenIn, _tokenOut, address(this),
-                1, 0, 100, abi.encodeWithSelector(
+                1, 0, 100, 0, abi.encodeWithSelector(
                     this.swap.selector, _tokenIn, _tokenOut, 1, recipient
                 )
             ) {} catch {}

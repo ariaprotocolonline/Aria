@@ -11,11 +11,15 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.39.0",
+    "connect-timeout": "^1.9.1",
     "cors": "^2.8.5",
     "dotenv": "^17.4.2",
-    "express": "^4.21.2"
+    "ethers": "^6.16.0",
+    "express": "^4.21.2",
+    "helmet": "^8.1.0"
   },
   "devDependencies": {
+    "@types/connect-timeout": "^1.9.0",
     "@types/cors": "^2.8.17",
     "@types/express": "^5.0.1",
     "@types/node": "^22.14.1",

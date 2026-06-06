@@ -1,4 +1,5 @@
 import { env } from '../config/env';
+import { callServer, assertNotRateLimited, isSafeError } from './api';
 
 export type RiskProfile = 'Conservative' | 'Balanced' | 'Aggressive';
 
@@ -14,74 +15,36 @@ export interface PortfolioContext {
   portfolioString?: string;
 }
 
+// Used by agentPools.ts — distinct name avoids collision with useMarketData's MarketPool.
+export interface ClaudeFeedPool {
+  name: string;
+  protocol: string;
+  apy: string;
+  tvl: string;
+  incentivized: boolean;
+  isLive?: boolean;
+}
+
 const now = () =>
   new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' });
 
 const stripFences = (text: string) =>
   text.trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
 
+// Builds the portfolio-data block sent as `portfolioContext` to the server.
+// The server appends this to its own hardened system prompt — the "You are ARIA"
+// prefix lives there; this function only returns context the server doesn't have.
 export function buildSystemPrompt({ riskProfile, portfolioString }: PortfolioContext): string {
-  const base = `You are ARIA (Autonomous RWA Intelligence Agent). Tone: WSJ editorial — quietly intelligent, institutional, data-dense.\nYou manage RWA positions on Mantle. Risk profile: ${riskProfile}.`;
-
+  const base = `Risk profile: ${riskProfile}.`;
   if (portfolioString) {
     return (
       base +
       `\nThe dashboard has injected the user's LIVE portfolio data below. ` +
-      `This data is real and authoritative — do not say you lack access to it. ` +
-      `When asked about balances, positions, or holdings, answer directly using these numbers.\n\n` +
+      `This data is real and authoritative — answer balance/position questions directly from these numbers.\n\n` +
       portfolioString
     );
   }
-
-  return base + ` Respond concisely.`;
-}
-
-// Route through aria-server proxy; fall back to direct Anthropic if proxy not configured
-async function callClaude(body: Record<string, unknown>): Promise<Response> {
-  if (env.API_URL) {
-    return fetch(`${env.API_URL}/api/chat`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-    });
-  }
-  return fetch(env.ANTHROPIC_API_URL, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'anthropic-version': env.ANTHROPIC_VERSION,
-      'anthropic-dangerous-direct-browser-access': 'true',
-    },
-    body: JSON.stringify({
-      model:      body.model,
-      max_tokens: body.max_tokens,
-      system:     body.system,
-      messages:   body.messages,
-    }),
-  });
-}
-
-async function checkRateLimit(response: Response): Promise<void> {
-  if (response.status === 429) {
-    throw new Error('You have reached your daily message limit. This resets at midnight.');
-  }
-  if (response.status === 503) {
-    throw new Error('ARIA chat is at capacity. Try again shortly.');
-  }
-  if (response.status === 401) {
-    throw new Error('Please connect your wallet to use ARIA chat.');
-  }
-}
-
-const SAFE_PREFIXES = [
-  'You have reached',
-  'ARIA chat is at capacity',
-  'Please connect your wallet',
-  'ARIA is unavailable',
-] as const;
-
-function isSafeError(msg: string): boolean {
-  return SAFE_PREFIXES.some(p => msg.startsWith(p));
+  return base;
 }
 
 export const generateIntelligenceFeed = async (
@@ -90,27 +53,26 @@ export const generateIntelligenceFeed = async (
   walletAddress?: string,
 ): Promise<FeedItem[]> => {
   try {
-    const response = await callClaude({
-      model:      env.ANTHROPIC_MODEL,
-      max_tokens: 600,
-      walletAddress: walletAddress ?? '',
-      system: `You are ARIA (Autonomous RWA Intelligence Agent), an institutional AI monitoring RWA positions on the Mantle blockchain.
-Generate a JSON array of exactly 3 fresh intelligence feed items for a ${riskProfile} risk profile.
-Each item has a "tag" (ACTION, ALERT, or OPPORTUNITY) and a concise WSJ-style "message" (1–2 sentences, data-dense, no fluff).
-Mix the tags — don't use the same tag three times. Make each item specific and different from standard boilerplate.
-${portfolioContext ? `\nUser portfolio context:\n${portfolioContext}` : ''}
-Return ONLY raw JSON — no markdown fences, no commentary:
-[{"tag":"ACTION","message":"..."},{"tag":"ALERT","message":"..."},{"tag":"OPPORTUNITY","message":"..."}]`,
+    const instruction =
+      `Generate a JSON array of exactly 3 fresh intelligence feed items for a ${riskProfile} risk profile. ` +
+      `Each item: {"tag":"ACTION"|"ALERT"|"OPPORTUNITY","message":"1-2 sentence WSJ-style data-dense note"}. ` +
+      `Mix the tags. Return ONLY raw JSON — no markdown fences, no commentary.` +
+      (portfolioContext ? `\n\nUser portfolio:\n${portfolioContext}` : '');
+
+    const response = await callServer({
+      model:           env.ANTHROPIC_MODEL,
+      max_tokens:      600,
+      walletAddress:   walletAddress ?? '',
+      portfolioContext: instruction,
       messages: [{ role: 'user', content: 'Generate a fresh feed update now.' }],
     });
 
-    await checkRateLimit(response);
+    await assertNotRateLimited(response);
     if (!response.ok) throw new Error(`API ${response.status}`);
 
     const data = await response.json();
     const raw = stripFences(data.content[0].text);
     const items: { tag: string; message: string }[] = JSON.parse(raw);
-
     if (!Array.isArray(items) || items.length === 0) throw new Error('empty response');
 
     const validTags = new Set(['ACTION', 'ALERT', 'OPPORTUNITY']);
@@ -127,8 +89,8 @@ Return ONLY raw JSON — no markdown fences, no commentary:
     const fallbacks = [
       [
         { tag: 'ALERT' as const,       message: 'WETH/WMNT pool liquidity thinned 18bps over the past 4h. Monitoring for continued compression before reallocation.' },
-        { tag: 'OPPORTUNITY' as const, message: `Agni Finance WETH/USDT pool offering a locked ${riskProfile === 'Conservative' ? '6.8' : riskProfile === 'Balanced' ? '11.2' : '19.4'}% APY. Entry window is narrow.` },
-        { tag: 'ACTION' as const,      message: `Portfolio rebalanced to ${riskProfile} mandate. USDC weight increased 3% to reduce volatility exposure.` },
+        { tag: 'OPPORTUNITY' as const, message: 'Agni Finance WETH/USDT pool offering a locked 11.2% APY. Entry window is narrow.' },
+        { tag: 'ACTION' as const,      message: 'Portfolio rebalanced to Balanced mandate. USDC weight increased 3% to reduce volatility exposure.' },
       ],
       [
         { tag: 'OPPORTUNITY' as const, message: 'FusionX WETH/USDT pool offering 22% APY with boosted incentives — eligible for current risk tier.' },
@@ -149,68 +111,56 @@ Return ONLY raw JSON — no markdown fences, no commentary:
   }
 };
 
-export interface MarketPool {
-  name: string;
-  protocol: string;
-  apy: string;
-  tvl: string;
-  incentivized: boolean;
-  isLive?: boolean;
-}
-
-const POOL_FALLBACKS: Record<RiskProfile, MarketPool[]> = {
+const POOL_FALLBACKS: Record<RiskProfile, ClaudeFeedPool[]> = {
   Conservative: [
-    { name: 'WETH/USDT',   protocol: 'Agni Finance', apy: '8.2%',  tvl: '$124.5M', incentivized: false },
-    { name: 'WETH/USDT',   protocol: 'FusionX',      apy: '7.8%',  tvl: '$89.2M',  incentivized: false },
-    { name: 'USDC/USDT',   protocol: 'Agni Finance', apy: '4.2%',  tvl: '$18.4M',  incentivized: true  },
-    { name: 'USDC/USDT',   protocol: 'FusionX',      apy: '3.8%',  tvl: '$42.1M',  incentivized: false },
-    { name: 'WETH/WMNT',   protocol: 'Agni Finance', apy: '6.1%',  tvl: '$31.6M',  incentivized: true  },
+    { name: 'WETH/USDT', protocol: 'Agni Finance', apy: '8.2%',  tvl: '$124.5M', incentivized: false },
+    { name: 'WETH/USDT', protocol: 'FusionX',      apy: '7.8%',  tvl: '$89.2M',  incentivized: false },
+    { name: 'USDC/USDT', protocol: 'Agni Finance', apy: '4.2%',  tvl: '$18.4M',  incentivized: true  },
+    { name: 'USDC/USDT', protocol: 'FusionX',      apy: '3.8%',  tvl: '$42.1M',  incentivized: false },
+    { name: 'WETH/WMNT', protocol: 'Agni Finance', apy: '6.1%',  tvl: '$31.6M',  incentivized: true  },
   ],
   Balanced: [
-    { name: 'WETH/WMNT',   protocol: 'Agni Finance', apy: '9.5%',  tvl: '$67.3M',  incentivized: false },
-    { name: 'WETH/USDT',   protocol: 'Agni Finance', apy: '8.2%',  tvl: '$124.5M', incentivized: false },
-    { name: 'WETH/USDT',   protocol: 'FusionX',      apy: '7.8%',  tvl: '$22.1M',  incentivized: true  },
-    { name: 'USDC/USDT',   protocol: 'Agni Finance', apy: '4.2%',  tvl: '$38.9M',  incentivized: false },
-    { name: 'USDC/USDT',   protocol: 'FusionX',      apy: '3.8%',  tvl: '$9.7M',   incentivized: true  },
+    { name: 'WETH/WMNT', protocol: 'Agni Finance', apy: '9.5%',  tvl: '$67.3M',  incentivized: false },
+    { name: 'WETH/USDT', protocol: 'Agni Finance', apy: '8.2%',  tvl: '$124.5M', incentivized: false },
+    { name: 'WETH/USDT', protocol: 'FusionX',      apy: '7.8%',  tvl: '$22.1M',  incentivized: true  },
+    { name: 'USDC/USDT', protocol: 'Agni Finance', apy: '4.2%',  tvl: '$38.9M',  incentivized: false },
+    { name: 'USDC/USDT', protocol: 'FusionX',      apy: '3.8%',  tvl: '$9.7M',   incentivized: true  },
   ],
   Aggressive: [
-    { name: 'WETH/WMNT',   protocol: 'Agni Finance', apy: '9.5%',  tvl: '$14.2M',  incentivized: false },
-    { name: 'WETH/USDT',   protocol: 'FusionX',      apy: '7.8%',  tvl: '$8.1M',   incentivized: false },
-    { name: 'WETH/USDT',   protocol: 'Agni Finance', apy: '8.2%',  tvl: '$6.4M',   incentivized: true  },
-    { name: 'USDC/USDT',   protocol: 'Agni Finance', apy: '4.2%',  tvl: '$4.8M',   incentivized: false },
-    { name: 'USDC/USDT',   protocol: 'FusionX',      apy: '3.8%',  tvl: '$11.3M',  incentivized: true  },
+    { name: 'WETH/WMNT', protocol: 'Agni Finance', apy: '9.5%',  tvl: '$14.2M',  incentivized: false },
+    { name: 'WETH/USDT', protocol: 'FusionX',      apy: '7.8%',  tvl: '$8.1M',   incentivized: false },
+    { name: 'WETH/USDT', protocol: 'Agni Finance', apy: '8.2%',  tvl: '$6.4M',   incentivized: true  },
+    { name: 'USDC/USDT', protocol: 'Agni Finance', apy: '4.2%',  tvl: '$4.8M',   incentivized: false },
+    { name: 'USDC/USDT', protocol: 'FusionX',      apy: '3.8%',  tvl: '$11.3M',  incentivized: true  },
   ],
 };
 
 export const generateMarketPools = async (
   riskProfile: RiskProfile,
   walletAddress?: string,
-): Promise<MarketPool[]> => {
+): Promise<ClaudeFeedPool[]> => {
   try {
-    const response = await callClaude({
-      model:      env.ANTHROPIC_MODEL,
-      max_tokens: 500,
-      walletAddress: walletAddress ?? '',
-      system: `You are ARIA. Generate a JSON array of 5 live Mantle DeFi market pools for a ${riskProfile} risk profile.
-Use realistic protocols from the Mantle ecosystem: Ondo Finance, Mantle LSP, Merchant Moe, Init Capital, Pendle, Lendle.
-Each pool: {"name":"...","protocol":"...","apy":"X.X%","tvl":"$XX.XM","incentivized":true|false}
-APY ranges — Conservative: 4–8%, Balanced: 8–20%, Aggressive: 15–35%.
-Vary the pools — don't repeat the same pool. Make TVL numbers realistic.
-Return ONLY raw JSON array — no markdown, no commentary.`,
+    const instruction =
+      `Generate a JSON array of 5 live Mantle DeFi market pools for a ${riskProfile} risk profile. ` +
+      `Protocols: Agni Finance, FusionX. Pairs: WETH/USDT, WETH/WMNT, USDC/USDT. ` +
+      `Each pool: {"name":"...","protocol":"...","apy":"X.X%","tvl":"$XX.XM","incentivized":true|false}. ` +
+      `APY ranges — Conservative: 4–9%, Balanced: 7–15%, Aggressive: 12–25%. ` +
+      `Return ONLY raw JSON array — no markdown, no commentary.`;
+
+    const response = await callServer({
+      model:           env.ANTHROPIC_MODEL,
+      max_tokens:      500,
+      walletAddress:   walletAddress ?? '',
+      portfolioContext: instruction,
       messages: [{ role: 'user', content: 'Generate current market pools.' }],
     });
 
     if (!response.ok) throw new Error(`API ${response.status}`);
-
     const data = await response.json();
     const raw = stripFences(data.content[0].text);
-    const items: MarketPool[] = JSON.parse(raw);
-
+    const items: ClaudeFeedPool[] = JSON.parse(raw);
     if (!Array.isArray(items) || items.length === 0) throw new Error('empty');
-
-    return items.filter(
-      (p) => p.name && p.protocol && p.apy && p.tvl && typeof p.incentivized === 'boolean',
-    );
+    return items.filter(p => p.name && p.protocol && p.apy && p.tvl && typeof p.incentivized === 'boolean');
   } catch {
     return POOL_FALLBACKS[riskProfile];
   }
@@ -224,24 +174,21 @@ export const chatWithAria = async (
   portfolioContext?: string,
 ): Promise<string> => {
   try {
-    const formattedHistory = history.map((h) => ({
+    const formattedHistory = history.map(h => ({
       role: h.role === 'aria' ? 'assistant' : 'user',
       content: h.content,
     }));
 
-    const system = buildSystemPrompt({ riskProfile, portfolioString: portfolioContext });
-
-    const response = await callClaude({
-      model:         env.ANTHROPIC_MODEL,
-      max_tokens:    300,
-      walletAddress: walletAddress ?? '',
-      system,
+    const response = await callServer({
+      model:           env.ANTHROPIC_MODEL,
+      max_tokens:      300,
+      walletAddress:   walletAddress ?? '',
+      portfolioContext: buildSystemPrompt({ riskProfile, portfolioString: portfolioContext }),
       messages: [...formattedHistory, { role: 'user', content: message }],
     });
 
-    await checkRateLimit(response);
+    await assertNotRateLimited(response);
     if (!response.ok) throw new Error(`API ${response.status}`);
-
     const data = await response.json();
     return data.content[0].text;
   } catch (err: unknown) {

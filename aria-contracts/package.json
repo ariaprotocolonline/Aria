@@ -13,7 +13,8 @@
     "deploy:full":    "hardhat run scripts/deployFull.ts --network mantleTestnet",
     "mocks:testnet":  "hardhat run scripts/deployMocks.ts --network mantleTestnet",
     "deploy:testnet": "hardhat run scripts/deploy.ts --network mantleTestnet",
-    "deploy:mainnet": "hardhat run scripts/deploy.ts --network mantleMainnet",
+    "deploy:mainnet":      "hardhat run scripts/deploy.ts --network mantleMainnet",
+    "deploy:mainnet:full": "hardhat run scripts/deployMainnet.ts --network mantleMainnet",
     "verify:testnet": "hardhat run scripts/verify.ts --network mantleTestnet",
     "verify:mainnet": "hardhat run scripts/verify.ts --network mantleMainnet",
     "clean":          "hardhat clean"

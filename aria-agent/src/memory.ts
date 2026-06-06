@@ -22,8 +22,8 @@ export interface AgentMemoryEntry {
   };
   marketContext: {
     riskProfile: string;
-    vaultBalanceUsdy: string;
-    vaultBalanceMeth: string;
+    vaultBalanceWeth: string;
+    vaultBalanceUsdc: string;
     topOpportunityApy: number;
     poolsScanned: number;
   };
@@ -49,17 +49,31 @@ export function loadMemory(): AgentMemoryEntry[] {
 
 export function saveMemory(entries: AgentMemoryEntry[]): void {
   ensureDataDir();
-  fs.writeFileSync(MEMORY_FILE, JSON.stringify(entries, null, 2));
+  // Atomic write: write to temp file then rename so a crash mid-write never corrupts the JSON.
+  const tmp = MEMORY_FILE + '.tmp';
+  fs.writeFileSync(tmp, JSON.stringify(entries, null, 2));
+  fs.renameSync(tmp, MEMORY_FILE);
 }
 
+const MAX_FILE_BYTES = 5 * 1024 * 1024; // 5 MB
+
 export function addMemoryEntry(entry: Omit<AgentMemoryEntry, 'id'>): void {
-  const entries = loadMemory();
+  let entries = loadMemory();
   const full: AgentMemoryEntry = {
     ...entry,
     id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
   };
   entries.unshift(full);
   if (entries.length > MAX_ENTRIES) entries.splice(MAX_ENTRIES);
+
+  // Guard against unbounded growth — truncate oldest if serialized size exceeds 5 MB.
+  while (entries.length > 1) {
+    const serialized = JSON.stringify(entries);
+    if (Buffer.byteLength(serialized, 'utf8') <= MAX_FILE_BYTES) break;
+    entries = entries.slice(0, Math.max(1, Math.floor(entries.length * 0.75)));
+    console.warn(`[memory] File size exceeded 5 MB — truncated to ${entries.length} entries`);
+  }
+
   saveMemory(entries);
 }
 
@@ -81,7 +95,7 @@ export function getMemorySummary(): string {
             acc[p!] = (acc[p!] ?? 0) + 1;
             return acc;
           }, {} as Record<string, number>)
-        ).sort((a, b) => b[1] - a[1])[0][0]
+        ).sort((a, b) => (b[1] ?? 0) - (a[1] ?? 0))[0]?.[0] ?? 'none'
       : 'none';
 
   const avgImprovement =

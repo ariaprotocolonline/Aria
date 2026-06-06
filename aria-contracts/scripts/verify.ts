@@ -3,11 +3,17 @@ import * as fs from "fs";
 import * as path from "path";
 
 async function main() {
-  const deploymentsPath = path.join(__dirname, "../deployments.json");
+  // deployMainnet.ts writes to mainnet-deployment.json; fall back to the
+  // testnet output (deployments.json) for testnet verification runs.
+  const mainnetPath = path.join(__dirname, "../mainnet-deployment.json");
+  const testnetPath = path.join(__dirname, "../deployments.json");
+  const deploymentsPath = fs.existsSync(mainnetPath) ? mainnetPath : testnetPath;
 
   if (!fs.existsSync(deploymentsPath)) {
     throw new Error(
-      "deployments.json not found — run the deploy script first:\n  npm run deploy:testnet"
+      "No deployment file found. Run the deploy script first:\n" +
+      "  Mainnet: npx hardhat run scripts/deployMainnet.ts --network mantleMainnet\n" +
+      "  Testnet: npx hardhat run scripts/deploy.ts --network mantleTestnet"
     );
   }
 

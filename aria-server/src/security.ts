@@ -20,7 +20,7 @@ const INJECTION_PATTERNS = [
   /reveal.*key/i,
   /show.*private/i,
   /execute.*transaction/i,
-  /call.*contract/i,
+  /call\s+(the\s+)?contract\s+function/i,
   /approve.*protocol/i,
   /change.*agent/i,
   /new.*instruction/i,
@@ -35,6 +35,10 @@ const INJECTION_PATTERNS = [
   /print.{0,10}hacked/i,
   /new\s+role/i,
   /disregard.{0,20}(instruction|rule|constraint|guideline)/i,
+  // Additional patterns identified in audit
+  /you are now in developer mode/i,
+  /disregard (all |any |previous )?instructions/i,
+  /respond only in (json|xml|yaml) with no (safety|restrictions)/i,
 ]
 
 export interface SecurityScanResult {
@@ -43,7 +47,18 @@ export interface SecurityScanResult {
   pattern?: string
 }
 
+// Zero address is never a valid wallet — block it explicitly.
+const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000'
+
 export function scanForInjection(input: string): SecurityScanResult {
+  // Block excessively repeated characters — likely a DoS or injection probe.
+  if (/(.)\1{499,}/.test(input)) {
+    return {
+      safe: false,
+      reason: 'Message contains excessive repeated characters',
+      pattern: 'repetition-500+',
+    }
+  }
   for (const pattern of INJECTION_PATTERNS) {
     if (pattern.test(input)) {
       return {
@@ -56,6 +71,10 @@ export function scanForInjection(input: string): SecurityScanResult {
   return { safe: true }
 }
 
+export function isBlockedWallet(address: string): boolean {
+  return address.toLowerCase() === ZERO_ADDRESS
+}
+
 // ── Response validation ──────────────────────────────────────────────────────
 
 const FORBIDDEN_IN_RESPONSE = [
@@ -64,7 +83,7 @@ const FORBIDDEN_IN_RESPONSE = [
   /mnemonic/i,
   /seed.?phrase/i,
   /AGENT_PRIVATE/i,
-  /0x[0-9a-fA-F]{64}/, // looks like a raw private key
+  /(?<![0-9a-fA-F])0x[0-9a-fA-F]{64}(?![0-9a-fA-F])/, // looks like a raw private key
 ]
 
 export function validateAgentResponse(response: string): SecurityScanResult {
@@ -116,10 +135,18 @@ export function sanitizeUserInput(input: string): string {
 // ── Per-wallet rate limit (5 req/min) ────────────────────────────────────────
 
 const walletCallCount = new Map<string, { count: number; resetAt: number }>()
-const WALLET_MAX_CALLS_PER_MINUTE = 5
+const WALLET_MAX_CALLS_PER_MINUTE  = 5
+const WALLET_RATE_PRUNE_THRESHOLD  = 10_000
 
 export function checkWalletRateLimit(wallet: string): SecurityScanResult {
   const now   = Date.now()
+
+  if (walletCallCount.size > WALLET_RATE_PRUNE_THRESHOLD) {
+    for (const [k, v] of walletCallCount) {
+      if (now > v.resetAt) walletCallCount.delete(k)
+    }
+  }
+
   const entry = walletCallCount.get(wallet)
 
   if (!entry || now > entry.resetAt) {

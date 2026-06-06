@@ -14,11 +14,12 @@ export default {
         'text-secondary': 'var(--text-secondary)',
         accent: 'var(--accent)',
         border: 'var(--border)',
+        soft: 'var(--soft)',
         card: 'var(--card)',
       },
       fontFamily: {
-        serif: ['"Playfair Display"', 'Georgia', 'serif'],
-        sans: ['"DM Sans"', 'sans-serif'],
+        serif: ['"Instrument Serif"', '"Times New Roman"', 'serif'],
+        sans: ['"Geist"', 'system-ui', 'sans-serif'],
       }
     },
   },

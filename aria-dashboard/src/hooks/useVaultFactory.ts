@@ -40,7 +40,7 @@ export function useVaultFactory() {
     abi: FACTORY_ABI,
     functionName: 'getVault',
     args: address ? [address] : undefined,
-    query: { enabled: isFactoryDeployed && !!address },
+    query: { enabled: isFactoryDeployed && !!address, refetchInterval: 30_000 },
   });
 
   const { data: hasVault } = useReadContract({
@@ -48,7 +48,7 @@ export function useVaultFactory() {
     abi: FACTORY_ABI,
     functionName: 'hasVault',
     args: address ? [address] : undefined,
-    query: { enabled: isFactoryDeployed && !!address },
+    query: { enabled: isFactoryDeployed && !!address, refetchInterval: 30_000 },
   });
 
   const { writeContractAsync, isPending } = useWriteContract();

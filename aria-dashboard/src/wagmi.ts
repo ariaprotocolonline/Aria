@@ -30,13 +30,13 @@ export const mantleTestnet = defineChain({
 export const wagmiConfig = getDefaultConfig({
   appName: env.APP_NAME,
   projectId: env.WALLETCONNECT_PROJECT_ID,
-  chains: [mantleMainnet, mantleTestnet],
+  // Production: mainnet only. Testnet is removed so users cannot accidentally
+  // interact with testnet contracts while thinking they are on mainnet.
+  chains: [mantleMainnet],
   transports: {
-    [mantleMainnet.id]: http('https://rpc.mantle.xyz'),
-    [mantleTestnet.id]: fallback([
-      http('https://rpc.sepolia.mantle.xyz'),
-      http('https://mantle-sepolia.drpc.org'),
-      http('https://mantle-testnet.public.blastapi.io'),
+    [mantleMainnet.id]: fallback([
+      http(env.MANTLE_RPC_URL),
+      http('https://rpc.mantle.xyz'),
     ]),
   },
   ssr: false,

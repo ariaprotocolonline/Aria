@@ -1,11 +1,10 @@
-import Anthropic from '@anthropic-ai/sdk';
 import { type Address, parseAbi } from 'viem';
-import { publicClient, VAULT_ADDRESS, RISK_PROFILE, ANTHROPIC_API_KEY } from './config';
-import { getYieldOpportunities, type Opportunity } from './yield';
-import { validateAgentResponse } from './security';
+import { publicClient, RISK_PROFILE, DEEPSEEK_API_KEY, DEEPSEEK_MODEL } from './config';
+import { getYieldOpportunities, type Opportunity, USDC_ADDRESS, XSTOCK_LABELS, XSTOCKS_ENABLED } from './yield';
+import { validateAgentResponse, scanForInjection } from './security';
 import { getMemorySummary, getRecentMemory } from './memory';
-
-const anthropic = new Anthropic({ apiKey: ANTHROPIC_API_KEY });
+import { getElfaSignals, elfaSignalSummary } from './elfa';
+import { getNansenPoolIntel, nansenIntelSummary } from './nansen';
 
 export interface ReallocationDecision {
   shouldReallocate: boolean;
@@ -16,13 +15,9 @@ export interface ReallocationDecision {
   reason: string;
   claudeConfidence?: number;
   claudeUrgency?: 'low' | 'medium' | 'high';
+  riskProfile?: string;
   scannedOpportunities?: Opportunity[];
 }
-
-// ── System prompt for the agent analysis cycle ─────────────────────────────
-// This is NOT the chat system prompt. This is only used when the agent loop
-// calls Claude to analyze onchain data and produce a reallocation decision.
-// Claude talks. Code validates. Chain executes.
 
 const AGENT_ANALYSIS_SYSTEM_PROMPT = `\
 You are ARIA's intelligence layer, analyzing live onchain data to produce reallocation decisions for WETH and USDC positions on Mantle.
@@ -51,16 +46,10 @@ Rules:
 - Liquidity score weights equally with APY — a 0.3 liquidity score pool should not be recommended even at high APY.
 - Be conservative with confidence: 0.9+ only when data strongly supports the move.`;
 
-// ── Vault ABI ──────────────────────────────────────────────────────────────
-
 const VAULT_ABI = parseAbi([
   'function getBalance(address token) external view returns (uint256)',
   'function paused() external view returns (bool)',
 ]);
-
-// ── Risk profile thresholds ────────────────────────────────────────────────
-// minLiquidityScore: floor below which a pool is rejected regardless of APY
-// minImprovementBps: minimum APY gain required to trigger reallocation
 
 const PROFILE_FLOORS: Record<string, number> = {
   Conservative: 0.70,
@@ -74,8 +63,6 @@ const PROFILE_THRESHOLDS: Record<string, number> = {
   Aggressive:   40,
 };
 
-// ── Helpers ────────────────────────────────────────────────────────────────
-
 function noOp(reason: string, opportunity: Opportunity | null = null): ReallocationDecision {
   return {
     shouldReallocate: false,
@@ -87,13 +74,13 @@ function noOp(reason: string, opportunity: Opportunity | null = null): Reallocat
   };
 }
 
-async function getVaultBalances(tokenAddresses: Address[]): Promise<Map<Address, bigint>> {
+async function getVaultBalances(vaultAddress: Address, tokenAddresses: Address[]): Promise<Map<Address, bigint>> {
   const unique = [...new Set(tokenAddresses.map(a => a.toLowerCase() as Address))];
   const entries = await Promise.all(
     unique.map(async (token) => {
       try {
         const balance = await publicClient.readContract({
-          address: VAULT_ADDRESS,
+          address: vaultAddress,
           abi: VAULT_ABI,
           functionName: 'getBalance',
           args: [token],
@@ -107,42 +94,66 @@ async function getVaultBalances(tokenAddresses: Address[]): Promise<Map<Address,
   return new Map(entries);
 }
 
-// ── Claude decision block type ─────────────────────────────────────────────
-
 interface ClaudeDecision {
   action: string;
   fromProtocol: string | null;
   toProtocol: string;
   toPoolAddress: string;
   reason: string;
-  apyImprovementBps: number;
   liquidityScoreCurrent: number;
   liquidityScoreNew: number;
   confidence: number;
   urgency: 'low' | 'medium' | 'high';
 }
 
-// ── Main cycle ─────────────────────────────────────────────────────────────
+// H7: Sanitize a memory string before injecting it into a Claude prompt.
+// Returns the original if safe, or a redacted placeholder if suspicious.
+function sanitizeForPrompt(input: string, label: string): string {
+  const scan = scanForInjection(input);
+  if (!scan.safe) {
+    console.warn(`[agent] SECURITY: ${label} failed injection scan — redacted. Pattern: ${scan.pattern}`);
+    return `[${label} redacted — content failed security scan]`;
+  }
+  return input;
+}
 
-export async function runCycle(): Promise<ReallocationDecision> {
-  // 1. Bail early if vault is paused
+// Per-vault hold cache: skip the Claude call when pool APYs and vault balances
+// are identical to the last cycle that ended in a hold for that vault.
+const holdCache = new Map<Address, { key: string; decision: ReallocationDecision }>();
+
+// Accept pre-fetched opportunities to avoid a second RPC scan when the caller
+// already has fresh data (e.g. index.ts fetches once for feed + decision).
+export async function runCycle(vaultAddress: Address, prefetched?: Opportunity[]): Promise<ReallocationDecision> {
   const isPaused = await publicClient.readContract({
-    address: VAULT_ADDRESS,
+    address: vaultAddress,
     abi: VAULT_ABI,
     functionName: 'paused',
   });
 
   if (isPaused) return noOp('Vault is paused');
 
-  // 2. Gather live onchain data
-  const opportunities = await getYieldOpportunities();
+  const opportunities = prefetched ?? await getYieldOpportunities();
   if (opportunities.length === 0) return noOp('No pool data available');
   const withOpps = (d: ReallocationDecision): ReallocationDecision => ({ ...d, scannedOpportunities: opportunities });
 
   const tokenAddresses = opportunities.map(o => o.tokenIn);
-  const vaultBalances  = await getVaultBalances(tokenAddresses);
+  const vaultBalances  = await getVaultBalances(vaultAddress, tokenAddresses);
 
-  // 3. Build analysis prompt with real data — Claude sees the full picture
+  // Skip Claude entirely if no assets are deployed — there is nothing to reallocate.
+  const totalBalance = [...vaultBalances.values()].reduce((a, b) => a + b, 0n);
+  if (totalBalance === 0n) return withOpps(noOp('No vault balance — skipping analysis'));
+
+  // If pool APYs and vault balances are identical to the last cycle that held,
+  // Claude would reach the same conclusion — skip the API call.
+  const analysisKey = opportunities
+    .map(o => `${o.protocol}:${o.apyBps}:${o.liquidityScore.toFixed(2)}`)
+    .join('|') + `|${totalBalance.toString()}`;
+
+  const cached = holdCache.get(vaultAddress);
+  if (cached?.key === analysisKey) {
+    return withOpps({ ...cached.decision, reason: cached.decision.reason + ' (market unchanged)' });
+  }
+
   const poolSummary = opportunities
     .map(o => {
       const balance = vaultBalances.get(o.tokenIn.toLowerCase() as Address) ?? 0n;
@@ -152,40 +163,99 @@ export async function runCycle(): Promise<ReallocationDecision> {
         `Token: ${o.tokenIn}\n` +
         `APY: ${(o.apyBps / 100).toFixed(2)}%\n` +
         `Liquidity score: ${o.liquidityScore.toFixed(3)}\n` +
-        `Vault balance of this token: ${(Number(balance) / 1e18).toFixed(6)}`
+        `Vault balance of this token: ${
+          o.tokenIn.toLowerCase() === USDC_ADDRESS.toLowerCase()
+            ? (Number(balance) / 1e6).toFixed(2)
+            : (Number(balance) / 1e18).toFixed(6)
+        }`
       );
     })
     .join('\n\n');
 
-  const memorySummary = getMemorySummary();
+  // H7: Scan and sanitize all memory content before injecting into the Claude prompt.
+  const rawMemorySummary = getMemorySummary();
+  const memorySummary = sanitizeForPrompt(rawMemorySummary, 'memory summary');
+
   const recentDecisions = getRecentMemory(5)
-    .map(e => `${e.timestamp}: ${e.decision.reason} → ${e.outcome.executed ? 'executed' : 'held'}`)
+    .map(e => {
+      const line = `${e.timestamp}: ${e.decision.reason} → ${e.outcome.executed ? 'executed' : 'held'}`;
+      return sanitizeForPrompt(line, 'recent decision');
+    })
     .join('\n');
+
+  // C4: Derive current APY from the last executed reallocation recorded in memory.
+  const lastExecuted = getRecentMemory(10).find(e => e.outcome.executed);
+  const memoryTrackedCurrentApyBps = lastExecuted?.decision.apyImprovementBps ?? 0;
+
+  // Fetch Elfa and Nansen intelligence in parallel — both are optional enhancements.
+  // Failures are handled internally; nulls/empty arrays mean data is unavailable.
+  const [elfaSignals, nansenData] = await Promise.all([
+    getElfaSignals(),
+    Promise.all(opportunities.map(o => getNansenPoolIntel(o.poolAddress))),
+  ]);
+
+  const elfaSummary  = elfaSignalSummary(elfaSignals);
+  const nansenReport = nansenData.map(nansenIntelSummary).join('\n');
+
+  // xStocks note — appended only when XSTOCKS_ENABLED is true so that placeholder
+  // addresses never reach Claude during development.
+  const xstocksNote = XSTOCKS_ENABLED
+    ? `\n\nxStocks are available on Mantle via Fluxion DEX: ${Object.keys(XSTOCK_LABELS).join(', ')}. These are tokenized US equities trading 24/7, backed 1:1 by real securities. Conservative profiles should not hold xStocks. Balanced profiles may allocate up to 20%. Aggressive profiles may allocate up to 50%.`
+    : '';
 
   const analysisPrompt =
     `${memorySummary}\n\nRecent decisions:\n${recentDecisions || 'None yet.'}\n\n` +
+    `Elfa AI social + smart money signals:\n${elfaSummary}\n\n` +
+    `Nansen pool intelligence:\n${nansenReport}\n\n` +
     `Live Mantle pool data — analyze and recommend:\n\n${poolSummary}\n\n` +
     `Risk profile: ${RISK_PROFILE}\n` +
-    `Based on this data, what is your recommendation? Return analysis and a <decision> block.`;
+    `Using the Elfa sentiment and Nansen smart money flows above alongside the onchain data, ` +
+    `what is your recommendation? Return analysis and a <decision> block.` +
+    xstocksNote;
 
-  // 4. Ask Claude to analyze — this is genuine AI intelligence, not chat
-  const response = await anthropic.messages.create({
-    model: process.env.ANTHROPIC_MODEL ?? 'claude-sonnet-4-6',
-    max_tokens: 1000,
-    system: AGENT_ANALYSIS_SYSTEM_PROMPT,
-    messages: [{ role: 'user', content: analysisPrompt }],
-  });
+  async function callAI(): Promise<string> {
+    const attempt = async () => {
+      const res = await fetch('https://api.deepseek.com/chat/completions', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${DEEPSEEK_API_KEY}` },
+        body: JSON.stringify({
+          model:      DEEPSEEK_MODEL,
+          max_tokens: 1000,
+          messages: [
+            { role: 'system', content: AGENT_ANALYSIS_SYSTEM_PROMPT },
+            { role: 'user',   content: analysisPrompt },
+          ],
+        }),
+        signal: AbortSignal.timeout(45_000),
+      });
+      if (!res.ok) throw new Error(`DeepSeek ${res.status}: ${await res.text()}`);
+      const data = await res.json() as { choices: { message: { content: string } }[] };
+      const text = data.choices[0]?.message?.content ?? '';
+      if (!text) throw new Error('DeepSeek returned empty response');
+      return text;
+    };
 
-  const text = response.content[0]?.type === 'text' ? response.content[0].text : '';
+    try {
+      const text = await attempt();
+      console.log('[agent] AI provider: DeepSeek');
+      return text;
+    } catch (err) {
+      console.warn(`[agent] DeepSeek failed — retrying once: ${err instanceof Error ? err.message : err}`);
+      await new Promise(r => setTimeout(r, 2_000));
+      const text = await attempt();
+      console.log('[agent] AI provider: DeepSeek (retry)');
+      return text;
+    }
+  }
 
-  // 5. Validate response before parsing — blocks leaking secrets
+  const text = await callAI();
+
   const responseCheck = validateAgentResponse(text);
   if (!responseCheck.safe) {
     console.error(`[SECURITY] Agent response blocked: ${responseCheck.reason}`);
     return withOpps(noOp('Response failed security validation'));
   }
 
-  // 6. Parse the <decision> block
   const decisionMatch = text.match(/<decision>([\s\S]*?)<\/decision>/);
   if (!decisionMatch) {
     console.warn('[agent] No <decision> block in Claude response — holding');
@@ -194,21 +264,34 @@ export async function runCycle(): Promise<ReallocationDecision> {
 
   let claudeDecision: ClaudeDecision;
   try {
-    claudeDecision = JSON.parse(decisionMatch[1].trim());
+    claudeDecision = JSON.parse(decisionMatch[1]!.trim());
   } catch {
     console.warn('[agent] Malformed <decision> JSON — holding');
     return withOpps(noOp('Could not parse decision block'));
   }
 
-  // 7. If Claude recommends hold or alert — respect it
+  // Validate and clamp numeric/enum fields — JSON.parse gives no type guarantees.
+  if (typeof claudeDecision.confidence !== 'number' || isNaN(claudeDecision.confidence)) {
+    claudeDecision.confidence = 0;
+  } else {
+    claudeDecision.confidence = Math.max(0, Math.min(1, claudeDecision.confidence));
+  }
+  if (!['low', 'medium', 'high'].includes(claudeDecision.urgency)) {
+    claudeDecision.urgency = 'low';
+  }
+  if (typeof claudeDecision.liquidityScoreCurrent !== 'number') claudeDecision.liquidityScoreCurrent = 0;
+  if (typeof claudeDecision.liquidityScoreNew     !== 'number') claudeDecision.liquidityScoreNew     = 0;
+  if (typeof claudeDecision.reason !== 'string') claudeDecision.reason = '';
+  if (typeof claudeDecision.toProtocol !== 'string') claudeDecision.toProtocol = '';
+
   if (claudeDecision.action !== 'reallocate') {
-    return withOpps(noOp(claudeDecision.reason ?? 'Claude recommends holding'));
+    const holdResult = withOpps(noOp(claudeDecision.reason ?? 'Claude recommends holding'));
+    holdCache.set(vaultAddress, { key: analysisKey, decision: holdResult });
+    return holdResult;
   }
 
-  // ── From here: code enforces every safety gate ─────────────────────────────
-  // Claude's recommendation only executes if ALL checks below pass.
+  // All code-enforced safety gates below. Claude's recommendation only executes if ALL pass.
 
-  // 8. Target protocol must come from our hard-coded approved pool list
   const targetPool = opportunities.find(
     o => o.protocol === claudeDecision.toProtocol
   );
@@ -217,8 +300,7 @@ export async function runCycle(): Promise<ReallocationDecision> {
     return withOpps(noOp(`Recommended protocol "${claudeDecision.toProtocol}" not in approved list`));
   }
 
-  // 9. Liquidity score must meet the profile floor
-  const liquidityFloor = PROFILE_FLOORS[RISK_PROFILE];
+  const liquidityFloor = PROFILE_FLOORS[RISK_PROFILE] ?? 0.55;
   if (targetPool.liquidityScore < liquidityFloor) {
     return withOpps(noOp(
       `Liquidity score ${targetPool.liquidityScore.toFixed(3)} below ${RISK_PROFILE} floor ${liquidityFloor}`,
@@ -226,28 +308,28 @@ export async function runCycle(): Promise<ReallocationDecision> {
     ));
   }
 
-  // 10. APY improvement must meet the profile minimum threshold
-  const improvementThreshold = PROFILE_THRESHOLDS[RISK_PROFILE];
-  if (claudeDecision.apyImprovementBps < improvementThreshold) {
+  // C4: Use memory-tracked APY as the authoritative baseline, not Claude's self-reported improvement.
+  const actualImprovementBps = targetPool.apyBps - memoryTrackedCurrentApyBps;
+  const improvementThreshold = PROFILE_THRESHOLDS[RISK_PROFILE] ?? 75;
+  if (actualImprovementBps < improvementThreshold) {
     return withOpps(noOp(
-      `APY improvement ${claudeDecision.apyImprovementBps}bps below ${RISK_PROFILE} threshold ${improvementThreshold}bps`,
+      `APY improvement ${actualImprovementBps}bps (target ${targetPool.apyBps}bps vs tracked ${memoryTrackedCurrentApyBps}bps) below ${RISK_PROFILE} threshold ${improvementThreshold}bps`,
       targetPool
     ));
   }
 
-  // 11. Vault must actually hold a balance of the required token
   const vaultBalance = vaultBalances.get(targetPool.tokenIn.toLowerCase() as Address) ?? 0n;
   if (vaultBalance === 0n) {
     return withOpps(noOp('Vault has no balance in the required token', targetPool));
   }
 
-  // 12. All gates passed — return decision for execution
-  const currentApyBps = targetPool.apyBps - claudeDecision.apyImprovementBps;
+  // Clear this vault's hold cache — reallocation warranted; re-analyse next cycle.
+  holdCache.delete(vaultAddress);
 
   return withOpps({
     shouldReallocate: true,
     opportunity:      targetPool,
-    currentApyBps,
+    currentApyBps:    memoryTrackedCurrentApyBps,
     vaultTokenIn:     targetPool.tokenIn,
     amount:           vaultBalance,
     reason:           claudeDecision.reason,

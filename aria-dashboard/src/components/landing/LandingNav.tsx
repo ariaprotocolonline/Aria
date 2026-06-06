@@ -1,6 +1,6 @@
 import { Moon, Sun } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import WalletButton from '../WalletButton';
+import { ConnectButton } from '@rainbow-me/rainbowkit';
 
 interface LandingNavProps {
   isDarkMode: boolean;
@@ -39,7 +39,7 @@ const LandingNav: React.FC<LandingNavProps> = ({ isDarkMode, toggleDarkMode }) =
         {/* Right — connect wallet */}
         <div className="ml-auto flex items-center overflow-hidden">
           <div className="shrink-0">
-            <WalletButton />
+            <ConnectButton />
           </div>
         </div>
       </div>

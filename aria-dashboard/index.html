@@ -5,15 +5,15 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ARIA — Autonomous RWA Intelligence</title>
-    <!-- Google Fonts -->
+    <!-- Google Fonts: design system fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
       #aria-splash {
         position: fixed;
         inset: 0;
-        background: #0F1110;
+        background: #07080a;
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -23,25 +23,26 @@
       }
       #aria-splash.fade-out { opacity: 0; pointer-events: none; }
       #aria-splash-logo {
-        font-family: Georgia, 'Times New Roman', serif;
-        font-size: 3.5rem;
-        font-weight: 700;
-        color: #85B285;
-        letter-spacing: 0.15em;
+        font-family: 'Geist', system-ui, sans-serif;
+        font-size: 2rem;
+        font-weight: 400;
+        color: #75e5b0;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
         margin-bottom: 1.5rem;
       }
       #aria-splash-bar {
         width: 48px;
         height: 2px;
-        background: #85B285;
+        background: #75e5b0;
         border-radius: 2px;
         animation: aria-pulse 1.4s ease-in-out infinite;
       }
       #aria-splash-label {
         margin-top: 1.25rem;
-        color: #A3A8A4;
-        font-family: Arial, sans-serif;
-        font-size: 0.65rem;
+        color: #7a7d83;
+        font-family: 'Geist Mono', monospace;
+        font-size: 0.6rem;
         letter-spacing: 0.2em;
         text-transform: uppercase;
       }
@@ -51,7 +52,7 @@
       }
     </style>
   </head>
-  <body class="bg-bg text-text-primary font-sans antialiased">
+  <body>
     <!-- Splash shown instantly before React boots -->
     <div id="aria-splash">
       <div id="aria-splash-logo">ARIA</div>

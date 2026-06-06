@@ -1,97 +1,39 @@
-import { useState, useEffect, useCallback, lazy, Suspense } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { useAccount } from 'wagmi';
-import { type Address } from 'viem';
-import TopNav from './components/TopNav';
-import PortfolioRow from './components/PortfolioRow';
-import MiddleRow from './components/MiddleRow';
-import ChatPanel from './components/ChatPanel';
-import BottomStats from './components/BottomStats';
 import LandingPage from './pages/LandingPage';
-import AgentBot from './components/agent/AgentBot';
-
-const DocsPage  = lazy(() => import('./pages/DocsPage'));
-const AgentChat = lazy(() => import('./components/agent/AgentChat'));
-import OnboardingTour from './components/onboarding/OnboardingTour';
+import Dashboard from './pages/Dashboard';
+import OnboardingPage from './pages/OnboardingPage';
+import ResetPage from './pages/ResetPage';
+import VaultGuard from './components/VaultGuard';
 import ErrorBoundary from './components/ErrorBoundary';
 import NetworkGuard from './components/NetworkGuard';
-import VaultGuard from './components/VaultGuard';
-import { RiskProfile, type FeedItem, type MarketPool } from './services/claude';
-import { useVaultPaused } from './hooks/useARIAVault';
+import OnboardingTour from './components/onboarding/OnboardingTour';
 
-function Dashboard({
-  riskProfile,
-  setRiskProfile,
-  isDarkMode,
-  toggleDarkMode,
-  vaultAddress,
-}: {
-  riskProfile: RiskProfile;
-  setRiskProfile: (rp: RiskProfile) => void;
-  isDarkMode: boolean;
-  toggleDarkMode: () => void;
-  vaultAddress: Address;
-}) {
-  const isPaused = useVaultPaused(vaultAddress).data as boolean | undefined;
-  const [liveFeed, setLiveFeed] = useState<FeedItem[]>([]);
-  const [blendedApy, setBlendedApy] = useState<number | null>(null);
-
-  const handleFeedUpdate = useCallback((items: FeedItem[]) => {
-    setLiveFeed(items);
-  }, []);
-
-  const handlePoolsUpdate = useCallback((pools: MarketPool[]) => {
-    const apys = pools.map(p => parseFloat(p.apy.replace('%', ''))).filter(a => !isNaN(a));
-    setBlendedApy(apys.length > 0 ? apys.reduce((a, b) => a + b, 0) / apys.length : null);
-  }, []);
-
-  // Reset APY when risk profile changes so stale value doesn't persist
-  useEffect(() => { setBlendedApy(null); }, [riskProfile]);
-
-  return (
-    <div className="min-h-screen bg-bg text-text-primary transition-colors duration-300">
-      <TopNav isDarkMode={isDarkMode} toggleDarkMode={toggleDarkMode} />
-      <div className="px-6 md:px-12 lg:px-24">
-        <div className="max-w-7xl mx-auto flex flex-col">
-          {isPaused && (
-            <div className="mt-4 px-4 py-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-300 dark:border-yellow-700 rounded-sm text-sm text-yellow-800 dark:text-yellow-300 font-medium">
-              Agent execution is paused. Your funds are safe. You can still withdraw.
-            </div>
-          )}
-          <main className="flex-1 flex flex-col">
-            <PortfolioRow riskProfile={riskProfile} setRiskProfile={setRiskProfile} blendedApy={blendedApy} />
-            <MiddleRow riskProfile={riskProfile} onFeedUpdate={handleFeedUpdate} onPoolsUpdate={handlePoolsUpdate} />
-            <ChatPanel riskProfile={riskProfile} />
-          </main>
-          <BottomStats liveFeed={liveFeed} />
-        </div>
-      </div>
-      <AgentBot />
-    </div>
-  );
-}
+const DocsPage = lazy(() => import('./pages/DocsPage'));
 
 function App() {
-  const { isConnected } = useAccount();
-  const [riskProfile, setRiskProfile] = useState<RiskProfile>(
-    () => (localStorage.getItem('aria-risk-profile') as RiskProfile) || 'Balanced'
-  );
+  const { address, isConnected } = useAccount();
 
-  const handleSetRiskProfile = (rp: RiskProfile) => {
-    setRiskProfile(rp);
-    localStorage.setItem('aria-risk-profile', rp);
-  };
-  const [isDarkMode, setIsDarkMode] = useState(true);
+  const [isDarkMode, setIsDarkMode] = useState(
+    () => localStorage.getItem('aria-theme') !== 'light'
+  );
+  // Per-wallet onboarding: true only if THIS wallet completed onboarding
+  const [onboardingDone, setOnboardingDone] = useState(false);
 
   useEffect(() => {
-    if (isDarkMode) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  }, [isDarkMode]);
+    if (!address) { setOnboardingDone(false); return; }
+    const done = !!localStorage.getItem('aria-onboarding-done');
+    const savedWallet = localStorage.getItem('aria-onboarding-wallet');
+    setOnboardingDone(done && !!savedWallet && savedWallet === address.toLowerCase());
+  }, [address]);
 
-  const toggleDarkMode = () => setIsDarkMode(!isDarkMode);
+  const toggleDarkMode = () => setIsDarkMode(d => !d);
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = isDarkMode ? 'dark' : 'light';
+    localStorage.setItem('aria-theme', isDarkMode ? 'dark' : 'light');
+  }, [isDarkMode]);
 
   return (
     <ErrorBoundary>
@@ -102,21 +44,19 @@ function App() {
             <Route
               path="/"
               element={
-                !isConnected ? (
-                  <LandingPage isDarkMode={isDarkMode} toggleDarkMode={toggleDarkMode} />
-                ) : (
+                onboardingDone && isConnected ? (
                   <VaultGuard>
-                    {(vaultAddress) => (
-                      <Dashboard
-                        riskProfile={riskProfile}
-                        setRiskProfile={handleSetRiskProfile}
-                        isDarkMode={isDarkMode}
-                        toggleDarkMode={toggleDarkMode}
-                        vaultAddress={vaultAddress}
-                      />
-                    )}
+                    {(vaultAddress) => <Dashboard vaultAddress={vaultAddress} />}
                   </VaultGuard>
+                ) : (
+                  <LandingPage isDarkMode={isDarkMode} toggleDarkMode={toggleDarkMode} />
                 )
+              }
+            />
+            <Route
+              path="/onboarding"
+              element={
+                <OnboardingPage onComplete={() => setOnboardingDone(true)} isDarkMode={isDarkMode} toggleDarkMode={toggleDarkMode} />
               }
             />
             <Route
@@ -127,18 +67,7 @@ function App() {
                 </Suspense>
               }
             />
-            <Route
-              path="/agent"
-              element={
-                !isConnected ? (
-                  <Navigate to="/" replace />
-                ) : (
-                  <Suspense fallback={null}>
-                    <AgentChat />
-                  </Suspense>
-                )
-              }
-            />
+            <Route path="/reset" element={<ResetPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </NetworkGuard>

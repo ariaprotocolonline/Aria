@@ -1,5 +1,5 @@
 import { env } from '../config/env';
-import { type MarketPool } from './claude';
+import { type ClaudeFeedPool } from './claude';
 
 export interface AgentPoolRaw {
   protocol: string;
@@ -30,7 +30,7 @@ function liquidityLabel(score: number): string {
   return 'Low';
 }
 
-export async function fetchAgentPools(): Promise<MarketPool[] | null> {
+export async function fetchAgentPools(): Promise<ClaudeFeedPool[] | null> {
   if (!env.FEED_URL) return null;
   try {
     const res = await fetch(`${env.FEED_URL}/pools`, {

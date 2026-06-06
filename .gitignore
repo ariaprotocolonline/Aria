@@ -23,5 +23,15 @@ typechain-types/
 # ── Test coverage ─────────────────────────────────────────────────────────────
 coverage/
 
+# ── AI assistant context ──────────────────────────────────────────────────────
+CLAUDE.md
+
 # ── OS artifacts ──────────────────────────────────────────────────────────────
 .DS_Store
+
+# ── Telegram user data ────────────────────────────────────────────────────────
+aria-server/data/telegram-users.json
+aria-server/data/telegram-pending.json
+aria-tgbot/data/
+aria-tgbot/dist/
+aria-tgbot/node_modules/

@@ -15,6 +15,14 @@ async function main() {
   const feeRecipient = process.env.FEE_RECIPIENT_ADDRESS;
   if (!feeRecipient) throw new Error("FEE_RECIPIENT_ADDRESS is not set in .env");
 
+  const ZERO = "0x0000000000000000000000000000000000000000";
+  if (feeRecipient !== ZERO && feeRecipient.toLowerCase() === agentAddress.toLowerCase()) {
+    throw new Error(
+      "FEE_RECIPIENT_ADDRESS must not equal AGENT_ADDRESS.\n" +
+      "Use a separate cold-storage treasury wallet for fee collection."
+    );
+  }
+
   console.log("─────────────────────────────────────────");
   console.log("Deploying ARIAVault");
   console.log("─────────────────────────────────────────");

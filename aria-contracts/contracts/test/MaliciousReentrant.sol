@@ -9,7 +9,7 @@ interface IARIAVault {
     function reallocate(
         address tokenIn, address tokenOut, address protocol,
         uint256 amount, uint256 expectedApyBps, uint256 newApyBps,
-        bytes calldata data
+        uint256 minAmountOut, bytes calldata data
     ) external;
 }
 
@@ -139,7 +139,7 @@ contract MaliciousReentrant {
             // Attempt to re-enter reallocate() while we're already inside it
             try vault.reallocate(
                 address(this), address(this), address(this),
-                1, 0, 100, ""
+                1, 0, 100, 0, ""
             ) {
                 // If this succeeds, ReentrancyGuard failed
             } catch {

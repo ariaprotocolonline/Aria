@@ -1,10 +1,8 @@
-import Anthropic from '@anthropic-ai/sdk';
-import { ANTHROPIC_API_KEY } from './config';
+import { DEEPSEEK_API_KEY, DEEPSEEK_MODEL } from './config';
 import { type ReallocationDecision } from './agent';
 import { type ExecutionResult } from './executor';
 import { sanitizeUserInput, validateAgentResponse } from './security';
-
-const anthropic = new Anthropic({ apiKey: ANTHROPIC_API_KEY });
+import { USDC_ADDRESS } from './yield';
 
 const SYSTEM_PROMPT = `You are ARIA, an autonomous RWA agent. You write activity feed entries.
 
@@ -17,51 +15,61 @@ Rules:
 - Never mention contract addresses, transaction hashes, gas, or any infrastructure detail`;
 
 const FALLBACK_EXPLANATION = 'ARIA completed a reallocation. Details unavailable.';
-const FALLBACK_NO_ACTION   = 'No reallocation was triggered this cycle.';
+
+// USDC uses 6 decimals; WETH and all other supported tokens use 18.
+function formatTokenAmount(amount: bigint, tokenAddress: string): string {
+  const isUsdc = tokenAddress.toLowerCase() === USDC_ADDRESS.toLowerCase();
+  const divisor = isUsdc ? 1e6 : 1e18;
+  return (Number(amount) / divisor).toFixed(isUsdc ? 2 : 4);
+}
 
 export async function generateExplanation(
   decision: ReallocationDecision,
   result: ExecutionResult
 ): Promise<string> {
   const { opportunity, currentApyBps, amount } = decision;
-  const amountFormatted = (Number(amount) / 1e18).toFixed(4);
+  const amountFormatted = formatTokenAmount(amount, opportunity?.tokenIn ?? '');
 
   // Sanitize all agent-generated fields before sending to Claude
   const sanitizedReason   = sanitizeUserInput(decision.reason);
   const sanitizedProtocol = sanitizeUserInput(opportunity?.protocol ?? 'unknown');
 
-  try {
-    const message = await anthropic.messages.create({
-      model: process.env.ANTHROPIC_MODEL ?? 'claude-sonnet-4-6',
-      max_tokens: 150,
-      system: [
-        {
-          type: 'text',
-          text: SYSTEM_PROMPT,
-          cache_control: { type: 'ephemeral' },
-        },
-      ],
-      messages: [
-        {
-          role: 'user',
-          content: [
-            {
-              type: 'text',
-              text: `Explain this reallocation:
-Protocol: ${sanitizedProtocol}
-Amount: ${amountFormatted} tokens
-Previous APY: ${(currentApyBps / 100).toFixed(2)}%
-New APY: ${((opportunity?.apyBps ?? 0) / 100).toFixed(2)}%
-Tx hash: ${result.txHash}
-Reason: ${sanitizedReason}`,
-            },
-          ],
-        },
-      ],
-    });
+  const userPrompt =
+    `Explain this reallocation:\n` +
+    `Protocol: ${sanitizedProtocol}\n` +
+    `Amount: ${amountFormatted} tokens\n` +
+    `Previous APY: ${(currentApyBps / 100).toFixed(2)}%\n` +
+    `New APY: ${((opportunity?.apyBps ?? 0) / 100).toFixed(2)}%\n` +
+    `Reason: ${sanitizedReason}`;
 
-    const block = message.content[0];
-    const text  = block.type === 'text' ? block.text : '';
+  async function callDeepSeekExplainer(): Promise<string> {
+    const res = await fetch('https://api.deepseek.com/chat/completions', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${DEEPSEEK_API_KEY}` },
+      body: JSON.stringify({
+        model:      DEEPSEEK_MODEL,
+        max_tokens: 150,
+        messages: [
+          { role: 'system', content: SYSTEM_PROMPT },
+          { role: 'user',   content: userPrompt },
+        ],
+      }),
+      signal: AbortSignal.timeout(20_000),
+    });
+    if (!res.ok) throw new Error(`DeepSeek ${res.status}`);
+    const data = await res.json() as { choices: { message: { content: string } }[] };
+    return data.choices[0]?.message?.content ?? '';
+  }
+
+  try {
+    let text = '';
+    try {
+      text = await callDeepSeekExplainer();
+    } catch (err) {
+      console.warn(`[explainer] DeepSeek failed — retrying once: ${err instanceof Error ? err.message : err}`);
+      await new Promise(r => setTimeout(r, 2_000));
+      text = await callDeepSeekExplainer();
+    }
 
     const check = validateAgentResponse(text);
     if (!check.safe) {
@@ -69,47 +77,19 @@ Reason: ${sanitizedReason}`,
       return FALLBACK_EXPLANATION;
     }
 
-    return text || FALLBACK_EXPLANATION;
+    void result;
+
+    // Enforce 300-character cap — truncate to nearest sentence boundary.
+    let safe = text || FALLBACK_EXPLANATION;
+    if (safe.length > 300) {
+      const truncated = safe.slice(0, 300);
+      const lastPeriod = truncated.lastIndexOf('.');
+      safe = lastPeriod > 50 ? truncated.slice(0, lastPeriod + 1) : truncated.trimEnd() + '.';
+    }
+    return safe;
   } catch (err) {
     console.error('[explainer] generateExplanation error:', err);
     return FALLBACK_EXPLANATION;
   }
 }
 
-export async function generateNoActionExplanation(decision: ReallocationDecision): Promise<string> {
-  const sanitizedReason = sanitizeUserInput(decision.reason);
-
-  try {
-    const message = await anthropic.messages.create({
-      model: process.env.ANTHROPIC_MODEL ?? 'claude-sonnet-4-6',
-      max_tokens: 100,
-      system: [
-        {
-          type: 'text',
-          text: SYSTEM_PROMPT,
-          cache_control: { type: 'ephemeral' },
-        },
-      ],
-      messages: [
-        {
-          role: 'user',
-          content: `No reallocation was made this cycle. Reason: ${sanitizedReason}. Write one sentence about what ARIA is monitoring. Example: "Your position looks healthy — no better opportunities detected right now." Never say "no structured decision was returned" or mention pipeline, cycle, or system errors.`,
-        },
-      ],
-    });
-
-    const block = message.content[0];
-    const text  = block.type === 'text' ? block.text : '';
-
-    const check = validateAgentResponse(text);
-    if (!check.safe) {
-      console.error(`[SECURITY] Blocked no-action explanation: ${check.reason}`);
-      return FALLBACK_NO_ACTION;
-    }
-
-    return text || FALLBACK_NO_ACTION;
-  } catch (err) {
-    console.error('[explainer] generateNoActionExplanation error:', err);
-    return FALLBACK_NO_ACTION;
-  }
-}

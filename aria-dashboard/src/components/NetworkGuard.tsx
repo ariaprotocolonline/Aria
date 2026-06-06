@@ -1,8 +1,10 @@
 import React from 'react';
 import { useAccount, useChainId, useSwitchChain } from 'wagmi';
-import { mantleMainnet, mantleTestnet } from '../wagmi';
+import { mantleMainnet } from '../wagmi';
 
-const SUPPORTED_CHAIN_IDS: number[] = [mantleMainnet.id, mantleTestnet.id];
+// Mainnet only — testnet access is disabled in production to prevent users
+// from interacting with testnet contracts while believing they are on mainnet.
+const SUPPORTED_CHAIN_IDS: number[] = [mantleMainnet.id];
 
 const NetworkGuard: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isConnected } = useAccount();
@@ -21,9 +23,8 @@ const NetworkGuard: React.FC<{ children: React.ReactNode }> = ({ children }) => 
           <div className="w-2 h-2 bg-yellow-400 rounded-full mx-auto mb-6 animate-pulse" />
           <h2 className="font-serif text-2xl text-text-primary mb-3">Wrong Network</h2>
           <p className="text-text-secondary text-sm mb-6 leading-relaxed">
-            ARIA operates on Mantle. Please switch your wallet to{' '}
-            <strong className="text-text-primary">Mantle Mainnet</strong> or{' '}
-            <strong className="text-text-primary">Mantle Sepolia</strong> to continue.
+            ARIA operates on <strong className="text-text-primary">Mantle Mainnet</strong>.
+            Please switch your wallet to continue.
           </p>
           <div className="flex flex-col gap-3">
             <button
@@ -32,13 +33,6 @@ const NetworkGuard: React.FC<{ children: React.ReactNode }> = ({ children }) => 
               className="w-full py-3 bg-accent text-white font-semibold rounded-sm hover:opacity-90 transition-opacity disabled:opacity-50 text-sm"
             >
               {isPending ? 'Switching…' : 'Switch to Mantle Mainnet'}
-            </button>
-            <button
-              onClick={() => switchChain({ chainId: mantleTestnet.id })}
-              disabled={isPending}
-              className="w-full py-3 border border-soft text-text-primary font-medium rounded-sm hover:bg-bg-soft transition-colors disabled:opacity-50 text-sm"
-            >
-              {isPending ? 'Switching…' : 'Switch to Mantle Sepolia (Testnet)'}
             </button>
           </div>
         </div>

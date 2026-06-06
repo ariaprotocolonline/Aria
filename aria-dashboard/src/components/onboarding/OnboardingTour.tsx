@@ -1,37 +1,35 @@
 import React, { useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useAccount } from 'wagmi';
 import { useTour, TourStep } from '../../hooks/useTour';
 import TourCursor from './TourCursor';
 import TourTooltip from './TourTooltip';
 
-// ─── Step definitions ──────────────────────────────────────────────────────
+// ─── Step definitions ───────────────────────────────────────────────────────
 
 const LANDING_STEPS: TourStep[] = [
   {
-    selector: 'body',
     heading: 'Welcome to ARIA',
-    body: "ARIA is your autonomous RWA intelligence agent on Mantle. Let me give you a quick tour.",
+    body: 'ARIA is your autonomous yield intelligence agent on Mantle. It monitors liquidity, captures yield, and rebalances your portfolio — fully automated.',
   },
   {
     selector: '[data-tour="connect-wallet"]',
     heading: 'Connect Your Wallet',
-    body: 'Start here. ARIA supports MetaMask and all major wallets on Mantle network.',
-    action: true,
-  },
-  {
-    selector: '[data-tour="hero-heading"]',
-    heading: 'Billions in Untapped Capital',
-    body: 'ARIA continuously monitors liquidity and yield opportunities across Mantle — even when you\'re offline.',
+    body: 'Click "Connect wallet" to get started. ARIA supports MetaMask, WalletConnect, Coinbase Wallet, and all major wallets on Mantle.',
   },
   {
     selector: '[data-tour="how-it-works"]',
-    heading: 'Three Intelligence Layers',
-    body: 'Liquidity scanning, yield detection, and autonomous execution. ARIA handles all three so you don\'t have to.',
+    heading: 'How It Works',
+    body: 'ARIA scans Agni Finance and FusionX every 5 minutes, scores every pool by APY and liquidity depth, then reallocates when a better opportunity clears its safety gates.',
   },
   {
     selector: '[data-tour="docs-link"]',
-    heading: 'Read the Whitepaper',
-    body: 'Everything about how ARIA works is documented transparently. No black boxes.',
+    heading: 'Read the Docs',
+    body: 'Everything about how ARIA works is documented — no black boxes. Tap Docs to read the full whitepaper before depositing.',
+  },
+  {
+    heading: 'Ready to start?',
+    body: 'Connect your wallet to deploy your personal vault on Mantle. Your funds stay non-custodial — ARIA can only rebalance inside pre-approved protocols.',
   },
 ];
 
@@ -39,176 +37,118 @@ const DASHBOARD_STEPS: TourStep[] = [
   {
     selector: '[data-tour="vault-balance"]',
     heading: 'Your Vault Balance',
-    body: 'Your real-time balance across WETH and USDC. Every reallocation ARIA makes is reflected here instantly.',
-  },
-  {
-    selector: '[data-tour="wallet-button"]',
-    heading: 'Your Connected Wallet',
-    body: 'Your wallet address lives here. Click it anytime to disconnect from ARIA when you\'re done.',
+    body: 'Live WETH and USDC balance across your personal vault on Mantle. Every reallocation ARIA executes is reflected here in real time.',
   },
   {
     selector: '[data-tour="withdraw-btn"]',
     heading: 'Withdraw Anytime',
-    body: 'Your funds are never locked. Hit Withdraw to pull your WETH or USDC back to your wallet at any time.',
+    body: 'Your funds are never locked. Tap Withdraw to pull WETH or USDC back to your wallet — no timelock, no delay, even when ARIA is active.',
   },
   {
     selector: '[data-tour="intelligence-feed"]',
     heading: "ARIA's Live Feed",
-    body: 'Every decision ARIA makes is logged here in plain English — no transaction hashes, just clear explanations.',
+    body: 'Every decision ARIA makes is logged here in plain English — what moved, why it moved, and what the outcome was. Full transparency.',
   },
   {
     selector: '[data-tour="market-pools"]',
     heading: 'Live Market Pools',
-    body: 'Real-time yield opportunities ARIA is scanning across Mantle protocols. This data drives your returns.',
+    body: 'Real-time yield opportunities across Mantle protocols. Quality score, APY, liquidity depth, and trend — this is what drives your returns.',
   },
   {
     selector: '[data-tour="ask-aria"]',
     heading: 'Chat With ARIA',
-    body: 'Ask ARIA anything — portfolio strategy, market conditions, or why it made a specific move.',
+    body: 'Ask ARIA anything — portfolio strategy, market conditions, why it made a specific move. It knows your full position history.',
   },
   {
-    selector: '[data-tour="agent-button"]',
-    heading: 'Full Agent Mode',
-    body: 'Open the full ARIA agent interface for deeper conversations, reminders, and multi-step portfolio commands.',
-    action: true,
+    selector: '[data-tour="telegram-settings"]',
+    heading: 'Connect Telegram',
+    body: 'Get instant push notifications whenever ARIA reallocates your funds. Tap Connect here to link your Telegram account.',
   },
   {
-    selector: 'body',
     heading: "You're All Set",
-    body: 'ARIA is actively watching your positions 24/7. Replay this tour anytime from your profile settings.',
+    body: 'ARIA is watching your positions 24/7. You can replay this tour anytime from the Settings panel.',
   },
 ];
 
-// ─── Shared sub-components ─────────────────────────────────────────────────
+// ─── Highlight styles injected once ─────────────────────────────────────────
 
-interface WelcomeModalProps {
-  onStart: () => void;
-  onSkip: () => void;
-}
+const HIGHLIGHT_STYLES = `
+  .aria-tour-highlight {
+    outline: 2px solid #95A395 !important;
+    outline-offset: 4px !important;
+    border-radius: 8px !important;
+    box-shadow: 0 0 0 4px rgba(149,163,149,0.18) !important;
+    transition: outline 0.2s ease, box-shadow 0.2s ease !important;
+  }
+`;
 
-const WelcomeModal: React.FC<WelcomeModalProps> = ({ onStart, onSkip }) => (
-  <div
-    style={{
-      position: 'fixed',
-      inset: 0,
-      zIndex: 100000,
-      background: 'rgba(0,0,0,0.55)',
-      backdropFilter: 'blur(6px)',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: '16px',
-      animation: 'wFadeIn 0.35s ease-out forwards',
-    }}
-  >
-    <div
-      style={{
-        background: 'var(--bg, #ffffff)',
-        border: '1px solid var(--border, #E5E7E6)',
-        borderRadius: '16px',
-        padding: '40px 36px',
-        maxWidth: '340px',
-        width: '100%',
-        textAlign: 'center',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        boxShadow: '0 24px 60px rgba(0,0,0,0.16)',
-      }}
-    >
-      {/* Logo mark */}
-      <div
-        style={{
-          width: 60,
-          height: 60,
-          borderRadius: '50%',
-          border: '1px solid var(--border, #E5E7E6)',
-          background: 'var(--bg-soft, #F8F8F6)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          marginBottom: 20,
-        }}
-      >
-        <span style={{ fontFamily: 'Georgia, serif', fontSize: 26, fontWeight: 700, color: 'var(--text-primary, #0F1110)' }}>
-          A
-        </span>
+// ─── Welcome modal ───────────────────────────────────────────────────────────
+
+const WelcomeModal: React.FC<{ onStart: () => void; onSkip: () => void }> = ({ onStart, onSkip }) => (
+  <div style={{
+    position: 'fixed', inset: 0, zIndex: 100000,
+    background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(8px)',
+    display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16,
+    animation: 'wFadeIn 0.3s ease-out forwards',
+  }}>
+    <div style={{
+      background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 18,
+      padding: '44px 38px 36px', maxWidth: 360, width: '100%', textAlign: 'center',
+      display: 'flex', flexDirection: 'column', alignItems: 'center',
+      boxShadow: '0 28px 70px rgba(0,0,0,0.22)',
+      animation: 'wSlideUp 0.35s cubic-bezier(0.25,0.46,0.45,0.94) forwards',
+    }}>
+      {/* Logo circle */}
+      <div style={{
+        width: 60, height: 60, borderRadius: '50%',
+        border: '1.5px solid var(--line)', background: 'var(--panel)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 22,
+      }}>
+        <span style={{ fontFamily: 'var(--serif)', fontSize: 28, fontWeight: 700, color: 'var(--accent)' }}>A</span>
       </div>
 
-      <h2 style={{ fontFamily: 'Georgia, serif', fontSize: 22, fontWeight: 700, color: 'var(--text-primary, #0F1110)', margin: '0 0 10px' }}>
+      <h2 style={{ fontFamily: 'var(--serif)', fontSize: 22, fontWeight: 700, color: 'var(--ink)', margin: '0 0 10px' }}>
         Welcome to ARIA
       </h2>
-      <p style={{ fontFamily: 'Arial, sans-serif', fontSize: 13, color: 'var(--text-secondary, #6B6F6C)', lineHeight: 1.65, margin: '0 0 28px' }}>
-        Before you begin, would you like a quick tour of how ARIA's intelligence engine works?
+      <p style={{ fontSize: 13, color: 'var(--ink-2)', lineHeight: 1.7, margin: '0 0 30px', maxWidth: 280 }}>
+        Want a quick guided tour? ARIA will walk you through the key features — takes about 90 seconds.
       </p>
 
       <button
         onClick={onStart}
         style={{
-          width: '100%',
-          padding: '12px',
-          background: '#95A395',
-          color: '#ffffff',
-          border: 'none',
-          borderRadius: '6px',
-          fontSize: '14px',
-          fontWeight: 600,
-          cursor: 'pointer',
-          marginBottom: '10px',
+          width: '100%', padding: '13px', background: 'var(--accent)',
+          color: '#0a1b10', border: 'none', borderRadius: 9,
+          fontSize: 14, fontWeight: 700, cursor: 'pointer', marginBottom: 10,
+          letterSpacing: '0.01em',
         }}
       >
-        Show me around
+        Show me around →
       </button>
       <button
         onClick={onSkip}
-        style={{
-          background: 'none',
-          border: 'none',
-          cursor: 'pointer',
-          fontSize: '13px',
-          color: 'var(--text-secondary, #6B6F6C)',
-          textDecoration: 'underline',
-          textUnderlineOffset: '3px',
-          padding: '8px',
-        }}
+        style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 13, color: 'var(--mute)', padding: 8 }}
       >
         Skip tour
       </button>
     </div>
-
     <style>{`
-      @keyframes wFadeIn {
-        from { opacity: 0; }
-        to   { opacity: 1; }
-      }
+      @keyframes wFadeIn   { from { opacity:0 } to { opacity:1 } }
+      @keyframes wSlideUp  { from { opacity:0; transform:translateY(20px) } to { opacity:1; transform:translateY(0) } }
     `}</style>
   </div>
 );
 
-// ─── Inner tour overlay ────────────────────────────────────────────────────
+// ─── Tour engine ─────────────────────────────────────────────────────────────
 
-interface TourOverlayProps {
-  steps: TourStep[];
-  storageKey: string;
-}
-
-const TourOverlay: React.FC<TourOverlayProps> = ({ steps, storageKey }) => {
+const TourEngine: React.FC<{ steps: TourStep[]; storageKey: string }> = ({ steps, storageKey }) => {
   const {
-    isActive,
-    showWelcome,
-    currentStepIndex,
-    totalSteps,
-    currentStep,
-    targetRect,
-    hasArrived,
-    startTour,
-    skip,
-    next,
-    back,
-    restart,
+    isActive, showWelcome, currentStepIndex, totalSteps, currentStep,
+    cursorPos, hasArrived, tooltipVisible,
+    startTour, skip, next, back, restart,
   } = useTour(steps, storageKey);
 
-  // Listen for the global replay event dispatched by the TopNav button
+  // Allow Settings to fire a replay event
   useEffect(() => {
     const handler = () => restart();
     window.addEventListener('aria-replay-tour', handler);
@@ -216,39 +156,16 @@ const TourOverlay: React.FC<TourOverlayProps> = ({ steps, storageKey }) => {
   }, [restart]);
 
   if (showWelcome) return <WelcomeModal onStart={startTour} onSkip={skip} />;
-  if (!isActive || !targetRect) return null;
-
-  const isBodyStep = currentStep.selector === 'body';
+  if (!isActive)   return null;
 
   return (
     <>
-      {/* Highlight ring around target element */}
-      {!isBodyStep && (
-        <div
-          style={{
-            position: 'fixed',
-            zIndex: 99997,
-            pointerEvents: 'none',
-            borderRadius: '8px',
-            top: targetRect.top - 8,
-            left: targetRect.left - 8,
-            width: targetRect.width + 16,
-            height: targetRect.height + 16,
-            border: '2px solid #95A395',
-            boxShadow: '0 0 0 4px #95A39530',
-            opacity: hasArrived ? 1 : 0,
-            transition: 'top 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94), left 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94), width 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94), height 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.3s ease-out',
-          }}
-        />
-      )}
+      <style>{HIGHLIGHT_STYLES}</style>
 
-      <TourCursor
-        x={targetRect.cx}
-        y={targetRect.cy}
-        hasArrived={hasArrived}
-        actionTriggered={currentStep.action}
-      />
+      {/* Animated cursor */}
+      <TourCursor x={cursorPos.x} y={cursorPos.y} hasArrived={hasArrived} />
 
+      {/* Tooltip — appears near cursor after it lands */}
       <TourTooltip
         heading={currentStep.heading}
         body={currentStep.body}
@@ -258,33 +175,33 @@ const TourOverlay: React.FC<TourOverlayProps> = ({ steps, storageKey }) => {
         onBack={back}
         onFinish={skip}
         onSkip={skip}
-        x={targetRect.cx}
-        y={targetRect.cy}
-        visible={hasArrived}
+        x={cursorPos.x}
+        y={cursorPos.y}
+        visible={tooltipVisible}
       />
     </>
   );
 };
 
-// ─── Public component ──────────────────────────────────────────────────────
+// ─── Public component ────────────────────────────────────────────────────────
 
 const OnboardingTour: React.FC = () => {
-  const { isConnected } = useAccount();
+  const { isConnected, address } = useAccount();
+  const { pathname } = useLocation();
 
-  // When wallet connects, mark the landing tour complete so it doesn't restart
-  // if the user later disconnects, and so the dashboard tour doesn't fire on
-  // top of the wallet connection flow.
-  useEffect(() => {
-    if (isConnected) {
-      localStorage.setItem('aria-landing-tour-complete', 'true');
-    }
-  }, [isConnected]);
+  if (pathname === '/onboarding' || pathname === '/reset') return null;
 
-  return isConnected ? (
-    <TourOverlay steps={DASHBOARD_STEPS} storageKey="aria-tour-complete" />
-  ) : (
-    <TourOverlay steps={LANDING_STEPS} storageKey="aria-landing-tour-complete" />
-  );
+  const savedWallet = localStorage.getItem('aria-onboarding-wallet');
+  const onDashboard =
+    isConnected &&
+    pathname === '/' &&
+    !!localStorage.getItem('aria-onboarding-done') &&
+    !!savedWallet && !!address &&
+    savedWallet === address.toLowerCase();
+
+  return onDashboard
+    ? <TourEngine steps={DASHBOARD_STEPS} storageKey="aria-tour-complete" />
+    : <TourEngine steps={LANDING_STEPS}   storageKey="aria-landing-tour-complete" />;
 };
 
 export default OnboardingTour;
