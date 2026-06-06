@@ -119,7 +119,6 @@ export default function LandingPage({ isDarkMode: _isDarkMode, toggleDarkMode: _
             <a href="/docs" data-tour="docs-link">Docs</a>
           </div>
           <div className="lp-nav-cta">
-            <span className="lp-chain-pill"><span className="lp-d" />Mantle</span>
             <button
               className="lp-btn lp-btn-primary"
               onClick={() => go()}
