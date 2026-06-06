@@ -498,7 +498,7 @@ export default function LandingPage({ isDarkMode: _isDarkMode, toggleDarkMode: _
       {/* ===== ASSETS ===== */}
       <section className="lp-page lp-assets" ref={setRef(4)}>
         <div className="lp-wrap">
-          <div className="lp-sec-head" style={{ padding: '60px 0 0' }}>
+          <div className="lp-sec-head">
             <div className="lp-eyebrow">Supported assets</div>
             <h2 className="lp-sec-h">Twelve assets.<br /><em>One autonomous manager.</em></h2>
           </div>

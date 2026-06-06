@@ -1497,7 +1497,7 @@ body.view-direct .ask { display: none; }
 /* responsive */
 @media (max-width: 960px) {
   .lp .lp-pillars, .lp .lp-prob-grid { grid-template-columns: 1fr; }
-  .lp .lp-asset-grid { grid-template-columns: 1fr; }
+  .lp .lp-asset-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
   .lp .lp-arch, .lp .lp-road-grid { grid-template-columns: 1fr; }
   .lp .lp-layer, .lp .lp-phase { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.07); padding: 28px 24px; }
   .lp .lp-phase:nth-child(n+2) { padding-left: 24px; }
@@ -1891,11 +1891,19 @@ html, body { overflow-x: hidden; -webkit-tap-highlight-color: transparent; }
   .lp-trust-grid { grid-template-columns: 1fr; }
   .lp-tr { padding: 12px 0; }
   .lp-pillar { padding: 20px 18px; }
-  .lp-asset-card { padding: 20px 16px; }
+  .lp-asset-card { padding: 14px 12px; }
+  .lp-asset-head { margin-bottom: 10px; gap: 8px; }
+  .lp-glyph { width: 34px; height: 34px; font-size: 11px; border-radius: 9px; }
+  .lp-asset-name { font-size: 15px; }
+  .lp-asset-name em { font-size: 11px; }
+  .lp-asset-stats { grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 0; }
+  .lp-asset-stat .k { font-size: 9px; margin-bottom: 2px; }
+  .lp-asset-stat .v { font-size: 13px; }
+  .lp-asset-desc { display: none; }
+  .lp-soon { font-size: 9px; padding: 2px 5px; }
   .lp-arch-item { padding: 20px 16px; }
   .lp-integ { padding: 16px; }
   .lp-tab-panel { min-height: auto; padding: 24px 20px; }
-  .lp-asset-stats { grid-template-columns: 1fr; gap: 12px; }
 
   /* ── Landing footer ── */
   .lp-footer { padding: 40px 0 24px; }
