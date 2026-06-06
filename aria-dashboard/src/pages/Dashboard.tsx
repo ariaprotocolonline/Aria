@@ -13,16 +13,16 @@ import { useXStockPortfolio } from '../hooks/useXStockPortfolio';
 
 // TradingView public CDN — used by every major trading terminal for stock logos
 const XSTOCK_LOGOS: Record<string, string> = {
-  TSLAx:  'https://s3-symbol-logo.tradingview.com/tesla.svg',
-  NVDAx:  'https://s3-symbol-logo.tradingview.com/nvidia.svg',
-  AAPLx:  'https://s3-symbol-logo.tradingview.com/apple.svg',
-  METAx:  'https://s3-symbol-logo.tradingview.com/meta-platforms.svg',
-  GOOGLx: 'https://s3-symbol-logo.tradingview.com/alphabet.svg',
-  MSTRx:  'https://s3-symbol-logo.tradingview.com/microstrategy.svg',
-  HOODx:  'https://s3-symbol-logo.tradingview.com/robinhood-markets.svg',
-  SPYx:   'https://s3-symbol-logo.tradingview.com/spdr-sp-500-etf-trust.svg',
-  QQQx:   'https://s3-symbol-logo.tradingview.com/invesco-qqq-trust-series-1.svg',
-  CRCLx:  'https://s3-symbol-logo.tradingview.com/circle-internet-group.svg',
+  TSLAx:  '/assets/logos/tesla.svg',
+  NVDAx:  '/assets/logos/nvidia.svg',
+  AAPLx:  '/assets/logos/apple.svg',
+  METAx:  '/assets/logos/meta.svg',
+  GOOGLx: '/assets/logos/alphabet.svg',
+  MSTRx:  '/assets/logos/microstrategy.svg',
+  HOODx:  '/assets/logos/robinhood.svg',
+  SPYx:   '/assets/logos/spy.svg',
+  QQQx:   '/assets/logos/invesco.svg',
+  CRCLx:  '/assets/logos/circle.svg',
 };
 
 function XStockGlyph({ symbol, size = 28 }: { symbol: string; size?: number }) {
