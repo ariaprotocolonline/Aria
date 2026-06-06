@@ -370,8 +370,9 @@ export default function Dashboard({ vaultAddress }: { vaultAddress?: string }) {
 
   const { eth: ethPrice, mnt: mntPrice } = useTokenPrice();
   const { pools: marketPools, loading: marketsLoading, lastUpdated: marketsUpdated } = useMarketData();
-  const { status: tgStatus, loading: tgLoading, generateLink: tgGenerateLink, disconnect: tgDisconnect } = useTelegram();
+  const { status: tgStatus, loading: tgLoading, error: tgError, generateLink: tgGenerateLink, disconnect: tgDisconnect } = useTelegram();
   const [settingsTgLink, setSettingsTgLink] = useState<string | null>(null);
+  const [settingsTgErr, setSettingsTgErr]   = useState<string | null>(null);
   useEffect(() => { if (tgStatus.connected) setSettingsTgLink(null); }, [tgStatus.connected]);
   const { positions: xStockPositions, heldPositions: xStockHeld, totalValueUsd: xStockTotalUsd } = useXStockPortfolio();
 
@@ -2056,14 +2057,22 @@ export default function Dashboard({ vaultAddress }: { vaultAddress?: string }) {
                 <div className="lbl">
                   Connect Telegram
                   <div className="desc">Get real-time alerts when ARIA reallocates your funds, plus a daily summary. Chat with ARIA directly from @AriaRWAbot.</div>
+                  {settingsTgErr && (
+                    <div style={{ marginTop:6, fontSize:11, color:'var(--red)' }}>{settingsTgErr}</div>
+                  )}
                 </div>
                 <button
                   className="btn primary"
                   style={{ padding:'7px 16px', fontSize:12, display:'flex', alignItems:'center', gap:7 }}
                   disabled={tgLoading}
                   onClick={async () => {
+                    setSettingsTgErr(null);
                     const link = await tgGenerateLink();
-                    if (link) setSettingsTgLink(link);
+                    if (link) {
+                      setSettingsTgLink(link);
+                    } else {
+                      setSettingsTgErr(tgError ?? 'Could not reach bot server. Make sure your wallet is connected.');
+                    }
                   }}
                 >
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
