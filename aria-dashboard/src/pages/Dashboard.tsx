@@ -1999,37 +1999,64 @@ export default function Dashboard({ vaultAddress }: { vaultAddress?: string }) {
               <h3>Telegram notifications</h3>
               <span className="sub">{tgStatus.connected ? <span style={{ color:'var(--accent)' }}>● Connected</span> : 'Not connected'}</span>
             </div>
-            <div className="pref-row">
-              <div className="lbl">
-                Connect Telegram
-                <div className="desc">Get real-time alerts when ARIA reallocates your funds, plus a daily summary. Chat with ARIA directly from @AriaRWAbot.</div>
-              </div>
-              {tgStatus.connected ? (
-                <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+            {tgStatus.connected ? (
+              <div className="pref-row">
+                <div className="lbl">
+                  Connected
                   {tgStatus.username && (
-                    <span style={{ fontFamily:'var(--mono)', fontSize:11, color:'var(--mute)' }}>@{tgStatus.username}</span>
+                    <div className="desc">Linked to <span style={{ fontFamily:'var(--mono)' }}>@{tgStatus.username}</span></div>
                   )}
+                </div>
+                <button
+                  className="btn"
+                  style={{ padding:'7px 14px', fontSize:12 }}
+                  disabled={tgLoading}
+                  onClick={tgDisconnect}
+                >
+                  Disconnect
+                </button>
+              </div>
+            ) : settingsTgLink ? (
+              <div style={{ padding:'4px 0 8px' }}>
+                <div className="desc" style={{ marginBottom:12 }}>
+                  Tap the link below to open @AriaRWAbot and complete linking. Or copy it and open manually in Telegram.
+                </div>
+                <div style={{ display:'flex', gap:8, alignItems:'center', flexWrap:'wrap' }}>
+                  <a
+                    href={settingsTgLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn primary"
+                    style={{ padding:'8px 16px', fontSize:12, display:'inline-flex', alignItems:'center', gap:7, textDecoration:'none' }}
+                  >
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                    Open @AriaRWAbot
+                  </a>
                   <button
                     className="btn"
-                    style={{ padding:'7px 14px', fontSize:12 }}
-                    disabled={tgLoading}
-                    onClick={tgDisconnect}
+                    style={{ padding:'8px 14px', fontSize:12 }}
+                    onClick={() => { navigator.clipboard.writeText(settingsTgLink).catch(() => {}); }}
                   >
-                    Disconnect
+                    Copy link
+                  </button>
+                  <button
+                    className="btn"
+                    style={{ padding:'8px 14px', fontSize:12, color:'var(--mute)' }}
+                    onClick={() => setSettingsTgLink(null)}
+                  >
+                    Reset
                   </button>
                 </div>
-              ) : settingsTgLink ? (
-                <a
-                  href={settingsTgLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="btn primary"
-                  style={{ padding:'7px 16px', fontSize:12, display:'inline-flex', alignItems:'center', gap:7, textDecoration:'none' }}
-                >
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-                  Open @AriaRWAbot
-                </a>
-              ) : (
+                <div style={{ marginTop:10, fontFamily:'var(--mono)', fontSize:10, color:'var(--mute)', wordBreak:'break-all' }}>
+                  {settingsTgLink}
+                </div>
+              </div>
+            ) : (
+              <div className="pref-row">
+                <div className="lbl">
+                  Connect Telegram
+                  <div className="desc">Get real-time alerts when ARIA reallocates your funds, plus a daily summary. Chat with ARIA directly from @AriaRWAbot.</div>
+                </div>
                 <button
                   className="btn primary"
                   style={{ padding:'7px 16px', fontSize:12, display:'flex', alignItems:'center', gap:7 }}
@@ -2042,8 +2069,8 @@ export default function Dashboard({ vaultAddress }: { vaultAddress?: string }) {
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
                   {tgLoading ? 'Generating…' : 'Connect Telegram'}
                 </button>
-              )}
-            </div>
+              </div>
+            )}
           </section>
 
           {/* Danger zone */}
