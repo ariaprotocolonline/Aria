@@ -1779,7 +1779,14 @@ html, body { overflow-x: hidden; -webkit-tap-highlight-color: transparent; }
   .lp-dm-strat { display: none; }
   .lp-demo-tabs .lp-demo-tab:not(.active) { display: none; }
   .lp-dm-kpis { grid-template-columns: repeat(3, 1fr); }
-  .lp-stage-section { padding: 80px 0 60px; }
+  .lp-stage-section { padding: 64px 0 48px; }
+  .lp-sec-head     { padding: 44px 0 28px; }
+  .lp-problem      { padding: 44px 0 56px; }
+  .lp-assets       { padding: 44px 0 56px; }
+  .lp-tabs-section { padding: 44px 0 60px; }
+  .lp-how          { padding: 44px 0 56px; }
+  .lp-grid-bg      { padding: 56px 0 64px; }
+  .lp-roadmap      { padding: 56px 0 64px; }
   .lp-app-icon-btn { display: none; }
 
   /* Dashboard popover overflow */
@@ -1826,6 +1833,17 @@ html, body { overflow-x: hidden; -webkit-tap-highlight-color: transparent; }
    640px — Phone landscape / Small tablet
    ================================================================ */
 @media (max-width: 640px) {
+  /* ── Landing section paddings (desktop uses 60–120px, phone uses 32–40px) ── */
+  .lp-sec-head    { padding: 32px 0 20px; }
+  .lp-strip       { padding: 28px 0 12px; }
+  .lp-problem     { padding: 32px 0 36px; }
+  .lp-assets      { padding: 32px 0 36px; }
+  .lp-tabs-section{ padding: 32px 0 40px; }
+  .lp-how         { padding: 32px 0 36px; }
+  .lp-grid-bg     { padding: 36px 0 40px; }
+  .lp-roadmap     { padding: 36px 0 40px; }
+  .lp-footer      { padding: 36px 0 20px; }
+
   /* ── Landing nav ── */
   .lp-nav { height: 56px; }
   .lp-nav-inner { height: 56px; }
