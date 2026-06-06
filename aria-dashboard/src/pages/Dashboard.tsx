@@ -2067,11 +2067,15 @@ export default function Dashboard({ vaultAddress }: { vaultAddress?: string }) {
                   disabled={tgLoading}
                   onClick={async () => {
                     setSettingsTgErr(null);
+                    if (!address) {
+                      setSettingsTgErr('Wallet not connected. Please reconnect your wallet and try again.');
+                      return;
+                    }
                     const link = await tgGenerateLink();
                     if (link) {
                       setSettingsTgLink(link);
                     } else {
-                      setSettingsTgErr(tgError ?? 'Could not reach bot server. Make sure your wallet is connected.');
+                      setSettingsTgErr('Could not reach the bot server. Check that aria-tgbot is running (pm2 status).');
                     }
                   }}
                 >
