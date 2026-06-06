@@ -389,7 +389,7 @@ export default function LandingPage({ isDarkMode: _isDarkMode, toggleDarkMode: _
       {/* ===== PROBLEM ===== */}
       <section className="lp-page lp-problem" ref={setRef(2)}>
         <div className="lp-wrap">
-          <div className="lp-sec-head" style={{ paddingTop: 80, paddingBottom: 30 }}>
+          <div className="lp-sec-head">
             <div className="lp-eyebrow">The structural gap</div>
             <h2 className="lp-sec-h">RWA capital exists.<br />It just <em>doesn't work.</em></h2>
             <p className="lp-sec-sub">Tokenized treasuries and liquid staking gave us the assets. The infrastructure to actively manage them never caught up. Four problems define the gap.</p>
@@ -412,7 +412,7 @@ export default function LandingPage({ isDarkMode: _isDarkMode, toggleDarkMode: _
       </section>
 
       {/* ===== INTELLIGENCE LAYERS ===== */}
-      <section className="lp-page" ref={setRef(3)} style={{ padding: '60px 0' }}>
+      <section className="lp-page lp-intelligence" ref={setRef(3)}>
         <div className="lp-wrap">
           <div className="lp-sec-head">
             <div className="lp-eyebrow">The ARIA protocol</div>
@@ -679,7 +679,7 @@ export default function LandingPage({ isDarkMode: _isDarkMode, toggleDarkMode: _
       {/* ===== RISK PROFILES ===== */}
       <section className="lp-page lp-tabs-section" ref={setRef(5)}>
         <div className="lp-wrap">
-          <div className="lp-sec-head" style={{ paddingTop: 60 }}>
+          <div className="lp-sec-head">
             <div className="lp-eyebrow">Three risk profiles</div>
             <h2 className="lp-sec-h">Set your appetite once.<br />ARIA stays <em>inside the lines.</em></h2>
             <p className="lp-sec-sub">Each profile governs reallocation thresholds, approved protocols, and concentration limits. Update them anytime, pause or withdraw with no timelock.</p>

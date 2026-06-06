@@ -1281,6 +1281,9 @@ body.view-direct .ask { display: none; }
 .lp-sec-h em { font-family: var(--serif); font-style: italic; font-weight: 400; }
 .lp-sec-sub { max-width: 640px; margin: 0 auto; color: var(--ink-2); font-size: 17px; line-height: 1.55; }
 
+/* intelligence (no specific padding — inherits lp-page) */
+.lp-intelligence { padding: 60px 0; }
+
 /* problem */
 .lp-problem { padding: 60px 0 80px; }
 .lp-prob-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
@@ -1780,14 +1783,15 @@ html, body { overflow-x: hidden; -webkit-tap-highlight-color: transparent; }
   .lp-demo-tabs .lp-demo-tab:not(.active) { display: none; }
   .lp-dm-kpis { grid-template-columns: repeat(3, 1fr); }
   .lp-stage-section { padding: 64px 0 48px; }
-  .lp-sec-head     { padding: 44px 0 28px; }
-  .lp-problem      { padding: 44px 0 56px; }
-  .lp-assets       { padding: 44px 0 56px; }
-  .lp-tabs-section { padding: 44px 0 60px; }
-  .lp-how          { padding: 44px 0 56px; }
-  .lp-grid-bg      { padding: 56px 0 64px; }
-  .lp-roadmap      { padding: 56px 0 64px; }
-  .lp-app-icon-btn { display: none; }
+  .lp-sec-head      { padding: 44px 0 28px; }
+  .lp-problem       { padding: 44px 0 56px; }
+  .lp-intelligence  { padding: 44px 0; }
+  .lp-assets        { padding: 44px 0 56px; }
+  .lp-tabs-section  { padding: 44px 0 60px; }
+  .lp-how           { padding: 44px 0 56px; }
+  .lp-grid-bg       { padding: 56px 0 64px; }
+  .lp-roadmap       { padding: 56px 0 64px; }
+  .lp-app-icon-btn  { display: none; }
 
   /* Dashboard popover overflow */
   .notif-pop { right: -8px; }
@@ -1834,15 +1838,16 @@ html, body { overflow-x: hidden; -webkit-tap-highlight-color: transparent; }
    ================================================================ */
 @media (max-width: 640px) {
   /* ── Landing section paddings (desktop uses 60–120px, phone uses 32–40px) ── */
-  .lp-sec-head    { padding: 32px 0 20px; }
-  .lp-strip       { padding: 28px 0 12px; }
-  .lp-problem     { padding: 32px 0 36px; }
-  .lp-assets      { padding: 32px 0 36px; }
-  .lp-tabs-section{ padding: 32px 0 40px; }
-  .lp-how         { padding: 32px 0 36px; }
-  .lp-grid-bg     { padding: 36px 0 40px; }
-  .lp-roadmap     { padding: 36px 0 40px; }
-  .lp-footer      { padding: 36px 0 20px; }
+  .lp-sec-head    { padding: 28px 0 16px; }
+  .lp-strip       { padding: 24px 0 10px; }
+  .lp-problem     { padding: 28px 0 32px; }
+  .lp-intelligence{ padding: 28px 0; }
+  .lp-assets      { padding: 28px 0 32px; }
+  .lp-tabs-section{ padding: 28px 0 36px; }
+  .lp-how         { padding: 28px 0 32px; }
+  .lp-grid-bg     { padding: 32px 0 36px; }
+  .lp-roadmap     { padding: 32px 0 36px; }
+  .lp-footer      { padding: 32px 0 18px; }
 
   /* ── Landing nav ── */
   .lp-nav { height: 56px; }
