@@ -1500,7 +1500,7 @@ body.view-direct .ask { display: none; }
 /* responsive */
 @media (max-width: 960px) {
   .lp .lp-pillars, .lp .lp-prob-grid { grid-template-columns: 1fr; }
-  .lp .lp-asset-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
+  .lp .lp-asset-grid { grid-template-columns: 1fr; gap: 10px; }
   .lp .lp-arch, .lp .lp-road-grid { grid-template-columns: 1fr; }
   .lp .lp-layer, .lp .lp-phase { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.07); padding: 28px 24px; }
   .lp .lp-phase:nth-child(n+2) { padding-left: 24px; }
@@ -1896,16 +1896,20 @@ html, body { overflow-x: hidden; -webkit-tap-highlight-color: transparent; }
   .lp-trust-grid { grid-template-columns: 1fr; }
   .lp-tr { padding: 12px 0; }
   .lp-pillar { padding: 20px 18px; }
-  .lp-asset-card { padding: 14px 12px; }
-  .lp-asset-head { margin-bottom: 10px; gap: 8px; }
-  .lp-glyph { width: 34px; height: 34px; font-size: 11px; border-radius: 9px; }
-  .lp-asset-name { font-size: 15px; }
-  .lp-asset-name em { font-size: 11px; }
-  .lp-asset-stats { grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 0; }
-  .lp-asset-stat .k { font-size: 9px; margin-bottom: 2px; }
+  /* ── Asset grid: 1 card per row ── */
+  .lp-asset-grid { grid-template-columns: 1fr; gap: 10px; margin-top: 20px; }
+  .lp-asset-card  { padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; }
+  /* Row 1 inside card: logo + name + soon badge */
+  .lp-asset-head  { display: flex; flex-direction: row; align-items: center; gap: 12px; margin-bottom: 0; }
+  .lp-glyph       { width: 38px; height: 38px; font-size: 13px; border-radius: 10px; flex-shrink: 0; }
+  .lp-asset-name  { font-size: 15px; font-weight: 600; flex: 1; }
+  .lp-asset-name em { font-size: 11px; display: block; margin-top: 1px; }
+  .lp-soon        { flex-shrink: 0; font-size: 9.5px; padding: 3px 7px; }
+  /* Row 2 inside card: 3 stats side by side */
+  .lp-asset-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; margin-bottom: 0; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 10px; }
+  .lp-asset-stat .k { font-size: 9px; margin-bottom: 3px; }
   .lp-asset-stat .v { font-size: 13px; }
-  .lp-asset-desc { display: none; }
-  .lp-soon { font-size: 9px; padding: 2px 5px; }
+  .lp-asset-desc  { display: none; }
   .lp-arch-item { padding: 20px 16px; }
   .lp-integ { padding: 16px; }
   .lp-tab-panel { min-height: auto; padding: 24px 20px; }
