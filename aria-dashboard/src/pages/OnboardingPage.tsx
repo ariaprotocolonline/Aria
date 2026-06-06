@@ -192,7 +192,7 @@ export default function OnboardingPage({ onComplete }: { onComplete: () => void;
             <section className="ob-step ob-fadeIn">
               <div className="ob-eyebrow">Step 2, Identity</div>
               <h1>What should ARIA <em>call you?</em></h1>
-              <p className="ob-lead">Choose a name ARIA will use in its greetings, activity log, and conversations. You can change it anytime in settings — it never leaves your vault.</p>
+              <p className="ob-lead">Choose a name ARIA will use in its greetings, activity log, and conversations. You can change it anytime in settings. It never leaves your vault.</p>
 
               <div className="ob-label">Your name</div>
               <div className="ob-name-field">
@@ -276,7 +276,7 @@ export default function OnboardingPage({ onComplete }: { onComplete: () => void;
             <section className="ob-step ob-fadeIn">
               <div className="ob-eyebrow">Step 4, Notifications</div>
               <h1>Use ARIA directly in <em>Telegram</em></h1>
-              <p className="ob-lead">Get real-time alerts when ARIA moves your funds, receive daily portfolio summaries, and chat with ARIA directly from your phone — without opening the dashboard.</p>
+              <p className="ob-lead">Get real-time alerts when ARIA moves your funds, receive daily portfolio summaries, and chat with ARIA directly from your phone, without opening the dashboard.</p>
 
               <div style={{ display:'flex', flexDirection:'column', gap:14, margin:'28px 0' }}>
                 <div style={{ display:'flex', alignItems:'flex-start', gap:16, padding:'18px 20px', border:'1px solid var(--line)', borderRadius:12, background:'rgba(255,255,255,0.02)' }}>
@@ -288,7 +288,7 @@ export default function OnboardingPage({ onComplete }: { onComplete: () => void;
                   </span>
                   <div>
                     <div style={{ fontWeight:600, fontSize:14, marginBottom:4 }}>Instant trade alerts</div>
-                    <div style={{ fontSize:13, color:'var(--mute)', lineHeight:1.5 }}>Know the moment ARIA reallocates — with the reason, amounts, and transaction hash.</div>
+                    <div style={{ fontSize:13, color:'var(--mute)', lineHeight:1.5 }}>Know the moment ARIA reallocates, with the reason, amounts, and transaction hash.</div>
                   </div>
                 </div>
                 <div style={{ display:'flex', alignItems:'flex-start', gap:16, padding:'18px 20px', border:'1px solid var(--line)', borderRadius:12, background:'rgba(255,255,255,0.02)' }}>
@@ -299,7 +299,7 @@ export default function OnboardingPage({ onComplete }: { onComplete: () => void;
                   </span>
                   <div>
                     <div style={{ fontWeight:600, fontSize:14, marginBottom:4 }}>Chat with ARIA anywhere</div>
-                    <div style={{ fontSize:13, color:'var(--mute)', lineHeight:1.5 }}>Ask about your positions, request explanations, or check your portfolio — directly in Telegram via @AriaRWAbot.</div>
+                    <div style={{ fontSize:13, color:'var(--mute)', lineHeight:1.5 }}>Ask about your positions, request explanations, or check your portfolio directly in Telegram via @AriaRWAbot.</div>
                   </div>
                 </div>
                 <div style={{ display:'flex', alignItems:'flex-start', gap:16, padding:'18px 20px', border:'1px solid var(--line)', borderRadius:12, background:'rgba(255,255,255,0.02)' }}>
@@ -331,7 +331,7 @@ export default function OnboardingPage({ onComplete }: { onComplete: () => void;
             <section className="ob-step ob-fadeIn">
               <div className="ob-eyebrow">Step 5, Connect bot</div>
               <h1>Open <em>@AriaRWAbot</em></h1>
-              <p className="ob-lead">Tap the button below to open Telegram. The bot will link to your wallet automatically — no typing required.</p>
+              <p className="ob-lead">Tap the button below to open Telegram. The bot will link to your wallet automatically, no typing required.</p>
 
               <div style={{ textAlign:'center', margin:'32px 0' }}>
                 {tgStatus.connected ? (
@@ -402,7 +402,7 @@ export default function OnboardingPage({ onComplete }: { onComplete: () => void;
                   <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 8l3.5 3.5L13 5" /></svg>
                 </div>
                 <h1>You're in, <em>{displayName}.</em></h1>
-                <p className="ob-lead">Your vault is deployed. ARIA is already scanning Mantle for your first allocation — you'll see live activity the moment you enter.</p>
+                <p className="ob-lead">Your vault is deployed. ARIA is already scanning Mantle for your first allocation. You will see live activity the moment you enter.</p>
 
                 <div className="ob-summary">
                   <div className="ob-sum-row">
@@ -423,7 +423,7 @@ export default function OnboardingPage({ onComplete }: { onComplete: () => void;
                   <div className="ob-sum-row">
                     <span className="ob-sum-k">Telegram</span>
                     <span className="ob-sum-v" style={{ color: tgStatus.connected ? 'var(--accent)' : 'var(--mute)' }}>
-                      {tgStatus.connected ? `● Connected${tgStatus.username ? ` @${tgStatus.username}` : ''}` : 'Not connected — add from Settings'}
+                      {tgStatus.connected ? `● Connected${tgStatus.username ? ` @${tgStatus.username}` : ''}` : 'Not connected. Add from Settings.'}
                     </span>
                   </div>
                   <div className="ob-sum-row">

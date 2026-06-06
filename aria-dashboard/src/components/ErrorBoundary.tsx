@@ -30,7 +30,7 @@ class ErrorBoundary extends Component<Props, State> {
           <div className="max-w-md w-full border border-soft bg-card rounded-sm p-8 text-center">
             <h1 className="font-serif text-2xl text-text-primary mb-3">Something went wrong</h1>
             <p className="text-text-secondary text-sm mb-6 leading-relaxed">
-              ARIA encountered an unexpected error. Your funds are safe — this is a UI issue only.
+              ARIA encountered an unexpected error. Your funds are safe. This is a UI issue only.
             </p>
             <p className="font-mono text-xs text-text-secondary bg-bg-soft border border-soft rounded-sm px-4 py-3 mb-6 text-left break-all">
               {this.state.error?.message ?? 'Unknown error'}

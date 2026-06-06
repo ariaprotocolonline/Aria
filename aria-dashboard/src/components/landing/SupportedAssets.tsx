@@ -30,7 +30,7 @@ const SupportedAssets = () => {
       apy: null,
       tvl: null,
       image: '/assets/city.jpeg',
-      description: 'Tokenized US equities trading 24/7 onchain: TSLAx, NVDAx, AAPLx, METAx, GOOGLx, SPYx, QQQx and more. Trade Tesla, Apple, and Nvidia via Fluxion DEX — backed 1:1 by real securities.',
+      description: 'Tokenized US equities trading 24/7 onchain: TSLAx, NVDAx, AAPLx, METAx, GOOGLx, SPYx, QQQx and more. Trade Tesla, Apple, and Nvidia via Fluxion DEX, backed 1:1 by real securities.',
       comingSoon: true,
     },
   ];

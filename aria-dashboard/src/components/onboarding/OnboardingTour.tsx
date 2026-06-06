@@ -10,7 +10,7 @@ import TourTooltip from './TourTooltip';
 const LANDING_STEPS: TourStep[] = [
   {
     heading: 'Welcome to ARIA',
-    body: 'ARIA is your autonomous yield intelligence agent on Mantle. It monitors liquidity, captures yield, and rebalances your portfolio — fully automated.',
+    body: 'ARIA is your autonomous yield intelligence agent on Mantle. It monitors liquidity, captures yield, and rebalances your portfolio, fully automated.',
   },
   {
     selector: '[data-tour="connect-wallet"]',
@@ -25,11 +25,11 @@ const LANDING_STEPS: TourStep[] = [
   {
     selector: '[data-tour="docs-link"]',
     heading: 'Read the Docs',
-    body: 'Everything about how ARIA works is documented — no black boxes. Tap Docs to read the full whitepaper before depositing.',
+    body: 'Everything about how ARIA works is documented. No black boxes. Tap Docs to read the full whitepaper before depositing.',
   },
   {
     heading: 'Ready to start?',
-    body: 'Connect your wallet to deploy your personal vault on Mantle. Your funds stay non-custodial — ARIA can only rebalance inside pre-approved protocols.',
+    body: 'Connect your wallet to deploy your personal vault on Mantle. Your funds stay non-custodial. ARIA can only rebalance inside pre-approved protocols.',
   },
 ];
 
@@ -42,22 +42,22 @@ const DASHBOARD_STEPS: TourStep[] = [
   {
     selector: '[data-tour="withdraw-btn"]',
     heading: 'Withdraw Anytime',
-    body: 'Your funds are never locked. Tap Withdraw to pull WETH or USDC back to your wallet — no timelock, no delay, even when ARIA is active.',
+    body: 'Your funds are never locked. Tap Withdraw to pull WETH or USDC back to your wallet. No timelock, no delay, even when ARIA is active.',
   },
   {
     selector: '[data-tour="intelligence-feed"]',
     heading: "ARIA's Live Feed",
-    body: 'Every decision ARIA makes is logged here in plain English — what moved, why it moved, and what the outcome was. Full transparency.',
+    body: 'Every decision ARIA makes is logged here in plain English: what moved, why it moved, and what the outcome was. Full transparency.',
   },
   {
     selector: '[data-tour="market-pools"]',
     heading: 'Live Market Pools',
-    body: 'Real-time yield opportunities across Mantle protocols. Quality score, APY, liquidity depth, and trend — this is what drives your returns.',
+    body: 'Real-time yield opportunities across Mantle protocols. Quality score, APY, liquidity depth, and trend. This is what drives your returns.',
   },
   {
     selector: '[data-tour="ask-aria"]',
     heading: 'Chat With ARIA',
-    body: 'Ask ARIA anything — portfolio strategy, market conditions, why it made a specific move. It knows your full position history.',
+    body: 'Ask ARIA anything: portfolio strategy, market conditions, why it made a specific move. It knows your full position history.',
   },
   {
     selector: '[data-tour="telegram-settings"]',
@@ -111,7 +111,7 @@ const WelcomeModal: React.FC<{ onStart: () => void; onSkip: () => void }> = ({ o
         Welcome to ARIA
       </h2>
       <p style={{ fontSize: 13, color: 'var(--ink-2)', lineHeight: 1.7, margin: '0 0 30px', maxWidth: 280 }}>
-        Want a quick guided tour? ARIA will walk you through the key features — takes about 90 seconds.
+        Want a quick guided tour? ARIA will walk you through the key features. Takes about 90 seconds.
       </p>
 
       <button

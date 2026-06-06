@@ -710,7 +710,7 @@ export default function Dashboard({ vaultAddress }: { vaultAddress?: string }) {
                 <div className="dl-meta">
                   <span className="rl">
                     {siweSigningIn
-                      ? <span style={{ color: 'var(--warm)', fontStyle: 'italic' }}>Check your wallet — a signing request is pending…</span>
+                      ? <span style={{ color: 'var(--warm)', fontStyle: 'italic' }}>Check your wallet. A signing request is pending...</span>
                       : 'Direct line to ARIA'
                     }
                   </span>
@@ -1092,7 +1092,7 @@ export default function Dashboard({ vaultAddress }: { vaultAddress?: string }) {
                             }
                           </span>
                           <div className="body">
-                            <b>{pool.nm} {pool.sub} — {pool.apy} APY</b>
+                            <b>{pool.nm} {pool.sub}: {pool.apy} APY</b>
                             <div className="why">Quality {pool.q}/100 · TVL {pool.depth} · {pool.status}</div>
                           </div>
                           <span className={`tag ${pool.q >= 70 ? '' : pool.q >= 55 ? 'mute' : 'red'}`}>Q {pool.q}</span>
@@ -1110,7 +1110,7 @@ export default function Dashboard({ vaultAddress }: { vaultAddress?: string }) {
                     <div className="feed-row hold">
                       <span className="ts">—</span>
                       <span className="icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="8" cy="8" r="5.5"/><path d="M8 4v4l2 2"/></svg></span>
-                      <div className="body"><b>Vault ready — no events yet</b><div className="why">{env.FEED_URL ? 'Agent connected. Waiting for first reallocation.' : 'Configure VITE_FEED_URL to stream live agent events.'}</div></div>
+                      <div className="body"><b>Vault ready. No events yet.</b><div className="why">{env.FEED_URL ? 'Agent connected. Waiting for first reallocation.' : 'Configure VITE_FEED_URL to stream live agent events.'}</div></div>
                       <span className="tag mute">standby</span>
                     </div>
                   )}
@@ -1384,7 +1384,7 @@ export default function Dashboard({ vaultAddress }: { vaultAddress?: string }) {
           <div className="view-head">
             <div>
               <h1>Markets</h1>
-              <div className="sub">Mantle DeFi ecosystem — pools monitored by the ARIA agent</div>
+              <div className="sub">Mantle DeFi ecosystem. Pools monitored by the ARIA agent.</div>
             </div>
             <div className="filters" role="tablist">
               {(['all','weth','usdc'] as const).map(f => {
@@ -1930,7 +1930,7 @@ export default function Dashboard({ vaultAddress }: { vaultAddress?: string }) {
             <div className="card-head"><h3>Security</h3><span className="sub">defense in depth</span></div>
             <div>
               {[
-                { lbl:'Withdrawal allowlist', desc:'Only your connected wallet can withdraw. Add cold-storage addresses to extend. On-chain enforcement via the vault contract — withdrawals always go to the vault owner.', action:<button className="btn" style={{ padding:'7px 14px', fontSize:12 }} onClick={() => { switchView('activity'); setActPane('onchain'); }}>View on-chain</button> },
+                { lbl:'Withdrawal allowlist', desc:'Only your connected wallet can withdraw. Add cold-storage addresses to extend. On-chain enforcement via the vault contract. Withdrawals always go to the vault owner.', action:<button className="btn" style={{ padding:'7px 14px', fontSize:12 }} onClick={() => { switchView('activity'); setActPane('onchain'); }}>View on-chain</button> },
                 { lbl:'Auto-disconnect', desc:'Disconnect wallet after 30 min of inactivity.', action:<label className="switch"><input type="checkbox" defaultChecked /><span className="sl" /></label> },
                 { lbl:'Hardware wallet signing', desc:'Require Ledger/Trezor signature for deposits and profile changes above $50k.', action:<label className="switch"><input type="checkbox" /><span className="sl" /></label> },
               ].map(({ lbl, desc, action }) => (

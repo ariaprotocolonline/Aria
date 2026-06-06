@@ -338,7 +338,7 @@ export default function LandingPage({ isDarkMode: _isDarkMode, toggleDarkMode: _
                 <div className="lp-log">
                   {(marketPools.length > 0 ? [
                     { ts: 'now',   body: `Reallocated 2.40 WETH → ${marketPools[0]?.nm ?? 'Agni'} ${marketPools[0]?.sub ?? 'WETH/MNT'} · ${marketPools[0]?.apy ?? '14.2%'} APY`, tag: '+192 bps', type: 'exec' },
-                    { ts: '04:11', body: `${marketPools[1]?.nm ?? 'FusionX'} ${marketPools[1]?.sub ?? 'WETH/USDC'} — yield ${marketPools[1]?.apy ?? '11.1%'} · below threshold, holding`, tag: 'hold', type: 'signal' },
+                    { ts: '04:11', body: `${marketPools[1]?.nm ?? 'FusionX'} ${marketPools[1]?.sub ?? 'WETH/USDC'}: yield ${marketPools[1]?.apy ?? '11.1%'} · below threshold, holding`, tag: 'hold', type: 'signal' },
                     { ts: '02:31', body: 'Liquidity depth check: all active pools above floor · no action needed', tag: 'ok', type: 'signal' },
                   ] : [
                     { ts: '08:42', body: 'Reallocated 2.40 WETH → Agni WETH/MNT-0.3% · 14.2% APY', tag: '+192 bps', type: 'exec' },
@@ -586,7 +586,7 @@ export default function LandingPage({ isDarkMode: _isDarkMode, toggleDarkMode: _
                 <div className="lp-asset-stat"><div className="k">Platform</div><div className="v">Fluxion DEX</div></div>
                 <div className="lp-asset-stat"><div className="k">Backing</div><div className="v">META equity</div></div>
               </div>
-              <div className="lp-asset-desc">Tokenized Meta Platforms stock. On-chain exposure to Facebook, Instagram, and WhatsApp's parent company — no custody risk.</div>
+              <div className="lp-asset-desc">Tokenized Meta Platforms stock. On-chain exposure to Facebook, Instagram, and WhatsApp's parent company, no custody risk.</div>
             </div>
 
             <div className="lp-asset-card lp-ac-xstock">
@@ -614,7 +614,7 @@ export default function LandingPage({ isDarkMode: _isDarkMode, toggleDarkMode: _
                 <div className="lp-asset-stat"><div className="k">Platform</div><div className="v">Fluxion DEX</div></div>
                 <div className="lp-asset-stat"><div className="k">Backing</div><div className="v">MSTR equity</div></div>
               </div>
-              <div className="lp-asset-desc">Tokenized MicroStrategy stock. Leveraged Bitcoin proxy on-chain — one of the highest-beta crypto-correlated equities available.</div>
+              <div className="lp-asset-desc">Tokenized MicroStrategy stock. Leveraged Bitcoin proxy on-chain, one of the highest-beta crypto-correlated equities available.</div>
             </div>
 
             <div className="lp-asset-card lp-ac-xstock">
@@ -656,7 +656,7 @@ export default function LandingPage({ isDarkMode: _isDarkMode, toggleDarkMode: _
                 <div className="lp-asset-stat"><div className="k">Platform</div><div className="v">Fluxion DEX</div></div>
                 <div className="lp-asset-stat"><div className="k">Backing</div><div className="v">100 US tech cos</div></div>
               </div>
-              <div className="lp-asset-desc">Tokenized Invesco QQQ ETF tracking the Nasdaq-100. Concentrated tech exposure — NVDA, AAPL, MSFT, META, AMZN and more.</div>
+              <div className="lp-asset-desc">Tokenized Invesco QQQ ETF tracking the Nasdaq-100. Concentrated tech exposure: NVDA, AAPL, MSFT, META, AMZN and more.</div>
             </div>
 
             <div className="lp-asset-card lp-ac-xstock">
@@ -670,7 +670,7 @@ export default function LandingPage({ isDarkMode: _isDarkMode, toggleDarkMode: _
                 <div className="lp-asset-stat"><div className="k">Platform</div><div className="v">Fluxion DEX</div></div>
                 <div className="lp-asset-stat"><div className="k">Backing</div><div className="v">CRCL equity</div></div>
               </div>
-              <div className="lp-asset-desc">Tokenized Circle stock. On-chain exposure to the issuer of USDC — the stablecoin infrastructure company at the heart of onchain finance.</div>
+              <div className="lp-asset-desc">Tokenized Circle stock. On-chain exposure to the issuer of USDC, the stablecoin infrastructure company at the heart of onchain finance.</div>
             </div>
 
           </div>
@@ -815,9 +815,9 @@ export default function LandingPage({ isDarkMode: _isDarkMode, toggleDarkMode: _
           </div>
           <div className="lp-arch">
             {[
-              { lvl: 'LAYER 01, VAULT CONTRACT', h: <>Funds you <em>own.</em></>, p: 'Each user gets an individually deployed vault on Mantle. ARIA holds bounded execution permission — it can move funds only between protocols you approved at vault creation. Pause or withdraw anytime, no timelock.', stats: [['Per-user vaults','isolated'], ['Approved set','user-defined'], ['Withdrawal timelock','0s']] },
+              { lvl: 'LAYER 01, VAULT CONTRACT', h: <>Funds you <em>own.</em></>, p: 'Each user gets an individually deployed vault on Mantle. ARIA holds bounded execution permission. It can move funds only between protocols you approved at vault creation. Pause or withdraw anytime, no timelock.', stats: [['Per-user vaults','isolated'], ['Approved set','user-defined'], ['Withdrawal timelock','0s']] },
               { lvl: 'LAYER 02, INTELLIGENCE', h: <>Signals, scored<br />and <em>compared.</em></>, p: 'Autonomous agent continuously queries Mantle RPCs for pool state, emissions, lending rates, and liquidity composition. Converts raw data into Quality Scores and risk-adjusted yield deltas calibrated to your profile.', stats: [['RPC poll cadence','~12s'], ['Quality factors','4'], ['Profile calibration','per-vault']] },
-              { lvl: 'LAYER 03, EXECUTION', h: <>Onchain, <em>atomic</em>,<br />auditable.</>, p: 'When signals align, ARIA submits a coordinated multicall through your vault. Withdraw, swap, deposit — one transaction, one block, one row in your activity feed with every condition that drove it.', stats: [['Median time-to-action','4–6s'], ['Circuit breakers','armed'], ['Audit logs','onchain']] },
+              { lvl: 'LAYER 03, EXECUTION', h: <>Onchain, <em>atomic</em>,<br />auditable.</>, p: 'When signals align, ARIA submits a coordinated multicall through your vault. Withdraw, swap, deposit, all in one transaction, one block, one row in your activity feed with every condition that drove it.', stats: [['Median time-to-action','4–6s'], ['Circuit breakers','armed'], ['Audit logs','onchain']] },
             ].map((layer, i) => (
               <div key={i} className="lp-layer">
                 <div className="lp-lvl">LAYER 0{i + 1}, <b>{['VAULT CONTRACT','INTELLIGENCE','EXECUTION'][i]}</b></div>
@@ -844,7 +844,7 @@ export default function LandingPage({ isDarkMode: _isDarkMode, toggleDarkMode: _
           </div>
           <div className="lp-int-grid">
             {[
-              { gl: 'A', bg: 'linear-gradient(135deg,#75e5b0,#4dd394)', nm: 'Agni Finance', role: 'CL, core', p: "Concentrated liquidity for WETH/USDC and mETH/ETH pools — the foundation of ARIA's base-case deployment." },
+              { gl: 'A', bg: 'linear-gradient(135deg,#75e5b0,#4dd394)', nm: 'Agni Finance', role: 'CL, core', p: "Concentrated liquidity for WETH/USDC and mETH/ETH pools, the foundation of ARIA's base-case deployment." },
               { gl: 'F', bg: 'linear-gradient(135deg,#7afff0,#3dd9c4)', nm: 'FusionX', role: 'AMM', p: 'Standard AMM liquidity provision focused on ETH pairs. Used across all three risk profiles.' },
               { gl: 'L', bg: 'linear-gradient(135deg,#ff7878,#d84a4a)', nm: 'Lendle', role: 'Lending', p: 'Lending and borrowing markets. WETH as collateral plus deposit yield, unlocked on Balanced and Aggressive.' },
               { gl: 'I', bg: 'linear-gradient(135deg,#a78bff,#7a4dff)', nm: 'Init Capital', role: 'Lending', p: 'Isolated lending markets. Risk-isolated yield deployment for Balanced and above.' },
@@ -932,7 +932,7 @@ export default function LandingPage({ isDarkMode: _isDarkMode, toggleDarkMode: _
         <div className="lp-cta-bg" />
         <div className="lp-wrap">
           <h2>Real World Assets exist.<br />Make them <em>work.</em></h2>
-          <p>Connect your wallet, pick a profile, deposit. ARIA handles continuous monitoring, risk-adjusted reallocation, and onchain execution — and explains every move in plain language.</p>
+          <p>Connect your wallet, pick a profile, deposit. ARIA handles continuous monitoring, risk-adjusted reallocation, and onchain execution, explaining every move in plain language.</p>
           <div className="lp-cta-actions">
             <button className="lp-btn lp-btn-primary lp-btn-lg" onClick={() => go()}>Launch app →</button>
             <button className="lp-btn lp-btn-lg" onClick={() => navigate('/docs')}>Read whitepaper</button>

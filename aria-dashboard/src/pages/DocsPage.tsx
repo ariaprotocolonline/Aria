@@ -6,20 +6,20 @@ import { useConnectModal } from '@rainbow-me/rainbowkit';
 const BANNER_KEY = 'aria-docs-banner-dismissed';
 
 const SECTIONS = [
-  { id: 'abstract',       label: '01 — Abstract' },
-  { id: 'introduction',   label: '02 — Introduction' },
-  { id: 'the-problem',    label: '03 — The Problem' },
-  { id: 'protocol',       label: '04 — The Protocol' },
-  { id: 'ux',             label: '05 — User Experience' },
-  { id: 'architecture',   label: '06 — Architecture' },
-  { id: 'fees',           label: '07 — Fees' },
-  { id: 'assets',         label: '08 — Supported Assets' },
-  { id: 'profiles',       label: '09 — Risk Profiles' },
-  { id: 'landscape',      label: '10 — Competitive Landscape' },
-  { id: 'roadmap',        label: '11 — Roadmap' },
-  { id: 'governance',     label: '12 — Governance' },
-  { id: 'disclosures',    label: '13 — Risk Disclosures' },
-  { id: 'conclusion',     label: '14 — Conclusion' },
+  { id: 'abstract',       label: '01. Abstract' },
+  { id: 'introduction',   label: '02. Introduction' },
+  { id: 'the-problem',    label: '03. The Problem' },
+  { id: 'protocol',       label: '04. The Protocol' },
+  { id: 'ux',             label: '05. User Experience' },
+  { id: 'architecture',   label: '06. Architecture' },
+  { id: 'fees',           label: '07. Fees' },
+  { id: 'assets',         label: '08. Supported Assets' },
+  { id: 'profiles',       label: '09. Risk Profiles' },
+  { id: 'landscape',      label: '10. Competitive Landscape' },
+  { id: 'roadmap',        label: '11. Roadmap' },
+  { id: 'governance',     label: '12. Governance' },
+  { id: 'disclosures',    label: '13. Risk Disclosures' },
+  { id: 'conclusion',     label: '14. Conclusion' },
 ];
 
 export default function DocsPage({ isDarkMode: _isDarkMode, toggleDarkMode: _toggleDarkMode }: { isDarkMode: boolean; toggleDarkMode: () => void }) {
