@@ -2126,30 +2126,52 @@ html, body { overflow-x: hidden; -webkit-tap-highlight-color: transparent; }
   position: sticky;
   top: 0;
   z-index: 200;
-  height: 60px;
   display: flex;
-  align-items: center;
-  background: rgba(7,8,10,0.80);
+  flex-direction: column;
+  background: rgba(7,8,10,0.88);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border-bottom: 1px solid rgba(255,255,255,0.07);
 }
 .mob-nav-inner {
   width: 100%;
-  max-width: 100%;
   padding: 0 20px;
+  height: 56px;
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
-.mob-nav-cta { padding: 8px 16px; font-size: 13px; }
+.mob-nav-cta { padding: 7px 14px; font-size: 12.5px; }
+.mob-nav-links {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+  border-top: 1px solid rgba(255,255,255,0.05);
+  padding: 0 20px;
+  height: 36px;
+}
+.mob-nav-links::-webkit-scrollbar { display: none; }
+.mob-nav-links a {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: var(--ink-2);
+  text-decoration: none;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+  padding: 0 14px 0 0;
+  cursor: pointer;
+}
+.mob-nav-links a:hover { color: var(--ink); }
 
 /* ── Hero ───────────────────────────────────────────────────────── */
 .mob-hero {
   position: relative;
-  min-height: calc(100dvh - 60px);
   display: flex;
-  align-items: flex-start;
+  align-items: center;
+  justify-content: center;
   overflow: hidden;
   padding: 0;
 }
@@ -2177,20 +2199,21 @@ html, body { overflow-x: hidden; -webkit-tap-highlight-color: transparent; }
   padding: 40px 20px 48px;
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
+  text-align: center;
   width: 100%;
 }
 
 /* Pill — overrides desktop lp-pill margin for mobile */
 .mob-pill { margin-bottom: 28px; }
 
-/* Headline — mirrors desktop .lp-hero-h scale and serif italic */
+/* Headline — mirrors desktop .lp-hero-h exactly */
 .mob-h1 {
   font-family: var(--sans);
   font-weight: 400;
   font-size: clamp(36px, 9.5vw, 56px);
   letter-spacing: -0.04em;
-  line-height: 1.03;
+  line-height: 1;
   margin: 0 0 20px;
   color: var(--ink);
 }
@@ -2199,15 +2222,7 @@ html, body { overflow-x: hidden; -webkit-tap-highlight-color: transparent; }
   font-style: italic;
   font-weight: 400;
 }
-.mob-accent {
-  color: var(--accent);
-  display: block;
-  font-size: 0.62em;
-  font-family: var(--mono);
-  letter-spacing: 0.06em;
-  margin-top: 6px;
-  font-style: normal;
-}
+/* lp-accent-word is already defined globally — no override needed */
 .mob-hero-sub {
   font-size: 15px;
   line-height: 1.6;
@@ -2270,6 +2285,12 @@ html, body { overflow-x: hidden; -webkit-tap-highlight-color: transparent; }
   flex-shrink: 0;
   align-self: stretch;
   margin: 10px 0;
+}
+
+/* KPI section wrapper — sits just below the hero fold */
+.mob-kpis-section {
+  padding: 24px 20px;
+  border-top: 1px solid rgba(255,255,255,0.06);
 }
 
 /* ── Sections ───────────────────────────────────────────────────── */

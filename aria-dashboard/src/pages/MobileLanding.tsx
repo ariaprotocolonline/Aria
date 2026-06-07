@@ -62,7 +62,7 @@ const SECURITY = [
   'Agent can ONLY reallocate between whitelisted protocols',
   'Agent can NEVER withdraw funds to any external wallet',
   'You can withdraw at any time, even when paused',
-  'Every move is on-chain — verifiable and auditable',
+  'Every move is on-chain. Verifiable and auditable.',
 ];
 
 /* ─── Component ─────────────────────────────────────────────────── */
@@ -96,6 +96,12 @@ export default function MobileLanding({ isDarkMode: _d, toggleDarkMode: _t }: { 
             Launch app →
           </button>
         </div>
+        <div className="mob-nav-links">
+          <a href="#how">Protocol</a>
+          <a href="#profiles">Risk profiles</a>
+          <a href="#assets">Integrations</a>
+          <a href="/docs">Docs</a>
+        </div>
       </nav>
 
       {/* ── HERO ────────────────────────────────────────────── */}
@@ -105,22 +111,23 @@ export default function MobileLanding({ isDarkMode: _d, toggleDarkMode: _t }: { 
         <div className="mob-hero-grid" />
 
         <div className="mob-hero-content">
-          {/* Same pill badge as desktop */}
+          {/* Same pill badge as desktop — identical text */}
           <div className="lp-pill mob-pill">
             <span className="lp-dot" />
-            Live on Mantle · v1.0 audited
+            Live on Mantle, v1.0 audited and shipping
             <span className="lp-pill-tag">MAINNET</span>
           </div>
 
           <h1 className="mob-h1">
             Real World Assets,<br />
             <em>actively</em> managed.<br />
-            <span className="mob-accent">Onchain. Autonomous.</span>
+            <span className="lp-accent-word">Onchain. Autonomous.</span>
           </h1>
 
           <p className="mob-hero-sub">
-            ARIA puts your WETH and USDC to work, monitoring liquidity, capturing yield across Mantle,
-            and rebalancing in real time. You set the risk profile. ARIA handles the rest.
+            ARIA is an autonomous protocol that puts your WETH and USDC to work, monitoring liquidity,
+            capturing yield across Mantle, and rebalancing in real time. You set the risk profile.
+            ARIA handles the rest, and explains every move.
           </p>
 
           <div className="mob-hero-actions">
@@ -136,31 +143,33 @@ export default function MobileLanding({ isDarkMode: _d, toggleDarkMode: _t }: { 
               Read whitepaper
             </button>
           </div>
-
-          {/* KPI strip — same card feel as desktop demo KPIs */}
-          <div className="mob-kpis">
-            <div className="mob-kpi">
-              <div className="mob-kpi-v" style={{ color: 'var(--accent)' }}>9–22%</div>
-              <div className="mob-kpi-k">Target APY</div>
-            </div>
-            <div className="mob-kpi-div" />
-            <div className="mob-kpi">
-              <div className="mob-kpi-v">5<span>min</span></div>
-              <div className="mob-kpi-k">Scan cycle</div>
-            </div>
-            <div className="mob-kpi-div" />
-            <div className="mob-kpi">
-              <div className="mob-kpi-v">24<span>/7</span></div>
-              <div className="mob-kpi-k">Autonomous</div>
-            </div>
-            <div className="mob-kpi-div" />
-            <div className="mob-kpi">
-              <div className="mob-kpi-v" style={{ fontSize: 14, color: 'var(--accent)' }}>Non-custodial</div>
-              <div className="mob-kpi-k">Your keys</div>
-            </div>
-          </div>
         </div>
       </section>
+
+      {/* ── KPI STRIP (first section below fold) ────────────── */}
+      <div className="mob-kpis-section">
+        <div className="mob-kpis">
+          <div className="mob-kpi">
+            <div className="mob-kpi-v" style={{ color: 'var(--accent)' }}>9–22%</div>
+            <div className="mob-kpi-k">Target APY</div>
+          </div>
+          <div className="mob-kpi-div" />
+          <div className="mob-kpi">
+            <div className="mob-kpi-v">5<span>min</span></div>
+            <div className="mob-kpi-k">Scan cycle</div>
+          </div>
+          <div className="mob-kpi-div" />
+          <div className="mob-kpi">
+            <div className="mob-kpi-v">24<span>/7</span></div>
+            <div className="mob-kpi-k">Autonomous</div>
+          </div>
+          <div className="mob-kpi-div" />
+          <div className="mob-kpi">
+            <div className="mob-kpi-v" style={{ fontSize: 13, color: 'var(--accent)' }}>Non-custodial</div>
+            <div className="mob-kpi-k">Your keys</div>
+          </div>
+        </div>
+      </div>
 
       {/* ── HOW IT WORKS ────────────────────────────────────── */}
       <section className="mob-section">
