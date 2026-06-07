@@ -371,6 +371,9 @@ async function startPolling(): Promise<void> {
             handleUpdate(JSON.stringify({ message: update.message })).catch(() => {});
           }
         }
+      } else if (!data.ok) {
+        // No bot token or API error — back off to avoid a tight spin
+        await new Promise(r => setTimeout(r, 3_000));
       }
     } catch {
       // network blip — wait a moment then retry

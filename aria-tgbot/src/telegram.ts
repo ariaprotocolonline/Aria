@@ -1,7 +1,10 @@
-const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
-const TG_BASE   = BOT_TOKEN ? `https://api.telegram.org/bot${BOT_TOKEN}` : null;
+function getTgBase(): string | null {
+  const token = process.env.TELEGRAM_BOT_TOKEN;
+  return token ? `https://api.telegram.org/bot${token}` : null;
+}
 
 export async function sendMessage(chatId: number | string, text: string): Promise<boolean> {
+  const TG_BASE = getTgBase();
   if (!TG_BASE) return false;
   try {
     const res = await fetch(`${TG_BASE}/sendMessage`, {
@@ -15,6 +18,7 @@ export async function sendMessage(chatId: number | string, text: string): Promis
 }
 
 export async function setWebhook(url: string, secretToken?: string): Promise<boolean> {
+  const TG_BASE = getTgBase();
   if (!TG_BASE) return false;
   try {
     const payload: Record<string, unknown> = { url, allowed_updates: ['message'] };
@@ -39,6 +43,7 @@ export async function setWebhook(url: string, secretToken?: string): Promise<boo
 }
 
 export async function deleteWebhook(): Promise<void> {
+  const TG_BASE = getTgBase();
   if (!TG_BASE) return;
   await fetch(`${TG_BASE}/deleteWebhook`, { method: 'POST', signal: AbortSignal.timeout(5_000) }).catch(() => {});
 }
@@ -47,6 +52,7 @@ export async function getUpdates(offset: number): Promise<{
   ok: boolean;
   result: { update_id: number; message?: { chat: { id: number }; from?: { username?: string }; text?: string } }[];
 }> {
+  const TG_BASE = getTgBase();
   if (!TG_BASE) return { ok: false, result: [] };
   const res = await fetch(
     `${TG_BASE}/getUpdates?offset=${offset}&timeout=30&allowed_updates=message`,
