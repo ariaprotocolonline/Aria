@@ -303,11 +303,26 @@ async function main() {
     });
   }
 
-  // Schedule hourly pool intelligence updates to all linked Telegram users
+  // Schedule hourly pool intelligence updates — only sent when APY shifts by > 50 bps
+  // since the last update, so users aren't spammed with identical messages.
+  let lastSentPoolSnapshot: { protocol: string; apyBps: number }[] = [];
+
   scheduleHourlyUpdate(async () => {
     try {
       const pools = await getYieldOpportunities();
       if (pools.length === 0) return;
+
+      // Skip if top pool APYs haven't moved more than 50 bps since last send
+      const changed = pools.some(p => {
+        const prev = lastSentPoolSnapshot.find(s => s.protocol === p.protocol);
+        return !prev || Math.abs(p.apyBps - prev.apyBps) > 50;
+      });
+      if (!changed) {
+        log('[Hourly] Pool data unchanged — skipping update');
+        return;
+      }
+      lastSentPoolSnapshot = pools.map(p => ({ protocol: p.protocol, apyBps: p.apyBps }));
+
       const msg    = buildHourlyMessage(pools);
       const vaults = await discoverVaults();
       const ownersSeen = new Set<string>();
@@ -320,7 +335,6 @@ async function main() {
           }
         } catch { /* vault may be paused or not yet active */ }
       }
-      // Also notify single-vault owner if set and not already covered
       const envOwner = process.env.VAULT_OWNER_ADDRESS;
       if (envOwner && !ownersSeen.has(envOwner.toLowerCase())) {
         notifyRaw(envOwner, msg).catch(() => {});
