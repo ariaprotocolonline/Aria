@@ -2104,13 +2104,14 @@ html, body { overflow-x: hidden; -webkit-tap-highlight-color: transparent; }
 }
 
 /* ================================================================
-   MOBILE LANDING (.mob-) — shown only on phones/small tablets
-   Desktop landing page (.lp) is hidden at ≤768px via JS swap.
+/* ================================================================
+   MOBILE LANDING (.mob-) — separate component, shown ≤768px
+   Design language: identical to desktop .lp — same tokens, same
+   visual grammar. Only layout differs (single column, normal scroll).
+   Reuses lp- classes for buttons, pills, eyebrows, brand, cards.
    ================================================================ */
 
-/* Root — no overflow set here so position:sticky on .mob-nav works and
-   position:fixed wallet modals (RainbowKit) are not clipped. Each section
-   constrains its own content with padding instead. */
+/* ── Root ───────────────────────────────────────────────────────── */
 .mob {
   min-height: 100dvh;
   background: var(--bg);
@@ -2120,280 +2121,248 @@ html, body { overflow-x: hidden; -webkit-tap-highlight-color: transparent; }
   font-family: var(--sans);
 }
 
-/* NAV */
+/* ── Nav ────────────────────────────────────────────────────────── */
 .mob-nav {
   position: sticky;
   top: 0;
-  z-index: 100;
+  z-index: 200;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  background: rgba(7,8,10,0.80);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+.mob-nav-inner {
+  width: 100%;
+  max-width: 100%;
+  padding: 0 20px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 20px;
-  height: 56px;
-  background: rgba(7,8,10,0.88);
-  backdrop-filter: blur(12px);
-  border-bottom: 1px solid rgba(255,255,255,0.07);
 }
-.mob-brand {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  font-family: var(--serif);
-  font-size: 17px;
-  font-weight: 400;
-  color: var(--ink);
-}
-.mob-brand img { border-radius: 6px; }
-.mob-cta-sm {
-  padding: 8px 16px;
-  background: var(--accent);
-  color: var(--btn-ink);
-  border: none;
-  border-radius: 8px;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  font-family: var(--sans);
-}
+.mob-nav-cta { padding: 8px 16px; font-size: 13px; }
 
-/* HERO */
+/* ── Hero ───────────────────────────────────────────────────────── */
 .mob-hero {
   position: relative;
-  padding: 48px 20px 40px;
+  min-height: calc(100dvh - 60px);
   display: flex;
-  flex-direction: column;
   align-items: flex-start;
   overflow: hidden;
+  padding: 0;
 }
+/* Identical radial gradient to desktop lp-hero-bg */
 .mob-hero-bg {
   position: absolute;
   inset: 0;
-  background: radial-gradient(ellipse 90% 55% at 50% -10%, rgba(117,229,176,0.14) 0%, transparent 70%);
+  background: radial-gradient(ellipse 120% 60% at 50% -10%, rgba(117,229,176,0.18) 0%, transparent 65%);
   pointer-events: none;
 }
-.mob-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  font-family: var(--mono);
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--accent);
-  background: rgba(117,229,176,0.08);
-  border: 1px solid rgba(117,229,176,0.22);
-  border-radius: 100px;
-  padding: 5px 12px;
-  margin-bottom: 24px;
+/* Same dot-grid as desktop hero ::before */
+.mob-hero-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 20%, transparent 75%);
+  pointer-events: none;
+}
+.mob-hero-content {
   position: relative;
+  z-index: 1;
+  padding: 40px 20px 48px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
 }
-.mob-dot {
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: var(--accent);
-  animation: mob-pulse 2s ease-in-out infinite;
-}
-@keyframes mob-pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.4; }
-}
-.mob-pill-tag {
-  font-size: 8.5px;
-  background: rgba(117,229,176,0.15);
-  border: 1px solid rgba(117,229,176,0.3);
-  padding: 1px 6px;
-  border-radius: 4px;
-  letter-spacing: 0.08em;
-}
+
+/* Pill — overrides desktop lp-pill margin for mobile */
+.mob-pill { margin-bottom: 28px; }
+
+/* Headline — mirrors desktop .lp-hero-h scale and serif italic */
 .mob-h1 {
   font-family: var(--sans);
-  font-size: clamp(34px, 9.5vw, 52px);
-  font-weight: 700;
-  letter-spacing: -0.03em;
-  line-height: 1.05;
-  margin: 0 0 16px;
+  font-weight: 400;
+  font-size: clamp(36px, 9.5vw, 56px);
+  letter-spacing: -0.04em;
+  line-height: 1.03;
+  margin: 0 0 20px;
   color: var(--ink);
-  position: relative;
 }
 .mob-h1 em {
   font-family: var(--serif);
   font-style: italic;
   font-weight: 400;
-  color: var(--accent);
 }
-.mob-sub {
+.mob-accent {
+  color: var(--accent);
+  display: block;
+  font-size: 0.62em;
+  font-family: var(--mono);
+  letter-spacing: 0.06em;
+  margin-top: 6px;
+  font-style: normal;
+}
+.mob-hero-sub {
   font-size: 15px;
   line-height: 1.6;
   color: var(--ink-2);
   margin: 0 0 28px;
-  max-width: 420px;
-  position: relative;
+  max-width: 100%;
 }
-.mob-hero-btns {
+
+/* CTA buttons — full width on mobile, same lp-btn visual */
+.mob-hero-actions {
   display: flex;
   flex-direction: column;
   gap: 10px;
   width: 100%;
-  position: relative;
   margin-bottom: 32px;
 }
-.mob-btn-primary {
+.mob-btn-full {
   width: 100%;
-  padding: 14px 20px;
-  background: var(--accent);
-  color: var(--btn-ink);
-  border: none;
-  border-radius: 10px;
-  font-size: 15px;
-  font-weight: 700;
-  cursor: pointer;
-  font-family: var(--sans);
-  letter-spacing: -0.01em;
+  justify-content: center;
 }
-.mob-btn-ghost {
-  width: 100%;
-  padding: 13px 20px;
-  background: transparent;
-  color: var(--ink-2);
-  border: 1px solid rgba(255,255,255,0.12);
-  border-radius: 10px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  font-family: var(--sans);
-}
-.mob-btn-lg { font-size: 16px; padding: 16px 20px; }
 
-/* STATS STRIP */
-.mob-stats {
+/* KPI strip — same card feel as desktop lp-dm-kpi */
+.mob-kpis {
   display: flex;
-  align-items: center;
-  gap: 0;
   width: 100%;
-  background: rgba(255,255,255,0.03);
+  background: rgba(255,255,255,0.02);
   border: 1px solid rgba(255,255,255,0.07);
-  border-radius: 12px;
+  border-radius: 14px;
   overflow: hidden;
-  position: relative;
 }
-.mob-stat {
+.mob-kpi {
   flex: 1;
-  padding: 14px 8px;
+  padding: 14px 6px;
   text-align: center;
 }
-.mob-stat-v {
-  font-size: 20px;
-  font-weight: 700;
+.mob-kpi-v {
+  font-size: 17px;
+  font-weight: 500;
   letter-spacing: -0.02em;
   color: var(--ink);
   line-height: 1;
-  margin-bottom: 4px;
+  margin-bottom: 5px;
 }
-.mob-stat-v span {
-  font-size: 11px;
+.mob-kpi-v span {
+  font-size: 10px;
   font-weight: 400;
   color: var(--ink-2);
   letter-spacing: 0;
 }
-.mob-stat-k {
+.mob-kpi-k {
   font-family: var(--mono);
-  font-size: 9px;
+  font-size: 8.5px;
   color: var(--mute);
   text-transform: uppercase;
   letter-spacing: 0.06em;
 }
-.mob-stat-div {
+.mob-kpi-div {
   width: 1px;
-  height: 32px;
   background: rgba(255,255,255,0.07);
   flex-shrink: 0;
+  align-self: stretch;
+  margin: 10px 0;
 }
 
-/* SECTION */
+/* ── Sections ───────────────────────────────────────────────────── */
 .mob-section {
-  padding: 40px 20px;
+  padding: 52px 20px;
   border-top: 1px solid rgba(255,255,255,0.06);
 }
-.mob-eyebrow {
-  font-family: var(--mono);
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 0.14em;
-  color: var(--accent);
-  margin-bottom: 10px;
+.mob-section-grid {
+  position: relative;
 }
-.mob-h2 {
+/* Subtle dot-grid on alternate sections — same as desktop lp-grid-bg */
+.mob-section-grid::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: radial-gradient(ellipse 80% 70% at 50% 50%, black 10%, transparent 75%);
+  pointer-events: none;
+}
+.mob-sec-head {
+  margin-bottom: 28px;
+}
+
+/* Section heading — same style as desktop lp-sec-h */
+.mob-sec-h {
   font-family: var(--sans);
-  font-size: clamp(22px, 6.5vw, 30px);
-  font-weight: 700;
-  letter-spacing: -0.025em;
-  line-height: 1.15;
+  font-weight: 400;
+  font-size: clamp(28px, 7.5vw, 44px);
+  letter-spacing: -0.035em;
+  line-height: 1.05;
+  margin: 10px 0 0;
   color: var(--ink);
-  margin: 0 0 24px;
 }
-.mob-h2 em {
+.mob-sec-h em {
   font-family: var(--serif);
   font-style: italic;
   font-weight: 400;
-  color: var(--accent);
 }
 
-/* HOW IT WORKS */
-.mob-steps {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
+/* ── How it works — lp-arch style bordered container ────────────── */
+.mob-arch {
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.018), rgba(255,255,255,0.003));
+  overflow: hidden;
 }
-.mob-step {
+.mob-arch-item {
   display: flex;
-  gap: 16px;
   align-items: flex-start;
+  gap: 18px;
+  padding: 22px 20px;
 }
-.mob-step-n {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: rgba(117,229,176,0.1);
-  border: 1px solid rgba(117,229,176,0.28);
-  color: var(--accent);
+.mob-arch-num {
   font-family: var(--mono);
-  font-size: 13px;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  font-size: 11px;
+  color: var(--accent);
+  letter-spacing: 0.08em;
+  padding-top: 2px;
   flex-shrink: 0;
+  min-width: 26px;
 }
-.mob-step-body { flex: 1; }
-.mob-step-h {
+.mob-arch-h {
   font-size: 15px;
-  font-weight: 600;
+  font-weight: 500;
   color: var(--ink);
   margin-bottom: 5px;
   letter-spacing: -0.01em;
 }
-.mob-step-p {
+.mob-arch-p {
   font-size: 13px;
   line-height: 1.6;
   color: var(--ink-2);
 }
 
-/* RISK PROFILES */
+/* ── Risk profiles — premium card with colored border accent ─────── */
 .mob-profiles {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
+  position: relative;
 }
 .mob-profile {
-  background: rgba(255,255,255,0.02);
   border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 14px;
-  padding: 18px;
+  border-radius: 16px;
+  padding: 20px;
+  transition: border-color 0.2s;
 }
 .mob-profile-top {
   display: flex;
-  align-items: flex-start;
+  align-items: baseline;
   justify-content: space-between;
   margin-bottom: 10px;
 }
@@ -2401,52 +2370,47 @@ html, body { overflow-x: hidden; -webkit-tap-highlight-color: transparent; }
   font-family: var(--mono);
   font-size: 10px;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
-  margin-bottom: 4px;
-  opacity: 0.9;
+  letter-spacing: 0.12em;
 }
 .mob-profile-apy {
-  font-size: 26px;
-  font-weight: 700;
+  font-size: 22px;
+  font-weight: 500;
   letter-spacing: -0.03em;
   line-height: 1;
 }
-.mob-profile-apy span {
-  font-size: 12px;
-  font-weight: 400;
-  opacity: 0.7;
+.mob-profile-apy em {
+  font-size: 11px;
+  font-style: normal;
+  opacity: 0.65;
   margin-left: 3px;
+  font-weight: 400;
 }
 .mob-profile-desc {
   font-size: 13px;
   line-height: 1.6;
   color: var(--ink-2);
-  margin-bottom: 14px;
+  margin: 0 0 14px;
 }
 .mob-profile-params {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
   border-top: 1px solid rgba(255,255,255,0.06);
   padding-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
 }
 .mob-profile-param {
   display: flex;
   justify-content: space-between;
-  align-items: center;
   font-family: var(--mono);
   font-size: 11px;
+  color: var(--mute);
 }
-.mob-profile-pk { color: var(--mute); }
-.mob-profile-pv { color: var(--ink); }
 
-/* ASSETS */
+/* ── Assets — lp-asset-card style ───────────────────────────────── */
 .mob-assets {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
   border: 1px solid rgba(255,255,255,0.07);
-  border-radius: 14px;
+  border-radius: 16px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.018), rgba(255,255,255,0.003));
   overflow: hidden;
   margin-bottom: 14px;
 }
@@ -2454,120 +2418,134 @@ html, body { overflow-x: hidden; -webkit-tap-highlight-color: transparent; }
   display: flex;
   align-items: center;
   gap: 14px;
-  padding: 16px;
+  padding: 16px 18px;
   border-bottom: 1px solid rgba(255,255,255,0.06);
 }
 .mob-asset:last-child { border-bottom: none; }
-.mob-asset-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
 .mob-asset-body { flex: 1; }
 .mob-asset-sym {
-  font-size: 14px;
-  font-weight: 600;
+  font-size: 15px;
+  font-weight: 500;
   color: var(--ink);
   letter-spacing: -0.01em;
 }
 .mob-asset-name {
-  font-size: 11px;
-  color: var(--mute);
-  margin-top: 1px;
   font-family: var(--mono);
+  font-size: 10.5px;
+  color: var(--mute);
+  margin-top: 2px;
 }
 .mob-asset-apy {
   font-family: var(--mono);
   font-size: 12px;
   color: var(--accent);
-  text-align: right;
 }
 .mob-asset-note {
   font-size: 12px;
   color: var(--mute);
-  line-height: 1.5;
+  line-height: 1.55;
+  font-family: var(--mono);
   margin: 0;
 }
 
-/* SECURITY */
+/* ── Security ───────────────────────────────────────────────────── */
 .mob-security {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 0;
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 16px;
+  overflow: hidden;
+  background: linear-gradient(180deg, rgba(255,255,255,0.018), rgba(255,255,255,0.003));
+  position: relative;
 }
 .mob-sec-row {
   display: flex;
   align-items: flex-start;
-  gap: 12px;
+  gap: 14px;
+  padding: 16px 18px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
   font-size: 14px;
   color: var(--ink-2);
   line-height: 1.5;
 }
-.mob-sec-row svg { flex-shrink: 0; margin-top: 2px; }
+.mob-sec-row:last-child { border-bottom: none; }
+.mob-sec-check {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: rgba(117,229,176,0.1);
+  border: 1px solid rgba(117,229,176,0.28);
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
 
-/* CTA */
+/* ── CTA — matches desktop lp-cta radial glow ───────────────────── */
 .mob-cta {
-  position: relative;
-  padding: 48px 20px;
+  padding: 60px 20px;
   text-align: center;
+  position: relative;
   overflow: hidden;
   border-top: 1px solid rgba(255,255,255,0.06);
 }
 .mob-cta-bg {
   position: absolute;
   inset: 0;
-  background: radial-gradient(ellipse 80% 60% at 50% 100%, rgba(117,229,176,0.1) 0%, transparent 70%);
+  background: radial-gradient(ellipse 80% 60% at 50% 100%, rgba(117,229,176,0.16), transparent 70%);
   pointer-events: none;
 }
 .mob-cta-h {
-  font-size: clamp(22px, 6.5vw, 30px);
-  font-weight: 700;
-  letter-spacing: -0.025em;
-  line-height: 1.2;
+  font-family: var(--sans);
+  font-weight: 400;
+  font-size: clamp(30px, 8.5vw, 52px);
+  letter-spacing: -0.04em;
+  line-height: 1.05;
   color: var(--ink);
-  margin: 0 0 12px;
+  margin: 0 0 16px;
   position: relative;
 }
+.mob-cta-h em {
+  font-family: var(--serif);
+  font-style: italic;
+}
 .mob-cta-p {
-  font-size: 14px;
+  font-size: 15px;
   color: var(--ink-2);
   margin: 0 0 28px;
   line-height: 1.55;
   position: relative;
 }
-.mob-cta .mob-btn-primary { max-width: 320px; margin: 0 auto; position: relative; }
-
-/* FOOTER */
-.mob-footer {
-  padding: 28px 20px 36px;
-  border-top: 1px solid rgba(255,255,255,0.07);
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
+.mob-cta-btn {
+  position: relative;
+  width: 100%;
+  max-width: 320px;
+  justify-content: center;
 }
-.mob-footer-brand {
+
+/* ── Footer — matches desktop lp-ft-bottom ──────────────────────── */
+.mob-footer {
+  padding: 24px 20px 36px;
+  border-top: 1px solid rgba(255,255,255,0.07);
+}
+.mob-footer-top {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--ink);
-  font-family: var(--serif);
+  justify-content: space-between;
+  margin-bottom: 0;
 }
+.mob-footer-brand { gap: 7px; }
 .mob-footer-links {
   display: flex;
-  gap: 20px;
+  gap: 16px;
 }
 .mob-footer-links a {
-  font-size: 13px;
+  font-size: 12px;
   color: var(--ink-2);
   text-decoration: none;
-}
-.mob-footer-links a:hover { color: var(--ink); }
-.mob-footer-copy {
-  font-size: 11px;
-  color: var(--mute);
-  line-height: 1.5;
   font-family: var(--mono);
 }
+.mob-footer-links a:hover { color: var(--ink); }
