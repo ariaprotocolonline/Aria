@@ -167,6 +167,7 @@ export default function Dashboard({ vaultAddress }: { vaultAddress?: string }) {
   const [pausePending, setPausePending] = useState(false);
   const dlThreadRef = useRef<HTMLDivElement>(null);
   const askThreadRef = useRef<HTMLDivElement>(null);
+  const mainRef = useRef<HTMLElement>(null);
 
   // ── Theme sync ─────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -186,7 +187,7 @@ export default function Dashboard({ vaultAddress }: { vaultAddress?: string }) {
 
   // ── Scroll top on view change ──────────────────────────────────────────────
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'auto' });
+    mainRef.current?.scrollTo({ top: 0, behavior: 'auto' });
   }, [view]);
 
   // ── Scroll DL thread ──────────────────────────────────────────────────────
@@ -614,7 +615,7 @@ export default function Dashboard({ vaultAddress }: { vaultAddress?: string }) {
       </aside>
 
       {/* ====== MAIN ====== */}
-      <main className="main" onClick={() => { setNotifOpen(false); setWalletOpen(false); }}>
+      <main ref={mainRef} className="main" onClick={() => { setNotifOpen(false); setWalletOpen(false); }}>
 
         {/* ============ DIRECT LINE VIEW ============ */}
         <section className={`view${view === 'direct' ? ' active' : ''}`} data-view="direct">

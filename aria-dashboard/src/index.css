@@ -109,7 +109,9 @@ button { font-family: inherit; }
   display: grid;
   grid-template-columns: 232px 1fr;
   grid-template-rows: 56px 1fr;
-  min-height: 100vh;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
 }
 .top {
   grid-column: 1 / -1;
@@ -349,6 +351,7 @@ button { font-family: inherit; }
 .main {
   padding: 28px 32px 80px;
   overflow-x: hidden;
+  overflow-y: auto;
   max-width: 1440px;
 }
 
