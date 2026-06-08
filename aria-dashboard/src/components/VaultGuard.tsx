@@ -22,6 +22,12 @@ const VaultGuard: React.FC<VaultGuardProps> = ({ children }) => {
     setFailed(false);
   }, [address]);
 
+  useEffect(() => {
+    if (!failed) return;
+    const t = setTimeout(() => setFailed(false), 5000);
+    return () => clearTimeout(t);
+  }, [failed]);
+
   const attemptCreate = useCallback(async () => {
     setFailed(false);
     setCreating(true);
