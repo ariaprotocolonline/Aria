@@ -71,16 +71,16 @@ echo ""
 # ─────────────────────────────────────────────────────────────────────────────
 
 echo "[1/5] Building aria-server..."
-cd aria-server && npm ci --prefer-offline && npm run build && cd ..
+cd aria-server && npm ci && npm run build && cd ..
 
 echo "[2/5] Building aria-agent..."
-cd aria-agent && npm ci --prefer-offline && npm run build && cd ..
+cd aria-agent && npm ci && npm run build && cd ..
 
 echo "[3/5] Building aria-tgbot..."
-cd aria-tgbot && npm ci --prefer-offline && npm run build && cd ..
+cd aria-tgbot && npm ci && npm run build && cd ..
 
 echo "[4/5] Building aria-dashboard..."
-cd aria-dashboard && npm ci --prefer-offline && npm run build && cd ..
+cd aria-dashboard && npm ci && npm run build && cd ..
 
 echo "[5/5] Deploying dashboard & restarting services..."
 sudo mkdir -p /var/www/aria-dashboard
