@@ -909,7 +909,7 @@ app.post('/api/chat', async (req, res) => {
           if (attempt < 2) await new Promise(res => setTimeout(res, 1_000));
         }
       }
-      throw new Error(`DeepSeek unavailable: ${lastErr instanceof Error ? lastErr.message : lastErr}`);
+      console.warn(`[${new Date().toISOString()}] DeepSeek failed (${lastErr instanceof Error ? lastErr.message : lastErr}), falling back to Claude`);
     }
     const r = await callClaudeChat(sys, msgs, claudeModel, maxTok);
     console.log(`[${new Date().toISOString()}] AI provider: Claude`);

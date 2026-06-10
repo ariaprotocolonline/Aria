@@ -305,7 +305,7 @@ button { font-family: inherit; }
   padding: 18px 12px;
   display: flex; flex-direction: column; gap: 4px;
   background: color-mix(in srgb, var(--ink) 0.5%, transparent);
-  height: calc(100vh - 56px); position: sticky; top: 56px;
+  min-height: 0;
   overflow-y: auto;
 }
 .side .grp {
@@ -357,6 +357,7 @@ button { font-family: inherit; }
 /* ===== main content area ===== */
 .main {
   padding: 28px 32px 80px;
+  min-height: 0;
   overflow-x: hidden;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;

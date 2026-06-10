@@ -546,7 +546,6 @@ export default function LandingPage({ isDarkMode, toggleDarkMode }: { isDarkMode
               <div className="lp-asset-head">
                 <XLogo src="/assets/logos/tesla.svg" alt="Tesla" letter="T" bg="linear-gradient(135deg,#e03535,#9b1414)" />
                 <div className="lp-asset-name">TSLAx <em>Tesla Inc</em></div>
-                <span className="lp-soon">Soon</span>
               </div>
               <div className="lp-asset-stats">
                 <div className="lp-asset-stat"><div className="k">Type</div><div className="v">Tokenized equity</div></div>
@@ -560,7 +559,6 @@ export default function LandingPage({ isDarkMode, toggleDarkMode }: { isDarkMode
               <div className="lp-asset-head">
                 <XLogo src="/assets/logos/nvidia.svg" alt="Nvidia" letter="N" bg="linear-gradient(135deg,#76b900,#4d7a00)" />
                 <div className="lp-asset-name">NVDAx <em>Nvidia Corp</em></div>
-                <span className="lp-soon">Soon</span>
               </div>
               <div className="lp-asset-stats">
                 <div className="lp-asset-stat"><div className="k">Type</div><div className="v">Tokenized equity</div></div>
@@ -574,7 +572,6 @@ export default function LandingPage({ isDarkMode, toggleDarkMode }: { isDarkMode
               <div className="lp-asset-head">
                 <XLogo src="/assets/logos/apple.svg" alt="Apple" letter="A" bg="linear-gradient(135deg,#aaaaaa,#666666)" />
                 <div className="lp-asset-name">AAPLx <em>Apple Inc</em></div>
-                <span className="lp-soon">Soon</span>
               </div>
               <div className="lp-asset-stats">
                 <div className="lp-asset-stat"><div className="k">Type</div><div className="v">Tokenized equity</div></div>
@@ -588,7 +585,6 @@ export default function LandingPage({ isDarkMode, toggleDarkMode }: { isDarkMode
               <div className="lp-asset-head">
                 <XLogo src="/assets/logos/meta.svg" alt="Meta" letter="M" bg="linear-gradient(135deg,#1877f2,#0a50c8)" />
                 <div className="lp-asset-name">METAx <em>Meta Platforms</em></div>
-                <span className="lp-soon">Soon</span>
               </div>
               <div className="lp-asset-stats">
                 <div className="lp-asset-stat"><div className="k">Type</div><div className="v">Tokenized equity</div></div>
@@ -602,7 +598,6 @@ export default function LandingPage({ isDarkMode, toggleDarkMode }: { isDarkMode
               <div className="lp-asset-head">
                 <XLogo src="/assets/logos/alphabet.svg" alt="Alphabet" letter="G" bg="linear-gradient(135deg,#4285f4,#1a56c8)" />
                 <div className="lp-asset-name">GOOGLx <em>Alphabet Inc</em></div>
-                <span className="lp-soon">Soon</span>
               </div>
               <div className="lp-asset-stats">
                 <div className="lp-asset-stat"><div className="k">Type</div><div className="v">Tokenized equity</div></div>
@@ -616,7 +611,6 @@ export default function LandingPage({ isDarkMode, toggleDarkMode }: { isDarkMode
               <div className="lp-asset-head">
                 <XLogo src="/assets/logos/microstrategy.svg" alt="MicroStrategy" letter="M" bg="linear-gradient(135deg,#f7941d,#c46a08)" />
                 <div className="lp-asset-name">MSTRx <em>MicroStrategy</em></div>
-                <span className="lp-soon">Soon</span>
               </div>
               <div className="lp-asset-stats">
                 <div className="lp-asset-stat"><div className="k">Type</div><div className="v">Tokenized equity</div></div>
@@ -630,7 +624,6 @@ export default function LandingPage({ isDarkMode, toggleDarkMode }: { isDarkMode
               <div className="lp-asset-head">
                 <XLogo src="/assets/logos/robinhood.svg" alt="Robinhood" letter="H" bg="linear-gradient(135deg,#00c805,#009204)" />
                 <div className="lp-asset-name">HOODx <em>Robinhood</em></div>
-                <span className="lp-soon">Soon</span>
               </div>
               <div className="lp-asset-stats">
                 <div className="lp-asset-stat"><div className="k">Type</div><div className="v">Tokenized equity</div></div>
@@ -644,7 +637,6 @@ export default function LandingPage({ isDarkMode, toggleDarkMode }: { isDarkMode
               <div className="lp-asset-head">
                 <XLogo src="/assets/logos/spy.svg" alt="SPY" letter="S" bg="linear-gradient(135deg,#d4a017,#9e7410)" />
                 <div className="lp-asset-name">SPYx <em>S&P 500 ETF</em></div>
-                <span className="lp-soon">Soon</span>
               </div>
               <div className="lp-asset-stats">
                 <div className="lp-asset-stat"><div className="k">Type</div><div className="v">Tokenized ETF</div></div>
@@ -658,7 +650,6 @@ export default function LandingPage({ isDarkMode, toggleDarkMode }: { isDarkMode
               <div className="lp-asset-head">
                 <XLogo src="/assets/logos/invesco.svg" alt="QQQ" letter="Q" bg="linear-gradient(135deg,#6c5ce7,#4530b8)" />
                 <div className="lp-asset-name">QQQx <em>Nasdaq-100 ETF</em></div>
-                <span className="lp-soon">Soon</span>
               </div>
               <div className="lp-asset-stats">
                 <div className="lp-asset-stat"><div className="k">Type</div><div className="v">Tokenized ETF</div></div>
@@ -672,7 +663,6 @@ export default function LandingPage({ isDarkMode, toggleDarkMode }: { isDarkMode
               <div className="lp-asset-head">
                 <XLogo src="/assets/logos/circle.svg" alt="Circle" letter="C" bg="linear-gradient(135deg,#2775ca,#1550a0)" />
                 <div className="lp-asset-name">CRCLx <em>Circle</em></div>
-                <span className="lp-soon">Soon</span>
               </div>
               <div className="lp-asset-stats">
                 <div className="lp-asset-stat"><div className="k">Type</div><div className="v">Tokenized equity</div></div>

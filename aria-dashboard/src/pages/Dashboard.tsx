@@ -1865,15 +1865,15 @@ export default function Dashboard({ vaultAddress }: { vaultAddress?: string }) {
               <div>
                 <div style={{ fontFamily:'var(--mono)', fontSize:'10.5px', color:'var(--mute)', letterSpacing:'0.06em', textTransform:'uppercase', marginBottom:5 }}>Swap from</div>
                 <div style={{ display:'flex', gap:6 }}>
-                  <button className={`btn${caTokenIn === 'WETH' ? ' primary' : ''}`} style={{ flex:1, padding:'7px 0', fontSize:12 }} onClick={() => setCaTokenIn('WETH')}>WETH</button>
-                  <button className={`btn${caTokenIn === 'USDC' ? ' primary' : ''}`} style={{ flex:1, padding:'7px 0', fontSize:12 }} onClick={() => setCaTokenIn('USDC')}>USDC</button>
+                  <button className={`btn${caTokenIn === 'WETH' ? ' primary' : ''}`} style={{ flex:1, padding:'7px 0', fontSize:12, justifyContent:'center' }} onClick={() => setCaTokenIn('WETH')}>WETH</button>
+                  <button className={`btn${caTokenIn === 'USDC' ? ' primary' : ''}`} style={{ flex:1, padding:'7px 0', fontSize:12, justifyContent:'center' }} onClick={() => setCaTokenIn('USDC')}>USDC</button>
                 </div>
               </div>
               <div>
                 <div style={{ fontFamily:'var(--mono)', fontSize:'10.5px', color:'var(--mute)', letterSpacing:'0.06em', textTransform:'uppercase', marginBottom:5 }}>Fee tier</div>
                 <div style={{ display:'flex', gap:6 }}>
                   {[100,500,3000,10000].map(f => (
-                    <button key={f} className={`btn${caFee === f ? ' primary' : ''}`} style={{ flex:1, padding:'7px 0', fontSize:11 }} onClick={() => setCaFee(f)}>{f === 100 ? '0.01%' : f === 500 ? '0.05%' : f === 3000 ? '0.3%' : '1%'}</button>
+                    <button key={f} className={`btn${caFee === f ? ' primary' : ''}`} style={{ flex:1, padding:'7px 0', fontSize:11, justifyContent:'center' }} onClick={() => setCaFee(f)}>{f === 100 ? '0.01%' : f === 500 ? '0.05%' : f === 3000 ? '0.3%' : '1%'}</button>
                   ))}
                 </div>
               </div>
