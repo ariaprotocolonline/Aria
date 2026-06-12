@@ -107,8 +107,13 @@ export function savePendingLink(code: string, walletAddress: string): void {
 export function consumePendingLink(code: string): string | null {
   const pending = readPending();
   const entry   = pending[code];
-  if (!entry || Date.now() - entry.createdAt > PENDING_TTL) {
-    if (entry) { delete pending[code]; writePending(pending); }
+  if (!entry) {
+    console.warn(`[consumePendingLink] code "${code}" not found — known codes: [${Object.keys(pending).join(', ')}]`);
+    return null;
+  }
+  if (Date.now() - entry.createdAt > PENDING_TTL) {
+    console.warn(`[consumePendingLink] code "${code}" expired`);
+    delete pending[code]; writePending(pending);
     return null;
   }
   delete pending[code];

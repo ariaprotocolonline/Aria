@@ -297,6 +297,9 @@ const server = http.createServer(async (req, res) => {
 
   // ── Telegram webhook (called by Telegram) ───────────────────────────────────
   if (method === 'POST' && url === '/webhook') {
+    // Read body before responding — avoids edge case where res.end() causes
+    // the socket to be recycled before the request body is fully consumed.
+    const body = await readBody(req).catch(() => '');
     // Validate secret token if configured — rejects spoofed webhook requests
     if (WEBHOOK_SECRET) {
       const incoming = req.headers['x-telegram-bot-api-secret-token'];
@@ -306,8 +309,7 @@ const server = http.createServer(async (req, res) => {
         return;
       }
     }
-    res.writeHead(200); res.end('{}'); // Acknowledge immediately
-    const body = await readBody(req).catch(() => '');
+    res.writeHead(200); res.end('{}');
     handleUpdate(body).catch(() => {});
     return;
   }
@@ -413,14 +415,19 @@ server.listen(PORT, '127.0.0.1', async () => {
   log(`Bot: @${BOT_USERNAME}`);
 
   const webhookUrl = process.env.TELEGRAM_WEBHOOK_URL;
-  if (process.env.TELEGRAM_BOT_TOKEN && webhookUrl) {
+  // Only register webhook in production — in dev mode we use polling so the
+  // local bot never steals the production webhook and corrupts the link flow
+  // (codes saved locally can't be found by the production webhook handler).
+  const isProduction = process.env.NODE_ENV === 'production';
+
+  if (isProduction && process.env.TELEGRAM_BOT_TOKEN && webhookUrl) {
     const ok = await setWebhook(webhookUrl, WEBHOOK_SECRET || undefined);
     if (!ok) {
-      // Webhook failed — fall back to polling so the bot still works locally
       startPolling().catch(() => {});
     }
   } else {
-    log('TELEGRAM_WEBHOOK_URL not set — starting in poll mode');
+    if (!isProduction) log('[Dev] Non-production env — using poll mode (webhook skipped to protect production)');
+    else log('TELEGRAM_WEBHOOK_URL not set — starting in poll mode');
     startPolling().catch(() => {});
   }
 });
