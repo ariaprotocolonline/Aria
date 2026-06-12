@@ -45,6 +45,11 @@ const DASHBOARD_STEPS: TourStep[] = [
     body: 'Your funds are never locked. Tap Withdraw to pull WETH or USDC back to your wallet. No timelock, no delay, even when ARIA is active.',
   },
   {
+    selector: '[data-tour="deposit-btn"]',
+    heading: 'Deposit to Your Vault',
+    body: 'Send WETH or USDC into your vault and ARIA immediately starts putting it to work across the highest-scoring pools on Mantle.',
+  },
+  {
     selector: '[data-tour="intelligence-feed"]',
     heading: "ARIA's Live Feed",
     body: 'Every decision ARIA makes is logged here in plain English: what moved, why it moved, and what the outcome was. Full transparency.',

@@ -733,7 +733,7 @@ export default function Dashboard({ vaultAddress }: { vaultAddress?: string }) {
                 <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M8 2v9M4 7l4 4 4-4M3 14h10"/></svg>
                 Withdraw
               </button>
-              <button className="btn primary" onClick={() => { setDepositToken('WETH'); setDepositInput(''); setTxError(''); setTxModal('deposit'); }}>
+              <button className="btn primary" data-tour="deposit-btn" onClick={() => { setDepositToken('WETH'); setDepositInput(''); setTxError(''); setTxModal('deposit'); }}>
                 <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.7"><path d="M8 13V4M4 8l4-4 4 4M3 2h10"/></svg>
                 Deposit
               </button>
