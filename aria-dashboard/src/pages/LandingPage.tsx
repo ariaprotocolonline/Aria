@@ -974,6 +974,17 @@ export default function LandingPage({ isDarkMode, toggleDarkMode }: { isDarkMode
         </div>
       </footer>
 
+      {/* ── Floating tour guide button ── */}
+      <button
+        className="lp-tour-fab"
+        onClick={() => window.dispatchEvent(new Event('aria-replay-tour'))}
+        title="Take a guided tour"
+      >
+        <span className="lp-tour-fab-lbl">Ask</span>
+        <span className="lp-tour-fab-nm">aria</span>
+        <span className="lp-tour-fab-dot" />
+      </button>
+
     </div>
   );
 }

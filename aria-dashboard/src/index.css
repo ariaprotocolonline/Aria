@@ -1369,6 +1369,32 @@ body.view-direct .ask { display: none; }
 .lp-asset-head { display: flex; align-items: center; gap: 14px; position: relative; margin-bottom: 26px; }
 
 /* "Soon" badge — sits at right end of lp-asset-head flex row */
+/* ── Landing page floating tour button ── */
+.lp-tour-fab {
+  position: fixed; right: 24px; bottom: 24px; z-index: 50;
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 12px 20px;
+  border-radius: 16px;
+  background: linear-gradient(180deg, var(--ask-bg-a), var(--ask-bg-b));
+  -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+  border: 1px solid var(--line-2);
+  box-shadow: 0 24px 60px -12px var(--shadow-strong), 0 0 0 1px color-mix(in srgb, var(--ink) 4%, transparent) inset;
+  cursor: pointer; transition: border-color .2s;
+}
+.lp-tour-fab:hover { border-color: rgba(117,229,176,0.45); }
+.lp-tour-fab-lbl {
+  font-family: var(--mono); font-size: 11px; color: var(--mute);
+  letter-spacing: 0.08em; text-transform: uppercase;
+}
+.lp-tour-fab-nm {
+  font-family: var(--serif); font-style: italic; font-size: 18px; line-height: 1; color: var(--ink);
+}
+.lp-tour-fab-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--accent); box-shadow: 0 0 8px var(--accent);
+  margin-left: 2px;
+}
+
 .lp-soon {
   margin-left: auto;
   flex-shrink: 0;
