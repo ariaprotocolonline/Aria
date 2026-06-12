@@ -97,10 +97,10 @@ export default function MobileLanding({ isDarkMode: _d, toggleDarkMode: _t }: { 
           </button>
         </div>
         <div className="mob-nav-links">
-          <a href="#how">Protocol</a>
+          <a href="#how" data-tour="how-it-works">Protocol</a>
           <a href="#profiles">Risk profiles</a>
           <a href="#assets">Integrations</a>
-          <a href="/docs">Docs</a>
+          <a href="/docs" data-tour="docs-link">Docs</a>
         </div>
       </nav>
 
@@ -131,7 +131,7 @@ export default function MobileLanding({ isDarkMode: _d, toggleDarkMode: _t }: { 
           </p>
 
           <div className="mob-hero-actions">
-            <button className="lp-btn lp-btn-primary lp-btn-lg mob-btn-full" onClick={go}>
+            <button className="lp-btn lp-btn-primary lp-btn-lg mob-btn-full" data-tour="connect-wallet" onClick={go}>
               Connect wallet →
             </button>
             <button className="lp-btn lp-btn-lg mob-btn-full" onClick={() => navigate('/docs')}>
@@ -304,6 +304,17 @@ export default function MobileLanding({ isDarkMode: _d, toggleDarkMode: _t }: { 
           <span>© 2026 ARIA</span>
         </div>
       </footer>
+
+      {/* ── Floating tour guide button ── */}
+      <button
+        className="lp-tour-fab"
+        onClick={() => window.dispatchEvent(new Event('aria-show-tour-welcome'))}
+        title="Take a guided tour"
+      >
+        <span className="lp-tour-fab-lbl">Ask</span>
+        <span className="lp-tour-fab-nm">aria</span>
+        <span className="lp-tour-fab-dot" />
+      </button>
 
     </div>
   );
