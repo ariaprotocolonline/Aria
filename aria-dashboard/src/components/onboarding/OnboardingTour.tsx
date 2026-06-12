@@ -50,19 +50,14 @@ const DASHBOARD_STEPS: TourStep[] = [
     body: 'Every decision ARIA makes is logged here in plain English: what moved, why it moved, and what the outcome was. Full transparency.',
   },
   {
-    selector: '[data-tour="market-pools"]',
-    heading: 'Live Market Pools',
-    body: 'Real-time yield opportunities across Mantle protocols. Quality score, APY, liquidity depth, and trend. This is what drives your returns.',
+    selector: '[data-tour="telegram-settings"]',
+    heading: 'Settings & Controls',
+    body: 'Adjust your risk profile, pause the agent, configure fees, and connect Telegram for real-time alerts — all from here.',
   },
   {
     selector: '[data-tour="ask-aria"]',
     heading: 'Chat With ARIA',
     body: 'Ask ARIA anything: portfolio strategy, market conditions, why it made a specific move. It knows your full position history.',
-  },
-  {
-    selector: '[data-tour="telegram-settings"]',
-    heading: 'Connect Telegram',
-    body: 'Get instant push notifications whenever ARIA reallocates your funds. Tap Connect here to link your Telegram account.',
   },
   {
     heading: "You're All Set",
