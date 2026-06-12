@@ -778,7 +778,7 @@ export default function Dashboard({ vaultAddress }: { vaultAddress?: string }) {
 
           {/* Chart + Strategy */}
           <div className="row-2">
-            <section className="card">
+            <section className="card" data-tour="portfolio-chart">
               <div className="card-head">
                 <h3>Portfolio value</h3>
                 <div className="ranges">

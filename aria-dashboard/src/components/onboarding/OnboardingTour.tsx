@@ -55,9 +55,9 @@ const DASHBOARD_STEPS: TourStep[] = [
     body: 'Every decision ARIA makes is logged here in plain English: what moved, why it moved, and what the outcome was. Full transparency.',
   },
   {
-    selector: '[data-tour="telegram-settings"]',
-    heading: 'Settings & Controls',
-    body: 'Adjust your risk profile, pause the agent, configure fees, and connect Telegram for real-time alerts — all from here.',
+    selector: '[data-tour="portfolio-chart"]',
+    heading: 'Portfolio Value',
+    body: 'Track your vault performance over time. Switch between 24H, 7D, 30D, 90D, and ALL to see how your capital has grown since ARIA started managing it.',
   },
   {
     selector: '[data-tour="ask-aria"]',
