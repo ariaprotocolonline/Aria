@@ -226,10 +226,34 @@ async function handleUpdate(body: string): Promise<void> {
   if (text === '/help') {
     await sendMessage(chatId,
       `🤖 <b>ARIA Bot</b>\n\n` +
+      `/about — what is ARIA?\n` +
       `/status — check your vault\n` +
       `/disconnect — unlink wallet\n` +
       `/help — this message\n\n` +
       `<i>Send any message to chat with ARIA directly.</i>`
+    );
+    return;
+  }
+
+  // /about
+  if (text === '/about') {
+    await sendMessage(chatId,
+      `<b>ARIA — Autonomous Real World Asset Intelligence</b>\n\n` +
+      `ARIA is a non-custodial yield management protocol built on Mantle. It puts your WETH and USDC to work across DeFi liquidity pools and automatically rebalances whenever a better opportunity appears.\n\n` +
+      `<b>How it works</b>\n` +
+      `Every 5 minutes, ARIA's AI agent scans active pools on Agni Finance and FusionX — both built on Uniswap V3 — and scores each one for APY and liquidity quality. When it finds a materially better pool that clears its safety gates, it moves your capital in a single atomic transaction: withdraw → swap → deposit.\n\n` +
+      `<b>Your vault, your keys</b>\n` +
+      `When you connect your wallet, the protocol deploys a personal smart contract vault owned entirely by you. ARIA's agent can only rebalance inside a pre-approved whitelist of protocols and tokens. It cannot withdraw to external wallets, cannot change the whitelist, and cannot transfer funds anywhere outside the vault. You can withdraw at any time, even if the agent is active.\n\n` +
+      `<b>Risk profiles</b>\n` +
+      `You choose how aggressively ARIA operates:\n` +
+      `· <b>Conservative</b> — moves only when APY improves by 1.5%+ and pool quality is high\n` +
+      `· <b>Balanced</b> — moves on 0.75%+ APY improvement, moderate quality floor\n` +
+      `· <b>Aggressive</b> — acts on 0.4%+ improvement, wider pool selection\n\n` +
+      `<b>Fees</b>\n` +
+      `0.5% annual management fee (charged on reallocation) and a 10% performance fee on APY gains above your current rate. Fees go to a separate cold-storage address — never the agent wallet.\n\n` +
+      `<b>Target returns</b>\n` +
+      `6–9% Conservative · 9–14% Balanced · 14–25%+ Aggressive\n\n` +
+      `<i>ariaprotocol.online</i>`
     );
     return;
   }

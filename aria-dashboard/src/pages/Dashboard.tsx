@@ -2145,6 +2145,7 @@ export default function Dashboard({ vaultAddress }: { vaultAddress?: string }) {
           <span className="s" onClick={e => { e.stopPropagation(); setAskInput("What's my best 30d position?"); }}>What's my best 30d position?</span>
           <span className="s" onClick={e => { e.stopPropagation(); setAskInput('Why is FusionX flagged?'); }}>Why is FusionX flagged?</span>
           <span className="s" onClick={e => { e.stopPropagation(); setAskInput('Switch to Aggressive'); }}>Switch to Aggressive</span>
+          <span className="s" onClick={e => { e.stopPropagation(); setAskInput('What is ARIA and how does it work?'); }}>What is ARIA?</span>
           <span className="s tour" onClick={e => { e.stopPropagation(); setAskCollapsed(true); window.dispatchEvent(new Event('aria-show-tour-welcome')); }}>Show me around</span>
         </div>
 

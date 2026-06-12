@@ -848,6 +848,23 @@ app.post('/api/chat', async (req, res) => {
     return res.status(400).json({ error: 'max_tokens must be between 1 and 4000' })
   }
 
+  // 6c. Short-circuit: static "What is ARIA?" answer — no AI call needed
+  const lastUserMsg = [...messages].reverse().find((m: { role: string }) => m.role === 'user')?.content ?? ''
+  if (/what\s+is\s+aria/i.test(lastUserMsg) && lastUserMsg.length < 120) {
+    const aboutText =
+      `ARIA is a non-custodial yield management protocol on Mantle. It puts your WETH and USDC to work across DeFi liquidity pools and automatically rebalances whenever a meaningfully better opportunity appears.\n\n` +
+      `How it works — every 5 minutes the AI agent scans active pools on Agni Finance and FusionX, scores each one for APY and liquidity quality, then moves capital in a single atomic transaction (withdraw → swap → deposit) when a better pool clears the safety gates. All of this happens without you needing to do anything.\n\n` +
+      `Your vault, your keys — when you connect your wallet, the protocol deploys a personal smart contract vault owned entirely by you. The agent can only rebalance inside a pre-approved whitelist of protocols. It cannot withdraw to external wallets or move funds anywhere outside your vault. You can withdraw at any time, even mid-cycle.\n\n` +
+      `Risk profiles — you pick how aggressively ARIA operates: Conservative (6–9% target APY, moves only on large improvements), Balanced (9–14%), or Aggressive (14–25%+). Set it once and ARIA stays inside those lines.\n\n` +
+      `Fees — 0.5% annual management fee and a 10% performance fee on APY gains above your current rate. Both go to a separate cold-storage address, never the agent wallet.\n\n` +
+      `The short version: you deposit, set a risk profile, and ARIA handles the rest — 24/7, autonomously, with every decision logged in plain English so you always know why it moved.`
+    return res.status(200).json({
+      content: [{ type: 'text', text: aboutText }],
+      model: 'static',
+      usage: { input_tokens: 0, output_tokens: 0 },
+    })
+  }
+
   // 7. Scan + sanitize every user message for injection
   const userMessages = messages.filter((m: { role: string }) => m.role === 'user')
   for (const msg of userMessages) {
