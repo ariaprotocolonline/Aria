@@ -145,15 +145,21 @@ const TourEngine: React.FC<{ steps: TourStep[]; storageKey: string }> = ({ steps
   const {
     isActive, showWelcome, currentStepIndex, totalSteps, currentStep,
     cursorPos, hasArrived, tooltipVisible,
-    startTour, skip, next, back, restart,
+    startTour, skip, next, back, restart, showWelcomeModal,
   } = useTour(steps, storageKey);
 
-  // Allow Settings to fire a replay event
+  // aria-replay-tour → restart directly (Settings panel)
+  // aria-show-tour-welcome → show the "Want a tour?" modal first (landing FAB)
   useEffect(() => {
-    const handler = () => restart();
-    window.addEventListener('aria-replay-tour', handler);
-    return () => window.removeEventListener('aria-replay-tour', handler);
-  }, [restart]);
+    const handleReplay   = () => restart();
+    const handleWelcome  = () => showWelcomeModal();
+    window.addEventListener('aria-replay-tour',        handleReplay);
+    window.addEventListener('aria-show-tour-welcome',  handleWelcome);
+    return () => {
+      window.removeEventListener('aria-replay-tour',       handleReplay);
+      window.removeEventListener('aria-show-tour-welcome', handleWelcome);
+    };
+  }, [restart, showWelcomeModal]);
 
   if (showWelcome) return <WelcomeModal onStart={startTour} onSkip={skip} />;
   if (!isActive)   return null;

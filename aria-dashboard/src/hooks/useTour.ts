@@ -137,11 +137,23 @@ export const useTour = (steps: TourStep[], storageKey: string) => {
     setIsActive(true);
   }, [storageKey]);
 
+  const showWelcomeModal = useCallback(() => {
+    clearTimers();
+    localStorage.removeItem(storageKey);
+    highlightedEl.current?.classList.remove('aria-tour-highlight');
+    highlightedEl.current = null;
+    setIsActive(false);
+    setCurrentStepIndex(0);
+    setHasArrived(false);
+    setTooltipVisible(false);
+    setShowWelcome(true);
+  }, [storageKey]); // eslint-disable-line react-hooks/exhaustive-deps
+
   return {
     isActive, showWelcome, currentStepIndex,
     totalSteps:    steps.length,
     currentStep:   steps[currentStepIndex] ?? steps[0]!,
     cursorPos, hasArrived, tooltipVisible,
-    startTour, skip, next, back, restart,
+    startTour, skip, next, back, restart, showWelcomeModal,
   };
 };
