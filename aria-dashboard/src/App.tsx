@@ -12,6 +12,23 @@ import OnboardingTour from './components/onboarding/OnboardingTour';
 
 const DocsPage = lazy(() => import('./pages/DocsPage'));
 
+function TourFab() {
+  const { isConnected } = useAccount();
+  const onboardingDone = !!localStorage.getItem('aria-onboarding-done');
+  if (isConnected && onboardingDone) return null;
+  return (
+    <button
+      className="lp-tour-fab"
+      onClick={() => window.dispatchEvent(new Event('aria-show-tour-welcome'))}
+      title="Take a guided tour"
+    >
+      <span className="lp-tour-fab-lbl">Ask</span>
+      <span className="lp-tour-fab-nm">aria</span>
+      <span className="lp-tour-fab-dot" />
+    </button>
+  );
+}
+
 function App() {
   const { address, isConnected } = useAccount();
 
@@ -40,6 +57,7 @@ function App() {
       <Router>
         <NetworkGuard>
           <OnboardingTour />
+          <TourFab />
           <Routes>
             <Route
               path="/"
