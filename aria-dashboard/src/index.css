@@ -701,7 +701,7 @@ button { font-family: inherit; }
 .ask-top .toggle { width: 18px; height: 18px; border-radius: 4px; display: grid; place-items: center; color: var(--mute); cursor: pointer; background: transparent; border: none; }
 .ask-top .toggle:hover { color: var(--ink); background: color-mix(in srgb, var(--ink) 4%, transparent); }
 .ask-thread { padding: 14px 16px; display: flex; flex-direction: column; gap: 14px; max-height: 260px; overflow-y: auto; }
-.ask-msg { font-size: 13px; line-height: 1.5; }
+.ask-msg { font-size: 13px; line-height: 1.65; white-space: pre-wrap; word-break: break-word; }
 .ask-msg.user { color: var(--ink-2); }
 .ask-msg.user::before { content: "you  "; font-family: var(--mono); font-size: 10px; color: var(--mute); letter-spacing: 0.06em; }
 .ask-msg.aria { color: var(--ink); }

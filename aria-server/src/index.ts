@@ -851,13 +851,15 @@ app.post('/api/chat', async (req, res) => {
   // 6c. Short-circuit: static "What is ARIA?" answer — no AI call needed
   const lastUserMsg = [...messages].reverse().find((m: { role: string }) => m.role === 'user')?.content ?? ''
   if (/what\s+is\s+aria/i.test(lastUserMsg) && lastUserMsg.length < 120) {
-    const aboutText =
-      `ARIA is a non-custodial yield management protocol on Mantle. It puts your WETH and USDC to work across DeFi liquidity pools and automatically rebalances whenever a meaningfully better opportunity appears.\n\n` +
-      `How it works — every 5 minutes the AI agent scans active pools on Agni Finance and FusionX, scores each one for APY and liquidity quality, then moves capital in a single atomic transaction (withdraw → swap → deposit) when a better pool clears the safety gates. All of this happens without you needing to do anything.\n\n` +
-      `Your vault, your keys — when you connect your wallet, the protocol deploys a personal smart contract vault owned entirely by you. The agent can only rebalance inside a pre-approved whitelist of protocols. It cannot withdraw to external wallets or move funds anywhere outside your vault. You can withdraw at any time, even mid-cycle.\n\n` +
-      `Risk profiles — you pick how aggressively ARIA operates: Conservative (6–9% target APY, moves only on large improvements), Balanced (9–14%), or Aggressive (14–25%+). Set it once and ARIA stays inside those lines.\n\n` +
-      `Fees — 0.5% annual management fee and a 10% performance fee on APY gains above your current rate. Both go to a separate cold-storage address, never the agent wallet.\n\n` +
-      `The short version: you deposit, set a risk profile, and ARIA handles the rest — 24/7, autonomously, with every decision logged in plain English so you always know why it moved.`
+    const aboutText = [
+      `ARIA is a non-custodial yield management protocol on Mantle. It puts your WETH and USDC to work across DeFi liquidity pools and automatically rebalances whenever a meaningfully better opportunity appears.`,
+      `How it works\n\nEvery 5 minutes the AI agent scans active pools on Agni Finance and FusionX. It scores each pool for APY and liquidity quality, then moves your capital in a single atomic transaction — withdraw, swap, deposit — when a better pool clears the safety gates. You don't touch anything.`,
+      `What makes it different\n\n· Liquidity quality scoring — ARIA doesn't just chase headline APY. It measures whether TVL is organic or propped up by incentives before committing capital.\n\n· Fully autonomous execution — no 'confirm this transaction' prompts. The agent acts, then logs exactly what it did and why.\n\n· Every move explained — your activity feed shows each reallocation in plain English so you always know what happened.`,
+      `Your vault, your keys\n\nWhen you connect your wallet, the protocol deploys a personal smart contract vault owned entirely by you. The agent can only rebalance inside a pre-approved whitelist of protocols. It cannot withdraw to external wallets, cannot move funds outside your vault, and cannot change its own permissions. You can withdraw at any time, even mid-cycle.`,
+      `Risk profiles\n\nYou pick how aggressively ARIA operates — set it once and it stays inside those lines:\n\n· Conservative — 6–9% target APY, moves only on large, high-confidence opportunities\n· Balanced — 9–14% target APY, moderate pool selection\n· Aggressive — 14–25%+ target APY, wider pool access`,
+      `Fees\n\n0.5% annual management fee and a 10% performance fee on APY gains above your current rate. Both go to a cold-storage address — never the agent wallet.`,
+      `Integrated pools right now: Agni Finance and FusionX.\nxStock strategies (NVDAx, TSLAx and others on Fluxion DEX) are coming in Phase II.`,
+    ].join('\n\n')
     return res.status(200).json({
       content: [{ type: 'text', text: aboutText }],
       model: 'static',
